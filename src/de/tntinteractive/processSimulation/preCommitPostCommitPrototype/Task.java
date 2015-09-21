@@ -1,4 +1,4 @@
-package de.tntinteractive.processSimulation.preCommitPostCommit;
+package de.tntinteractive.processSimulation.preCommitPostCommitPrototype;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +27,7 @@ public abstract class Task extends DevelopmentSimProcess {
     private State state;
 
     private final List<Task> prerequisites;
+    //TODO Konflikte mit anderen Tasks, Konfliktwahrscheinlichkeit steigt mit der Größe der betreffenden Tasks
 
     private List<Bug> lurkingBugs;
 

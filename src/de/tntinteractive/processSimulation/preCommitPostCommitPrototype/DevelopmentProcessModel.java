@@ -1,4 +1,4 @@
-package de.tntinteractive.processSimulation.preCommitPostCommit;
+package de.tntinteractive.processSimulation.preCommitPostCommitPrototype;
 
 import desmoj.core.simulator.Model;
 import desmoj.core.simulator.TimeSpan;
