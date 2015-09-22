@@ -1,4 +1,4 @@
-package de.tntinteractive.processSimulation.preCommitPostCommitPrototype;
+package de.unihannover.se.processSimulation.preCommitPostCommit;
 
 import java.util.concurrent.TimeUnit;
 
@@ -9,8 +9,7 @@ public class Main {
 
     public static void main(String[] args) {
 
-        final DevelopmentProcessModel model = new DevelopmentProcessModel("Simple test process", true, true, ReviewMode.POST_COMMIT);
-
+        final RealProcessingModel model = new RealProcessingModel("RealProcessingModel", ReviewMode.PRE_COMMIT);
         final Experiment exp = new Experiment("DevelopmentProcessModelTestExperiment",
                         TimeUnit.MINUTES, TimeUnit.HOURS, null);
         model.connectToExperiment(exp);
