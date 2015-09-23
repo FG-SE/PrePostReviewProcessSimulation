@@ -1,16 +1,19 @@
 package de.unihannover.se.processSimulation.preCommitPostCommit;
 
-import java.util.Iterator;
+import java.util.ArrayList;
+import java.util.List;
 
 import desmoj.core.simulator.Queue;
+import desmoj.core.simulator.TimeInstant;
 
 class Board {
 
+    private final RealProcessingModel model;
     private final Queue<StoryTask> openStoryTasks;
     private final Queue<BugfixTask> openBugs;
     private final Queue<Task> tasksReadyForReview;
     private final Queue<Task> tasksWithReviewRemarks;
-    private final RealProcessingModel model;
+    private Story storyInPlanning;
 
     public Board(RealProcessingModel owner) {
         this.model = owner;
@@ -21,20 +24,37 @@ class Board {
     }
 
     public Story getStoryToPlan() {
-        return new Story(this.model, 5);
+        if (this.storyInPlanning == null) {
+            this.storyInPlanning = new Story(this.model, 5);
+        }
+        return this.storyInPlanning;
     }
 
-    public void addTaskToBeImplemented(StoryTask task) {
-        this.openStoryTasks.insert(task);
+    public void addPlannedStory(Story story) {
+        assert this.storyInPlanning == story;
+        this.storyInPlanning = null;
+        for (final StoryTask task : story.getTasks()) {
+            this.openStoryTasks.insert(task);
+        }
     }
 
     public BugfixTask getBugToFix(Developer developer) {
-        return this.openBugs.removeFirst();
+        if (this.openBugs.isEmpty()) {
+            return null;
+        }
+        final BugfixTask best = determineBestFit(this.openBugs, developer);
+        this.openBugs.remove(best);
+        return best;
     }
 
     public StoryTask getTaskToImplement(Developer developer) {
-        //TODO einen Task auswählen, der zum zuletzte bearbeiteten Thema passt
-        return this.openStoryTasks.removeFirst();
+        //TODO: Vorbedingungs-Tasks beachten
+        if (this.openStoryTasks.isEmpty()) {
+            return null;
+        }
+        final StoryTask best = determineBestFit(this.openStoryTasks, developer);
+        this.openStoryTasks.remove(best);
+        return best;
     }
 
     public void addTaskReadyForReview(Task task) {
@@ -42,27 +62,46 @@ class Board {
     }
 
     public Task getTaskToReviewFor(Developer developer) {
-        final Iterator<Task> iter = this.tasksReadyForReview.iterator();
-        while(iter.hasNext()) {
-            final Task t = iter.next();
+        final List<Task> possibleTasks = new ArrayList<>();
+        for (final Task t : this.tasksReadyForReview) {
             if (!t.wasImplementedBy(developer)) {
-                iter.remove();
-                return t;
+                possibleTasks.add(t);
             }
         }
-        return null;
+        if (possibleTasks.isEmpty()) {
+            return null;
+        }
+        final Task best = determineBestFit(possibleTasks, developer);
+        this.tasksReadyForReview.remove(best);
+        return best;
     }
 
     public Task getTaskWithReviewRemarksFor(Developer developer) {
-        final Iterator<Task> iter = this.tasksWithReviewRemarks.iterator();
-        while(iter.hasNext()) {
-            final Task t = iter.next();
+        final List<Task> possibleTasks = new ArrayList<>();
+        for (final Task t : this.tasksWithReviewRemarks) {
             if (t.wasImplementedBy(developer)) {
-                iter.remove();
-                return t;
+                possibleTasks.add(t);
             }
         }
-        return null;
+        if (possibleTasks.isEmpty()) {
+            return null;
+        }
+        final Task best = determineBestFit(possibleTasks, developer);
+        this.tasksWithReviewRemarks.remove(best);
+        return best;
+    }
+
+    private static <T extends Task> T determineBestFit(Iterable<T> possibleTasks, Developer developer) {
+        TimeInstant bestTime = null;
+        T best = null;
+        for (final T t : possibleTasks) {
+            final TimeInstant lastTimeForT = developer.getLastTimeYouHadToDoWith(t);
+            if (bestTime == null || TimeInstant.isAfter(bestTime, lastTimeForT)) {
+                bestTime = lastTimeForT;
+                best = t;
+            }
+        }
+        return best;
     }
 
     public void addTaskWithReviewRemarks(Task task) {

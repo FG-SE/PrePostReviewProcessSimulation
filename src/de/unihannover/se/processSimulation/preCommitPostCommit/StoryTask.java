@@ -14,4 +14,9 @@ class StoryTask extends Task {
         return this.story;
     }
 
+    @Override
+    public String getMemoryKey() {
+        return this.story.getMemoryKey();
+    }
+
 }

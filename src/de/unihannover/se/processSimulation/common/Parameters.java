@@ -46,11 +46,11 @@ public class Parameters {
     }
 
     /**
-     * Taskwechsel-Overhead der angesetzt wird, nachdem ein Entwickler für 5 Minuten von einer anderen Aufgabe unterbrochen wurde.
+     * Taskwechsel-Overhead der angesetzt wird, nachdem ein Entwickler für eine Stunde von einer anderen Aufgabe unterbrochen wurde.
      * Wird zusammen mit {@link #getMaxTaskSwitchOverhead()} verwendet, um die Parameter für die Ebbinghaussche Vergessenskurve zu bestimmen.
      */
-    public TimeSpan getTaskSwitchOverheadAfterFiveMinuteInterruption() {
-        return new TimeSpan(15, TimeUnit.MINUTES);
+    public TimeSpan getTaskSwitchOverheadAfterOneHourInterruption() {
+        return new TimeSpan(10, TimeUnit.MINUTES);
     }
 
     /**
@@ -59,7 +59,9 @@ public class Parameters {
      * Ebbinghaussche Vergessenskurve zu bestimmen.
      */
     public TimeSpan getMaxTaskSwitchOverhead() {
-        return new TimeSpan(2, TimeUnit.HOURS);
+        //TODO: besser als Anteil des Gesamtaufwands der Story (abhängig von der Anzahl Story Points) angeben
+        //TODO: vielleicht auch noch unterscheiden zwischen "Zeit für komplettes Neu-Einarbeiten" und "Zeit für Wieder-Einarbeiten nach langer Zeit"
+        return new TimeSpan(1, TimeUnit.HOURS);
     }
 
 }

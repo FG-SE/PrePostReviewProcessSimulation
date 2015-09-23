@@ -7,9 +7,11 @@ import desmoj.core.simulator.TimeSpan;
 class Bug extends RealModelProcess {
 
     private boolean fixed;
+    private final Task task;
 
     public Bug(Task task) {
         super(task.getModel(), "bug");
+        this.task = task;
     }
 
     @Override
@@ -34,6 +36,10 @@ class Bug extends RealModelProcess {
 
     public void fix() {
         this.fixed = true;
+    }
+
+    public Task getTask() {
+        return this.task;
     }
 
 }

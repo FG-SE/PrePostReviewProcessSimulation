@@ -4,9 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import desmoj.core.simulator.TimeInstant;
 import desmoj.core.simulator.TimeSpan;
 
-class Task extends RealModelEntity {
+abstract class Task extends RealModelEntity implements MemoryItem {
 
     public enum State {
         OPEN,
@@ -31,9 +32,13 @@ class Task extends RealModelEntity {
         assert this.state == State.OPEN;
         assert this.implementor == null;
         this.implementor = dev;
+
+        this.handleTaskSwitchOverhead(dev);
+
+        //der "Konfliktzeitraum" soll erst beginnen, nachdem die Task-Switch/Einarbeitungsphase durch ist
         this.getSourceRepository().startWork(this);
         //TODO Zeit für Implementierung
-        this.implementor.hold(new TimeSpan(4, TimeUnit.HOURS));
+        this.implementor.hold(new TimeSpan(3, TimeUnit.HOURS));
 
         //TODO Bug-Anzahl abhängig von Entwicklerskill und Umfang des Tasks; Entwicklerskill gemessen in Bugs/Stunde, ggf. zusätzlich mit Varianz
         if (this instanceof StoryTask) {
@@ -59,8 +64,10 @@ class Task extends RealModelEntity {
         assert this.implementor != null;
         assert this.implementor != reviewer;
 
+        this.handleTaskSwitchOverhead(reviewer);
+
         //TODO Zeit für Review
-        reviewer.hold(new TimeSpan(2, TimeUnit.HOURS));
+        reviewer.hold(new TimeSpan(1, TimeUnit.HOURS));
 
         final List<Bug> foundBugs = new ArrayList<>();
         for (final Bug b : this.lurkingBugs) {
@@ -95,13 +102,15 @@ class Task extends RealModelEntity {
         assert this.state == State.REJECTED;
         assert this.implementor == dev;
 
+        this.handleTaskSwitchOverhead(dev);
+
         if (this.getModel().getReviewMode() == ReviewMode.POST_COMMIT) {
             //im Post-Commit-Fall wurde schon commitet und es muss nochmal "ausgecheckt" werden
             this.getSourceRepository().startWork(this);
         }
 
         //TODO Zeit für Fixing
-        dev.hold(new TimeSpan(1, TimeUnit.HOURS));
+        dev.hold(new TimeSpan(30, TimeUnit.MINUTES));
         //TODO nicht alle Bugs werden gefixt
         for (final Bug b : this.currentReview.getRemarks()) {
             this.lurkingBugs.remove(b);
@@ -109,6 +118,33 @@ class Task extends RealModelEntity {
         }
 
         this.endImplementation();
+    }
+
+    private void handleTaskSwitchOverhead(Developer dev) {
+        final TimeSpan taskSwitchOverhead = this.determineTaskSwitchOverhead(dev);
+        if (taskSwitchOverhead.getTimeInEpsilon() != 0) {
+            this.sendTraceNote("has task switch overhead switching to " + this);
+            dev.hold(taskSwitchOverhead);
+        }
+    }
+
+    private TimeSpan determineTaskSwitchOverhead(Developer dev) {
+        final TimeInstant lastTime = dev.getLastTimeYouHadToDoWith(this);
+        final TimeSpan max = this.getModel().getParameters().getMaxTaskSwitchOverhead();
+        if (lastTime == null) {
+            return max;
+        }
+
+        if (max.getTimeInEpsilon() == 0) {
+            return null;
+        }
+
+        final TimeSpan forOneHour = this.getModel().getParameters().getTaskSwitchOverheadAfterOneHourInterruption();
+        final double s = - new TimeSpan(1, TimeUnit.HOURS).getTimeAsDouble() / Math.log(1.0 - forOneHour.getTimeAsDouble() / max.getTimeAsDouble());
+
+        final double timeSinceLastTime = this.presentTime().getTimeAsDouble() - lastTime.getTimeAsDouble();
+        final double overhead = max.getTimeAsDouble() * (1.0 - Math.exp(- timeSinceLastTime / s));
+        return new TimeSpan(overhead);
     }
 
     public boolean wasImplementedBy(Developer developer) {

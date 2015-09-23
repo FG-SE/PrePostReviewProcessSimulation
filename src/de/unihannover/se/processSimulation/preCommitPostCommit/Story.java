@@ -8,11 +8,12 @@ import desmoj.core.simulator.TimeInstant;
 import desmoj.core.simulator.TimeOperations;
 import desmoj.core.simulator.TimeSpan;
 
-class Story extends RealModelEntity {
+class Story extends RealModelEntity implements MemoryItem {
 
     private final int storyPoints;
     private TimeInstant startTime;
     private final List<StoryTask> tasks;
+    private final List<Developer> additionalPlanners = new ArrayList<>();
 
     public Story(RealProcessingModel owner, int storyPoints) {
         super(owner, "story");
@@ -21,13 +22,32 @@ class Story extends RealModelEntity {
     }
 
     public void plan(Developer developer) {
+        if (this.startTime == null) {
+            this.doMainPlanning(developer);
+        } else {
+            this.joinPlanning(developer);
+        }
+    }
+
+    private void joinPlanning(Developer developer) {
+        this.additionalPlanners.add(developer);
+        developer.sendTraceNote("joins planning of " + this);
+        developer.passivate();
+    }
+
+    private void doMainPlanning(Developer developer) {
         this.startTime = this.presentTime();
         developer.sendTraceNote("starts planning of " + this);
         //TODO Zeit für Planung
         developer.hold(new TimeSpan(2, TimeUnit.HOURS));
 
-        //TODO: Entwickler als "im Thema" bei dieser Story kennzeichnen
-        this.getBoard().addTaskToBeImplemented(new StoryTask(this.getModel(), this));
+        new StoryTask(this.getModel(), this);
+
+        this.getBoard().addPlannedStory(this);
+
+        for (final Developer helper : this.additionalPlanners) {
+            helper.activate();
+        }
     }
 
     void addTaskHelper(StoryTask task) {
@@ -50,6 +70,15 @@ class Story extends RealModelEntity {
 
     public int getStoryPoints() {
         return this.storyPoints;
+    }
+
+    @Override
+    public String getMemoryKey() {
+        return this.getName();
+    }
+
+    public List<StoryTask> getTasks() {
+        return this.tasks;
     }
 
 }
