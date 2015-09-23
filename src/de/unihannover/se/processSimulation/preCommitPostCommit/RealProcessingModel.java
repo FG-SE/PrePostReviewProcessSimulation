@@ -3,18 +3,28 @@ package de.unihannover.se.processSimulation.preCommitPostCommit;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.unihannover.se.processSimulation.common.Parameters;
 import desmoj.core.simulator.Model;
+import desmoj.core.simulator.TimeSpan;
+import desmoj.core.statistic.Count;
+import desmoj.core.statistic.Tally;
 
-public class RealProcessingModel extends Model {
+class RealProcessingModel extends Model {
 
     private final ReviewMode reviewMode;
     private Board board;
+    private SourceRepository sourceRepository;
+
+    private Count finishedStoryPoints;
+    private Tally storyCycleTime;
 
     private final List<Developer> developers = new ArrayList<>();
+    private final Parameters parameters;
 
-    public RealProcessingModel(String name, ReviewMode reviewMode) {
+    public RealProcessingModel(String name, ReviewMode reviewMode, Parameters parameters) {
         super(null, name, true, true);
         this.reviewMode = reviewMode;
+        this.parameters = parameters;
     }
 
     @Override
@@ -24,13 +34,17 @@ public class RealProcessingModel extends Model {
 
     @Override
     public void init() {
-        this.board = new Board(this);
-        this.developers.add(new Developer(this));
+        this.parameters.init(this);
 
-        //TEST
-        final Task task = new Task(this);
-        task.startImplementation(this.developers.get(0));
-        this.board.addTaskWithReviewRemarks(task);
+        this.board = new Board(this);
+        this.sourceRepository = new SourceRepository();
+
+        this.finishedStoryPoints = new Count(this, "finishedStoryPoints", true, true);
+        this.storyCycleTime = new Tally(this, "storyCycleTime", true, true);
+
+        for (int i = 0; i < this.parameters.getNumDevelopers(); i++) {
+            this.developers.add(new Developer(this, this.parameters.getReviewSkillDist().sample()));
+        }
     }
 
     @Override
@@ -42,6 +56,25 @@ public class RealProcessingModel extends Model {
 
     public Board getBoard() {
         return this.board;
+    }
+
+    public SourceRepository getSourceRepository() {
+        return this.sourceRepository;
+    }
+
+    public void countFinishedStory(Story story) {
+        final TimeSpan cycleTime = story.getCycleTime(this.presentTime());
+        this.sendTraceNote("Story " + story + " finished after " + cycleTime);
+        this.storyCycleTime.update(cycleTime);
+        this.finishedStoryPoints.update(story.getStoryPoints());
+    }
+
+    public ReviewMode getReviewMode() {
+        return this.reviewMode;
+    }
+
+    public Parameters getParameters() {
+        return this.parameters;
     }
 
 }

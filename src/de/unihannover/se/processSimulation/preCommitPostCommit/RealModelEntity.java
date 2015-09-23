@@ -1,15 +1,19 @@
 package de.unihannover.se.processSimulation.preCommitPostCommit;
 
-import desmoj.core.simulator.SimProcess;
+import desmoj.core.simulator.Entity;
 
-abstract class RealModelProcess extends SimProcess {
+class RealModelEntity extends Entity {
 
-    public RealModelProcess(RealProcessingModel owner, String name) {
+    public RealModelEntity(RealProcessingModel owner, String name) {
         super(owner, name, true);
     }
 
     protected Board getBoard() {
         return this.getModel().getBoard();
+    }
+
+    protected SourceRepository getSourceRepository() {
+        return this.getModel().getSourceRepository();
     }
 
     @Override
