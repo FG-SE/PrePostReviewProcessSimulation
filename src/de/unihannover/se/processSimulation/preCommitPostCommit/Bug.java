@@ -1,45 +1,44 @@
 package de.unihannover.se.processSimulation.preCommitPostCommit;
 
-import java.util.concurrent.TimeUnit;
-
 import desmoj.core.simulator.TimeSpan;
 
-class Bug extends RealModelProcess {
+abstract class Bug extends RealModelProcess {
 
+    private boolean started;
     private boolean fixed;
-    private final Task task;
 
-    public Bug(Task task) {
-        super(task.getModel(), "bug");
-        this.task = task;
+    public Bug(RealProcessingModel model, String name) {
+        super(model, name);
+    }
+
+    public final void startTicking() {
+        if (this.started || this.fixed) {
+            return;
+        }
+        this.started = true;
+        this.activate();
     }
 
     @Override
     public void lifeCycle() {
+        assert this.started;
         if (this.fixed) {
             return;
         }
 
-        //TODO Zeit bis zur Aktivierung
-        this.hold(new TimeSpan(40, TimeUnit.HOURS));
+        this.hold(this.getActivationTime());
 
         if (!this.fixed) {
             this.explode();
         }
     }
 
-    private void explode() {
-        //TODO Abarbeitung dauert länger, wenn auf dem Buggy-Task andere Dinge aufgebaut haben (propabilistisch)
-        //TODO noch in Arbeit befindliche abhängige Tasks verzögern sich (propabilitisch)
-        this.getBoard().addBugToBeFixed(new BugfixTask(this));
-    }
+    protected abstract TimeSpan getActivationTime();
 
-    public void fix() {
+    protected abstract void explode();
+
+    public final void fix() {
         this.fixed = true;
-    }
-
-    public Task getTask() {
-        return this.task;
     }
 
 }

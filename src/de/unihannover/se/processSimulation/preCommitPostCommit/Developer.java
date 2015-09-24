@@ -9,11 +9,15 @@ import desmoj.core.simulator.TimeInstant;
 class Developer extends RealModelProcess {
 
     private final BoolDistBernoulli reviewerSkill;
+    private final BoolDistBernoulli globalBugDist;
     private final Map<String, TimeInstant> memory;
+    private final double implementationSkill;
 
-    public Developer(RealProcessingModel owner, double reviewerSkill) {
+    public Developer(RealProcessingModel owner, double reviewerSkill, double globalBugPropability, double implementationSkill) {
         super(owner, "developer");
         this.reviewerSkill = new BoolDistBernoulli(owner, "reviewerSkill-" + this, reviewerSkill, true, true);
+        this.globalBugDist = new BoolDistBernoulli(owner, "globalBugDist-" + this, globalBugPropability, true, true);
+        this.implementationSkill = implementationSkill;
         this.memory = new HashMap<>();
     }
 
@@ -66,6 +70,14 @@ class Developer extends RealModelProcess {
 
     private void saveLastTimeIHadToDoWith(MemoryItem task) {
         this.memory.put(task.getMemoryKey(), this.presentTime());
+    }
+
+    public boolean makesBlockerBug() {
+        return this.globalBugDist.sample();
+    }
+
+    public double getImplementationSkill() {
+        return this.implementationSkill;
     }
 
 }

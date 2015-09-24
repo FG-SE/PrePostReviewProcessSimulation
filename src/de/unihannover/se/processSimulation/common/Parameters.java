@@ -1,25 +1,65 @@
 package de.unihannover.se.processSimulation.common;
 
-import java.util.concurrent.TimeUnit;
-
 import desmoj.core.dist.BoolDist;
-import desmoj.core.dist.BoolDistBernoulli;
-import desmoj.core.dist.ContDistConstant;
 import desmoj.core.dist.NumericalDist;
-import desmoj.core.simulator.Model;
 import desmoj.core.simulator.TimeSpan;
 
 public class Parameters {
 
-    private NumericalDist<Double> reviewSkillDist;
-    private BoolDist conflictDist;
+    private final NumericalDist<Double> implementationSkillDist;
+    private final NumericalDist<Double> reviewSkillDist;
+    private final NumericalDist<Double> globalBugDist;
+    private final BoolDist conflictDist;
+    private final NumericalDist<Double> implementationTimeDist;
+    private final NumericalDist<Double> fixTimeDist;
+    private final NumericalDist<Double> globalBugSuspendTimeDist;
+    private final NumericalDist<Double> conflictResolutionTimeDist;
+    private final NumericalDist<Double> bugActivationTimeDist;
+    private final NumericalDist<Double> planningTimeDist;
+    private final NumericalDist<Double> reviewTimeDist;
+    private final int numDevelopers;
+    private final TimeSpan taskSwitchOverheadAfterOneHour;
+    private final TimeSpan maxTaskSwitchOverhead;
+    private final long genericRandomSeed;
 
-    public Parameters() {
+    public Parameters(
+                    NumericalDist<Double> implementationSkillDist,
+                    NumericalDist<Double> reviewSkillDist,
+                    NumericalDist<Double> globalBugDist,
+                    BoolDist conflictDist,
+                    NumericalDist<Double> implementationTimeDist,
+                    NumericalDist<Double> fixTimeDist,
+                    NumericalDist<Double> globalBugSuspendTimeDist,
+                    NumericalDist<Double> conflictResolutionTimeDist,
+                    NumericalDist<Double> bugActivationTimeDist,
+                    NumericalDist<Double> planningTimeDist,
+                    NumericalDist<Double> reviewTimeDist,
+                    int numDevelopers,
+                    TimeSpan taskSwitchOverheadAfterOneHour,
+                    TimeSpan maxTaskSwitchOverhead,
+                    long genericRandomSeed) {
+        this.implementationSkillDist = implementationSkillDist;
+        this.reviewSkillDist = reviewSkillDist;
+        this.globalBugDist = globalBugDist;
+        this.conflictDist = conflictDist;
+        this.implementationTimeDist = implementationTimeDist;
+        this.fixTimeDist = fixTimeDist;
+        this.globalBugSuspendTimeDist = globalBugSuspendTimeDist;
+        this.conflictResolutionTimeDist = conflictResolutionTimeDist;
+        this.bugActivationTimeDist = bugActivationTimeDist;
+        this.planningTimeDist = planningTimeDist;
+        this.reviewTimeDist = reviewTimeDist;
+        this.numDevelopers = numDevelopers;
+        this.taskSwitchOverheadAfterOneHour = taskSwitchOverheadAfterOneHour;
+        this.maxTaskSwitchOverhead = maxTaskSwitchOverhead;
+        this.genericRandomSeed = genericRandomSeed;
     }
 
-    public void init(Model owner) {
-        this.reviewSkillDist = new ContDistConstant(owner, "reviewSkillDist", 1.0, true, true);
-        this.conflictDist = new BoolDistBernoulli(owner, "conflictDist", 0.1, true, true);
+    /**
+     * Liefert die Verteilung für den "Entwickler-Skill", gemessen in Bugs/Stunde Implementierung.
+     */
+    public NumericalDist<Double> getImplementationSkillDist() {
+        return this.implementationSkillDist;
     }
 
     /**
@@ -28,6 +68,14 @@ public class Parameters {
      */
     public NumericalDist<Double> getReviewSkillDist() {
         return this.reviewSkillDist;
+    }
+
+    /**
+     * Liefert die Verteilung für die Wahrscheinlichkeit, einen globalen "Blocker-Bug" einzufügen
+     * (1.0 = In jeden Task wird ein Global-Bug eingefügt, 0.0 = Global-Bugs werden nie eingefügt).
+     */
+    public NumericalDist<Double> getGlobalBugDist() {
+        return this.globalBugDist;
     }
 
     /**
@@ -42,7 +90,65 @@ public class Parameters {
      * Liefert die Anzahl der Entwickler in der Simulation.
      */
     public int getNumDevelopers() {
-        return 2;
+        return this.numDevelopers;
+    }
+
+    /**
+     * Liefert die Verteilung, aus der die Implementierungsdauer von Tasks bezogen wird.
+     * Die gesampelten Werte werden als "Stunden" interpretiert.
+     */
+    public NumericalDist<Double> getImplementationTimeDist() {
+        return this.implementationTimeDist;
+    }
+
+    /**
+     * Liefert die Verteilung, aus der benötigte Zeit für die Korrektur EINER Review-Anmerkung bezogen wird.
+     * Die gesampelten Werte werden als "Stunden" interpretiert.
+     */
+    public NumericalDist<Double> getFixTimeDist() {
+        return this.fixTimeDist;
+    }
+
+    /**
+     * Liefert die Verteilung, aus der benötigte Zeit für das Review eines Tasks bezogen wird.
+     * Die gesampelten Werte werden als "Stunden" interpretiert.
+     */
+    public NumericalDist<Double> getReviewTimeDist() {
+        return this.reviewTimeDist;
+    }
+
+    /**
+     * Liefert die Verteilung, aus der benötigte Zeit für die Planung einer Story bezogen wird.
+     * Die gesampelten Werte werden als "Stunden" interpretiert.
+     */
+    public NumericalDist<Double> getPlanningTimeDist() {
+        return this.planningTimeDist;
+    }
+
+    /**
+     * Liefert die Verteilung, aus der Zeit, nach der ein normaler Bug auftritt (gezählt ab Commit), bezogen wird.
+     * Die gesampelten Werte werden als "Stunden" interpretiert.
+     */
+    public NumericalDist<Double> getBugActivationTimeDist() {
+        return this.bugActivationTimeDist;
+    }
+
+    /**
+     * Liefert die Verteilung, aus der die für das Auflösen eines Konflikts mit einem oder mehreren parallel bearbeiteten Tasks
+     * benötigte Zeit bezogen wird.
+     * Die gesampelten Werte werden als "Stunden" interpretiert.
+     */
+    public NumericalDist<Double> getConflictResolutionTimeDist() {
+        return this.conflictResolutionTimeDist;
+    }
+
+    /**
+     * Liefert die Verteilung, aus der die Zeit bezogen wird, die ein Entwickler durch das Auftreten eines "globalen Bugs" während der Implementierung
+     * verliert.
+     * Die gesampelten Werte werden als "Stunden" interpretiert.
+     */
+    public NumericalDist<Double> getGlobalBugSuspendTimeDist() {
+        return this.globalBugSuspendTimeDist;
     }
 
     /**
@@ -50,7 +156,7 @@ public class Parameters {
      * Wird zusammen mit {@link #getMaxTaskSwitchOverhead()} verwendet, um die Parameter für die Ebbinghaussche Vergessenskurve zu bestimmen.
      */
     public TimeSpan getTaskSwitchOverheadAfterOneHourInterruption() {
-        return new TimeSpan(10, TimeUnit.MINUTES);
+        return this.taskSwitchOverheadAfterOneHour;
     }
 
     /**
@@ -61,7 +167,11 @@ public class Parameters {
     public TimeSpan getMaxTaskSwitchOverhead() {
         //TODO: besser als Anteil des Gesamtaufwands der Story (abhängig von der Anzahl Story Points) angeben
         //TODO: vielleicht auch noch unterscheiden zwischen "Zeit für komplettes Neu-Einarbeiten" und "Zeit für Wieder-Einarbeiten nach langer Zeit"
-        return new TimeSpan(1, TimeUnit.HOURS);
+        return this.maxTaskSwitchOverhead;
+    }
+
+    public long getGenericRandomSeed() {
+        return this.genericRandomSeed;
     }
 
 }

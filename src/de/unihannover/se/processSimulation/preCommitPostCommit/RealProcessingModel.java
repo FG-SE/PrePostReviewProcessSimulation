@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.unihannover.se.processSimulation.common.Parameters;
+import de.unihannover.se.processSimulation.common.ParametersFactory;
+import desmoj.core.dist.LinearCongruentialRandomGenerator;
+import desmoj.core.dist.UniformRandomGenerator;
 import desmoj.core.simulator.Model;
 import desmoj.core.simulator.TimeSpan;
 import desmoj.core.statistic.Count;
@@ -19,12 +22,15 @@ class RealProcessingModel extends Model {
     private Tally storyCycleTime;
 
     private final List<Developer> developers = new ArrayList<>();
-    private final Parameters parameters;
+    private final ParametersFactory parameterFactory;
+    private Parameters parameters;
 
-    public RealProcessingModel(String name, ReviewMode reviewMode, Parameters parameters) {
+    private UniformRandomGenerator genericRandom;
+
+    public RealProcessingModel(String name, ReviewMode reviewMode, ParametersFactory parameterFactory) {
         super(null, name, true, true);
         this.reviewMode = reviewMode;
-        this.parameters = parameters;
+        this.parameterFactory = parameterFactory;
     }
 
     @Override
@@ -34,7 +40,8 @@ class RealProcessingModel extends Model {
 
     @Override
     public void init() {
-        this.parameters.init(this);
+        this.parameters = this.parameterFactory.create(this);
+        this.genericRandom = new LinearCongruentialRandomGenerator(this.getParameters().getGenericRandomSeed());
 
         this.board = new Board(this);
         this.sourceRepository = new SourceRepository();
@@ -43,7 +50,10 @@ class RealProcessingModel extends Model {
         this.storyCycleTime = new Tally(this, "storyCycleTime", true, true);
 
         for (int i = 0; i < this.parameters.getNumDevelopers(); i++) {
-            this.developers.add(new Developer(this, this.parameters.getReviewSkillDist().sample()));
+            this.developers.add(new Developer(this,
+                            this.parameters.getReviewSkillDist().sample(),
+                            this.parameters.getGlobalBugDist().sample(),
+                            this.parameters.getImplementationSkillDist().sample()));
         }
     }
 
@@ -75,6 +85,10 @@ class RealProcessingModel extends Model {
 
     public Parameters getParameters() {
         return this.parameters;
+    }
+
+    public boolean getRandomBool(double propabilityForTrue) {
+        return this.genericRandom.nextDouble() < propabilityForTrue;
     }
 
 }

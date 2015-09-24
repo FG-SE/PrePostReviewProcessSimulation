@@ -1,21 +1,29 @@
 package de.unihannover.se.processSimulation.preCommitPostCommit;
 
- class BugfixTask extends Task {
+import java.util.Collections;
+import java.util.List;
 
-    private final Bug bug;
+class BugfixTask extends Task {
 
-    public BugfixTask(Bug bug) {
+    private final NormalBug bug;
+
+    public BugfixTask(NormalBug bug) {
         super(bug.getModel(), "bug");
         this.bug = bug;
     }
 
-    public Bug getBug() {
+    public NormalBug getBug() {
         return this.bug;
     }
 
     @Override
     public String getMemoryKey() {
         return this.bug.getTask().getMemoryKey();
+    }
+
+    @Override
+    public List<? extends Task> getPrerequisites() {
+        return Collections.emptyList();
     }
 
 }

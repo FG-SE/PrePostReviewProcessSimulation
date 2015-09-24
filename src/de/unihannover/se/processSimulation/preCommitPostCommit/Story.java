@@ -1,6 +1,7 @@
 package de.unihannover.se.processSimulation.preCommitPostCommit;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -10,14 +11,12 @@ import desmoj.core.simulator.TimeSpan;
 
 class Story extends RealModelEntity implements MemoryItem {
 
-    private final int storyPoints;
     private TimeInstant startTime;
     private final List<StoryTask> tasks;
     private final List<Developer> additionalPlanners = new ArrayList<>();
 
     public Story(RealProcessingModel owner, int storyPoints) {
         super(owner, "story");
-        this.storyPoints = storyPoints;
         this.tasks = new ArrayList<>();
     }
 
@@ -38,10 +37,11 @@ class Story extends RealModelEntity implements MemoryItem {
     private void doMainPlanning(Developer developer) {
         this.startTime = this.presentTime();
         developer.sendTraceNote("starts planning of " + this);
-        //TODO Zeit für Planung
-        developer.hold(new TimeSpan(2, TimeUnit.HOURS));
+        developer.hold(this.getModel().getParameters().getPlanningTimeDist().sampleTimeSpan(TimeUnit.HOURS));
 
-        new StoryTask(this.getModel(), this);
+        final StoryTask t1 = new StoryTask(this.getModel(), this, Collections.emptyList());
+        new StoryTask(this.getModel(), this, Collections.singletonList(t1));
+        new StoryTask(this.getModel(), this, Collections.singletonList(t1));
 
         this.getBoard().addPlannedStory(this);
 
@@ -69,7 +69,13 @@ class Story extends RealModelEntity implements MemoryItem {
     }
 
     public int getStoryPoints() {
-        return this.storyPoints;
+        assert !this.tasks.isEmpty();
+        //Story-Points werden der Einfachheit halber über die Summe der Netto-Implementierungszeit bestimmt
+        double totalTime = 0.0;
+        for (final Task t : this.tasks) {
+            totalTime += t.getImplementationTime().getTimeAsDouble(TimeUnit.HOURS);
+        }
+        return (int) Math.ceil(totalTime);
     }
 
     @Override

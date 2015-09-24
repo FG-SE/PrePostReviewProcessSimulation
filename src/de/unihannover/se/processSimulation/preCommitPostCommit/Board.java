@@ -1,7 +1,9 @@
 package de.unihannover.se.processSimulation.preCommitPostCommit;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import desmoj.core.simulator.Queue;
 import desmoj.core.simulator.TimeInstant;
@@ -11,6 +13,7 @@ class Board {
     private final RealProcessingModel model;
     private final Queue<StoryTask> openStoryTasks;
     private final Queue<BugfixTask> openBugs;
+    private final Set<Task> tasksInImplementation;
     private final Queue<Task> tasksReadyForReview;
     private final Queue<Task> tasksWithReviewRemarks;
     private Story storyInPlanning;
@@ -19,6 +22,7 @@ class Board {
         this.model = owner;
         this.openStoryTasks = new Queue<>(owner, "openStoryTasks", true, true);
         this.openBugs = new Queue<>(owner, "openBugs", true, true);
+        this.tasksInImplementation = new LinkedHashSet<>();
         this.tasksReadyForReview = new Queue<>(owner, "tasksReadyForReview", true, true);
         this.tasksWithReviewRemarks = new Queue<>(owner, "taskWithReviewRemarks", true, true);
     }
@@ -44,20 +48,29 @@ class Board {
         }
         final BugfixTask best = determineBestFit(this.openBugs, developer);
         this.openBugs.remove(best);
+        this.tasksInImplementation.add(best);
         return best;
     }
 
     public StoryTask getTaskToImplement(Developer developer) {
-        //TODO: Vorbedingungs-Tasks beachten
-        if (this.openStoryTasks.isEmpty()) {
+        final List<StoryTask> possibleTasks = new ArrayList<>();
+        for (final StoryTask t : this.openStoryTasks) {
+            if (t.arePrerequisitesGiven()) {
+                possibleTasks.add(t);
+            }
+        }
+        if (possibleTasks.isEmpty()) {
             return null;
         }
-        final StoryTask best = determineBestFit(this.openStoryTasks, developer);
+        final StoryTask best = determineBestFit(possibleTasks, developer);
         this.openStoryTasks.remove(best);
+        this.tasksInImplementation.add(best);
         return best;
     }
 
     public void addTaskReadyForReview(Task task) {
+        assert this.tasksInImplementation.contains(task);
+        this.tasksInImplementation.remove(task);
         this.tasksReadyForReview.insert(task);
     }
 
@@ -88,6 +101,7 @@ class Board {
         }
         final Task best = determineBestFit(possibleTasks, developer);
         this.tasksWithReviewRemarks.remove(best);
+        this.tasksInImplementation.add(best);
         return best;
     }
 
@@ -96,7 +110,7 @@ class Board {
         T best = null;
         for (final T t : possibleTasks) {
             final TimeInstant lastTimeForT = developer.getLastTimeYouHadToDoWith(t);
-            if (bestTime == null || TimeInstant.isAfter(bestTime, lastTimeForT)) {
+            if (best == null || (lastTimeForT != null && (bestTime == null || TimeInstant.isAfter(bestTime, lastTimeForT)))) {
                 bestTime = lastTimeForT;
                 best = t;
             }
@@ -119,6 +133,10 @@ class Board {
 
     public void addBugToBeFixed(BugfixTask bugfixTask) {
         this.openBugs.insert(bugfixTask);
+    }
+
+    public Set<Task> getAllTasksInImplementation() {
+        return this.tasksInImplementation;
     }
 
 }

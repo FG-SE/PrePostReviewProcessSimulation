@@ -20,43 +20,74 @@ abstract class Task extends RealModelEntity implements MemoryItem {
     private Developer implementor;
 
     private final List<Bug> lurkingBugs;
+    private final List<TimeSpan> implementationInterruptions;
     private Review currentReview;
+    private boolean commited;
+
+    private final TimeSpan implementationTime;
 
     public Task(RealProcessingModel model, String name) {
         super(model, name);
         this.state = State.OPEN;
         this.lurkingBugs = new ArrayList<>();
+        this.implementationInterruptions = new ArrayList<>();
+        this.implementationTime = model.getParameters().getImplementationTimeDist().sampleTimeSpan(TimeUnit.HOURS);
     }
 
     public void performImplementation(Developer dev) {
         assert this.state == State.OPEN;
         assert this.implementor == null;
+        assert this.implementationInterruptions.isEmpty();
+
         this.implementor = dev;
 
         this.handleTaskSwitchOverhead(dev);
 
         //der "Konfliktzeitraum" soll erst beginnen, nachdem die Task-Switch/Einarbeitungsphase durch ist
         this.getSourceRepository().startWork(this);
-        //TODO Zeit für Implementierung
-        this.implementor.hold(new TimeSpan(3, TimeUnit.HOURS));
+        this.implementor.hold(this.implementationTime);
 
-        //TODO Bug-Anzahl abhängig von Entwicklerskill und Umfang des Tasks; Entwicklerskill gemessen in Bugs/Stunde, ggf. zusätzlich mit Varianz
-        if (this instanceof StoryTask) {
-            this.lurkingBugs.add(new Bug(this));
-        }
-
+        this.createBugs(this.implementationTime);
         this.endImplementation();
     }
 
     private void endImplementation() {
-        //TODO Mega-Bugs
-        //TODO Störungen zwishchendurch
+        this.handleAdditionalWaitsForInterruptions();
 
         if (this.getModel().getReviewMode() == ReviewMode.POST_COMMIT) {
             this.commit(this.implementor);
         }
+        this.handleAdditionalWaitsForInterruptions();
         this.state = State.READY_FOR_REVIEW;
         this.getBoard().addTaskReadyForReview(this);
+    }
+
+    private void createBugs(TimeSpan relevantTime) {
+        //TODO hier fehlt mir noch ein bisschen Zufall
+        double bugsCreated = this.implementor.getImplementationSkill() * relevantTime.getTimeAsDouble(TimeUnit.HOURS);
+        while (bugsCreated > 1) {
+            this.lurkingBugs.add(new NormalBug(this));
+            bugsCreated -= 1.0;
+        }
+        if (this.getModel().getRandomBool(bugsCreated)) {
+            this.lurkingBugs.add(new NormalBug(this));
+        }
+
+        if (this.implementor.makesBlockerBug()) {
+            this.lurkingBugs.add(new GlobalBug(this.getModel()));
+        }
+    }
+
+    private void handleAdditionalWaitsForInterruptions() {
+        while (!this.implementationInterruptions.isEmpty()) {
+            final TimeSpan interruption = this.implementationInterruptions.remove(0);
+            this.implementor.hold(interruption);
+        }
+    }
+
+    public void suspendImplementation(TimeSpan timeSpan) {
+        this.getModel().sendTraceNote("suspends implementation of " + this + " for " + timeSpan);
+        this.implementationInterruptions.add(timeSpan);
     }
 
     public void performReview(Developer reviewer) {
@@ -66,8 +97,7 @@ abstract class Task extends RealModelEntity implements MemoryItem {
 
         this.handleTaskSwitchOverhead(reviewer);
 
-        //TODO Zeit für Review
-        reviewer.hold(new TimeSpan(1, TimeUnit.HOURS));
+        reviewer.hold(this.getModel().getParameters().getReviewTimeDist().sampleTimeSpan(TimeUnit.HOURS));
 
         final List<Bug> foundBugs = new ArrayList<>();
         for (final Bug b : this.lurkingBugs) {
@@ -101,6 +131,7 @@ abstract class Task extends RealModelEntity implements MemoryItem {
     public void performFixing(Developer dev) {
         assert this.state == State.REJECTED;
         assert this.implementor == dev;
+        assert this.implementationInterruptions.isEmpty() : this + " contains interruptions " + this.implementationInterruptions;
 
         this.handleTaskSwitchOverhead(dev);
 
@@ -109,14 +140,21 @@ abstract class Task extends RealModelEntity implements MemoryItem {
             this.getSourceRepository().startWork(this);
         }
 
-        //TODO Zeit für Fixing
-        dev.hold(new TimeSpan(30, TimeUnit.MINUTES));
-        //TODO nicht alle Bugs werden gefixt
+        //An sich kann es neben dem Einbauen neuer Bugs auch vorkommen, dass bestehende und bereits angemerkte
+        //  Bugs nicht wirklich gefixt werden. Das wird hier vernachlässigt.
+
+        double hoursForFixing = 0.0;
+        for (final Bug b : this.currentReview.getRemarks()) {
+            hoursForFixing += this.getModel().getParameters().getFixTimeDist().sample();
+        }
+        final TimeSpan fixingTime = new TimeSpan(hoursForFixing, TimeUnit.HOURS);
+        dev.hold(fixingTime);
         for (final Bug b : this.currentReview.getRemarks()) {
             this.lurkingBugs.remove(b);
             b.fix();
         }
 
+        this.createBugs(fixingTime);
         this.endImplementation();
     }
 
@@ -136,7 +174,7 @@ abstract class Task extends RealModelEntity implements MemoryItem {
         }
 
         if (max.getTimeInEpsilon() == 0) {
-            return null;
+            return max;
         }
 
         final TimeSpan forOneHour = this.getModel().getParameters().getTaskSwitchOverheadAfterOneHourInterruption();
@@ -160,12 +198,23 @@ abstract class Task extends RealModelEntity implements MemoryItem {
         while (!this.getSourceRepository().tryCommit(this)) {
             //Konflikt vorhanden => Update ziehen, anpassen, und nochmal probieren
             this.getSourceRepository().restartWork(this);
-            //TODO Zeit für Konfliktbehebung
-            commiter.hold(new TimeSpan(15, TimeUnit.MINUTES));
+            commiter.hold(this.getModel().getParameters().getConflictResolutionTimeDist().sampleTimeSpan(TimeUnit.HOURS));
         }
 
+        this.commited = true;
         for (final Bug b : this.lurkingBugs) {
-            b.activate();
+            b.startTicking();
         }
     }
+
+    public boolean isCommited() {
+        return this.commited;
+    }
+
+    public abstract List<? extends Task> getPrerequisites();
+
+    public TimeSpan getImplementationTime() {
+        return this.implementationTime;
+    }
+
 }
