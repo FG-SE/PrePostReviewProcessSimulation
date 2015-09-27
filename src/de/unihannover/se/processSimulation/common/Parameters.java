@@ -63,7 +63,7 @@ public class Parameters {
     }
 
     /**
-     * Liefert die Verteilung für die Wahrscheinlichkeit, einen Bug zu finden
+     * Liefert die Verteilung für die Wahrscheinlichkeit, einen Bug zu finden (je Entwickler)
      * (1.0 = Bug wird mit Sicherheit gefunden, 0.0 = Bug wird mit Sicherheit nicht gefunden).
      */
     public NumericalDist<Double> getReviewSkillDist() {
@@ -71,7 +71,7 @@ public class Parameters {
     }
 
     /**
-     * Liefert die Verteilung für die Wahrscheinlichkeit, einen globalen "Blocker-Bug" einzufügen
+     * Liefert die Verteilung für die Wahrscheinlichkeit, einen globalen "Blocker-Bug" einzufügen (je Entwickler)
      * (1.0 = In jeden Task wird ein Global-Bug eingefügt, 0.0 = Global-Bugs werden nie eingefügt).
      */
     public NumericalDist<Double> getGlobalBugDist() {

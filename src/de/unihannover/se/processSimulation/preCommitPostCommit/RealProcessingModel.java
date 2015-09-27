@@ -5,6 +5,7 @@ import java.util.List;
 
 import de.unihannover.se.processSimulation.common.Parameters;
 import de.unihannover.se.processSimulation.common.ParametersFactory;
+import de.unihannover.se.processSimulation.common.ReviewMode;
 import desmoj.core.dist.LinearCongruentialRandomGenerator;
 import desmoj.core.dist.UniformRandomGenerator;
 import desmoj.core.simulator.Model;
@@ -12,7 +13,7 @@ import desmoj.core.simulator.TimeSpan;
 import desmoj.core.statistic.Count;
 import desmoj.core.statistic.Tally;
 
-class RealProcessingModel extends Model {
+public class RealProcessingModel extends Model {
 
     private final ReviewMode reviewMode;
     private Board board;
@@ -89,6 +90,18 @@ class RealProcessingModel extends Model {
 
     public boolean getRandomBool(double propabilityForTrue) {
         return this.genericRandom.nextDouble() < propabilityForTrue;
+    }
+
+    public long getFinishedStoryPoints() {
+        return this.finishedStoryPoints.getValue();
+    }
+
+    public double getStoryCycleTimeMean() {
+        return this.storyCycleTime.getMean();
+    }
+
+    public double getStoryCycleTimeStdDev() {
+        return this.storyCycleTime.getStdDev();
     }
 
 }
