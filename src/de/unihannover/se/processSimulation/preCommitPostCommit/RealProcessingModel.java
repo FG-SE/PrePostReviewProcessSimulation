@@ -20,6 +20,7 @@ public class RealProcessingModel extends Model {
     private SourceRepository sourceRepository;
 
     private Count finishedStoryPoints;
+    private Count remainingBugs;
     private Tally storyCycleTime;
 
     private final List<Developer> developers = new ArrayList<>();
@@ -49,6 +50,7 @@ public class RealProcessingModel extends Model {
 
         this.finishedStoryPoints = new Count(this, "finishedStoryPoints", true, true);
         this.storyCycleTime = new Tally(this, "storyCycleTime", true, true);
+        this.remainingBugs = new Count(this, "remainingBugs", true, true);
 
         for (int i = 0; i < this.parameters.getNumDevelopers(); i++) {
             this.developers.add(new Developer(this,
@@ -97,11 +99,33 @@ public class RealProcessingModel extends Model {
     }
 
     public double getStoryCycleTimeMean() {
+        if (this.storyCycleTime.getObservations() <= 0) {
+            return -1.0;
+        }
         return this.storyCycleTime.getMean();
     }
 
     public double getStoryCycleTimeStdDev() {
+        if (this.storyCycleTime.getObservations() <= 0) {
+            return -1.0;
+        }
         return this.storyCycleTime.getStdDev();
+    }
+
+    public int getStartedStoryCount() {
+        return this.board.getStartedStoryCount();
+    }
+
+    public long getRemainingBugCount() {
+        return this.remainingBugs.getValue();
+    }
+
+    void countBugCreated() {
+        this.remainingBugs.update();
+    }
+
+    void countBugFixed() {
+        this.remainingBugs.update(-1);
     }
 
 }

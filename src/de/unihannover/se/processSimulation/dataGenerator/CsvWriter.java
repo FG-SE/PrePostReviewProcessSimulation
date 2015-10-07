@@ -6,28 +6,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class ArffWriter implements DataWriter {
+public class CsvWriter implements DataWriter {
 
     private final Writer writer;
     private boolean dataStarted;
 
     private final List<String> attributes = new ArrayList<>();
 
-    public ArffWriter(Writer writer, String relationName) throws IOException {
+    public CsvWriter(Writer writer) {
         this.writer = writer;
-        this.writer.write("@relation " + relationName + "\n");
-        this.writer.write("\n");
-    }
-
-    @Override
-    public void close() throws IOException {
-        this.writer.close();
     }
 
     @Override
     public void addNumericAttribute(String name) throws IOException {
         assert !this.dataStarted;
-        this.writer.write("@attribute " + name + " numeric\n");
         this.attributes.add(name);
     }
 
@@ -35,8 +27,7 @@ public class ArffWriter implements DataWriter {
     public void writeTuple(Map<String, Object> experimentData) throws IOException {
         if (!this.dataStarted) {
             this.dataStarted = true;
-            this.writer.write("\n");
-            this.writer.write("@data\n");
+            this.writeHeader();
         }
 
         boolean first = true;
@@ -44,9 +35,22 @@ public class ArffWriter implements DataWriter {
             if (first) {
                 first = false;
             } else {
-                this.writer.write(',');
+                this.writer.write(';');
             }
             this.writer.write(experimentData.get(att).toString());
+        }
+        this.writer.write('\n');
+    }
+
+    private void writeHeader() throws IOException {
+        boolean first = true;
+        for (final String att : this.attributes) {
+            if (first) {
+                first = false;
+            } else {
+                this.writer.write(';');
+            }
+            this.writer.write(att);
         }
         this.writer.write('\n');
     }
@@ -54,6 +58,11 @@ public class ArffWriter implements DataWriter {
     @Override
     public void flush() throws IOException {
         this.writer.flush();
+    }
+
+    @Override
+    public void close() throws IOException {
+        this.writer.close();
     }
 
 }

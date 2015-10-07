@@ -1,7 +1,10 @@
 package de.unihannover.se.processSimulation.dataGenerator;
 
+import java.io.IOException;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 import de.unihannover.se.processSimulation.common.Parameters;
 import de.unihannover.se.processSimulation.common.ParametersFactory;
@@ -15,20 +18,52 @@ import desmoj.core.simulator.TimeSpan;
 
 public class BulkParameterFactory extends ParametersFactory implements Cloneable {
 
-    private double implementationSkillMode;
-    private double reviewSkillMode;
-    private double globalBugMode;
-    private double conflictPropability;
-    private double implementationTimeMode;
-    private double fixTimeMode;
-    private double globalBugSuspendTimeMode;
-    private double conflictResolutionTimeMode;
-    private double bugActivationTimeExpectedValue;
-    private double planningTimeMode;
-    private double reviewTimeMode;
-    private int numberOfDevelopers;
-    private TimeSpan taskSwitchOverheadAfterOneHour;
-    private TimeSpan maxTaskSwitchOverhead;
+    public BulkParameterFactory(
+                    double implementationSkillMode,
+                    double reviewSkillMode,
+                    double globalBugMode,
+                    double conflictPropability,
+                    double implementationTimeMode,
+                    double fixTimeMode,
+                    double globalBugSuspendTimeMode,
+                    double conflictResolutionTimeMode,
+                    double bugActivationTimeExpectedValue,
+                    double planningTimeMode,
+                    double reviewTimeMode,
+                    int numberOfDevelopers,
+                    TimeSpan taskSwitchOverheadAfterOneHour,
+                    TimeSpan maxTaskSwitchOverhead) {
+        this.implementationSkillMode = implementationSkillMode;
+        this.reviewSkillMode = reviewSkillMode;
+        this.globalBugMode = globalBugMode;
+        this.conflictPropability = conflictPropability;
+        this.implementationTimeMode = implementationTimeMode;
+        this.fixTimeMode = fixTimeMode;
+        this.globalBugSuspendTimeMode = globalBugSuspendTimeMode;
+        this.conflictResolutionTimeMode = conflictResolutionTimeMode;
+        this.bugActivationTimeExpectedValue = bugActivationTimeExpectedValue;
+        this.planningTimeMode = planningTimeMode;
+        this.reviewTimeMode = reviewTimeMode;
+        this.numberOfDevelopers = numberOfDevelopers;
+        this.taskSwitchOverheadAfterOneHour = taskSwitchOverheadAfterOneHour;
+        this.maxTaskSwitchOverhead = maxTaskSwitchOverhead;
+        this.seed = 764;
+    }
+
+    private final double implementationSkillMode;
+    private final double reviewSkillMode;
+    private final double globalBugMode;
+    private final double conflictPropability;
+    private final double implementationTimeMode;
+    private final double fixTimeMode;
+    private final double globalBugSuspendTimeMode;
+    private final double conflictResolutionTimeMode;
+    private final double bugActivationTimeExpectedValue;
+    private final double planningTimeMode;
+    private final double reviewTimeMode;
+    private final int numberOfDevelopers;
+    private final TimeSpan taskSwitchOverheadAfterOneHour;
+    private final TimeSpan maxTaskSwitchOverhead;
 
     private int seed;
 
@@ -114,8 +149,29 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
     }
 
     public void saveData(Map<String, Object> experimentData) {
-        // TODO Auto-generated method stub
+        experimentData.put("implementationSkillMode", this.implementationSkillMode);
+        experimentData.put("reviewSkillMode", this.reviewSkillMode);
+        experimentData.put("globalBugMode", this.globalBugMode);
+        experimentData.put("conflictPropability", this.conflictPropability);
+        experimentData.put("implementationTimeMode", this.implementationTimeMode);
+        experimentData.put("fixTimeMode", this.fixTimeMode);
+        experimentData.put("globalBugSuspendTimeMode", this.globalBugSuspendTimeMode);
+        experimentData.put("conflictResolutionTimeMode", this.conflictResolutionTimeMode);
+        experimentData.put("bugActivationTimeExpectedValue", this.bugActivationTimeExpectedValue);
+        experimentData.put("planningTimeMode", this.planningTimeMode);
+        experimentData.put("reviewTimeMode", this.reviewTimeMode);
+        experimentData.put("numberOfDevelopers", this.numberOfDevelopers);
+        experimentData.put("taskSwitchOverheadAfterOneHour", this.taskSwitchOverheadAfterOneHour.getTimeAsDouble(TimeUnit.HOURS));
+        experimentData.put("maxTaskSwitchOverhead", this.maxTaskSwitchOverhead.getTimeAsDouble(TimeUnit.HOURS));
+        experimentData.put("seed", this.seed);
+    }
 
+    public void addAttributesTo(DataWriter rawResultWriter) throws IOException {
+        final LinkedHashMap<String, Object> hs = new LinkedHashMap<>();
+        this.saveData(hs);
+        for (final String name : hs.keySet()) {
+            rawResultWriter.addNumericAttribute(name);
+        }
     }
 
 }

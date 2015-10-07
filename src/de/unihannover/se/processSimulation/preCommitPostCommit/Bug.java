@@ -9,6 +9,7 @@ abstract class Bug extends RealModelProcess {
 
     public Bug(RealProcessingModel model, String name) {
         super(model, name);
+        model.countBugCreated();
     }
 
     public final void startTicking() {
@@ -38,7 +39,10 @@ abstract class Bug extends RealModelProcess {
     protected abstract void explode();
 
     public final void fix() {
-        this.fixed = true;
+        if (!this.fixed) {
+            this.fixed = true;
+            this.getModel().countBugFixed();
+        }
     }
 
 }

@@ -18,6 +18,8 @@ class Board {
     private final Queue<Task> tasksWithReviewRemarks;
     private Story storyInPlanning;
 
+    private int startedStoryCount;
+
     public Board(RealProcessingModel owner) {
         this.model = owner;
         this.openStoryTasks = new Queue<>(owner, "openStoryTasks", true, true);
@@ -30,6 +32,7 @@ class Board {
     public Story getStoryToPlan() {
         if (this.storyInPlanning == null) {
             this.storyInPlanning = new Story(this.model, 5);
+            this.startedStoryCount++;
         }
         return this.storyInPlanning;
     }
@@ -137,6 +140,10 @@ class Board {
 
     public Set<Task> getAllTasksInImplementation() {
         return this.tasksInImplementation;
+    }
+
+    public int getStartedStoryCount() {
+        return this.startedStoryCount;
     }
 
 }
