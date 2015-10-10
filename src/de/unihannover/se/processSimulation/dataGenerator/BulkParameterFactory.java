@@ -18,38 +18,6 @@ import desmoj.core.simulator.TimeSpan;
 
 public class BulkParameterFactory extends ParametersFactory implements Cloneable {
 
-    public BulkParameterFactory(
-                    double implementationSkillMode,
-                    double reviewSkillMode,
-                    double globalBugMode,
-                    double conflictPropability,
-                    double implementationTimeMode,
-                    double fixTimeMode,
-                    double globalBugSuspendTimeMode,
-                    double conflictResolutionTimeMode,
-                    double bugActivationTimeExpectedValue,
-                    double planningTimeMode,
-                    double reviewTimeMode,
-                    int numberOfDevelopers,
-                    TimeSpan taskSwitchOverheadAfterOneHour,
-                    TimeSpan maxTaskSwitchOverhead) {
-        this.implementationSkillMode = implementationSkillMode;
-        this.reviewSkillMode = reviewSkillMode;
-        this.globalBugMode = globalBugMode;
-        this.conflictPropability = conflictPropability;
-        this.implementationTimeMode = implementationTimeMode;
-        this.fixTimeMode = fixTimeMode;
-        this.globalBugSuspendTimeMode = globalBugSuspendTimeMode;
-        this.conflictResolutionTimeMode = conflictResolutionTimeMode;
-        this.bugActivationTimeExpectedValue = bugActivationTimeExpectedValue;
-        this.planningTimeMode = planningTimeMode;
-        this.reviewTimeMode = reviewTimeMode;
-        this.numberOfDevelopers = numberOfDevelopers;
-        this.taskSwitchOverheadAfterOneHour = taskSwitchOverheadAfterOneHour;
-        this.maxTaskSwitchOverhead = maxTaskSwitchOverhead;
-        this.seed = 764;
-    }
-
     private final double implementationSkillMode;
     private final double reviewSkillMode;
     private final double globalBugMode;
@@ -57,6 +25,7 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
     private final double implementationTimeMode;
     private final double fixTimeMode;
     private final double globalBugSuspendTimeMode;
+    private final double bugAssessmentTimeMode;
     private final double conflictResolutionTimeMode;
     private final double bugActivationTimeExpectedValue;
     private final double planningTimeMode;
@@ -116,6 +85,40 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
 
     }
 
+    public BulkParameterFactory(
+                    double implementationSkillMode,
+                    double reviewSkillMode,
+                    double globalBugMode,
+                    double conflictPropability,
+                    double implementationTimeMode,
+                    double fixTimeMode,
+                    double globalBugSuspendTimeMode,
+                    double bugAssessmentTimeMode,
+                    double conflictResolutionTimeMode,
+                    double bugActivationTimeExpectedValue,
+                    double planningTimeMode,
+                    double reviewTimeMode,
+                    int numberOfDevelopers,
+                    TimeSpan taskSwitchOverheadAfterOneHour,
+                    TimeSpan maxTaskSwitchOverhead) {
+        this.implementationSkillMode = implementationSkillMode;
+        this.reviewSkillMode = reviewSkillMode;
+        this.globalBugMode = globalBugMode;
+        this.conflictPropability = conflictPropability;
+        this.implementationTimeMode = implementationTimeMode;
+        this.fixTimeMode = fixTimeMode;
+        this.globalBugSuspendTimeMode = globalBugSuspendTimeMode;
+        this.bugAssessmentTimeMode = bugAssessmentTimeMode;
+        this.conflictResolutionTimeMode = conflictResolutionTimeMode;
+        this.bugActivationTimeExpectedValue = bugActivationTimeExpectedValue;
+        this.planningTimeMode = planningTimeMode;
+        this.reviewTimeMode = reviewTimeMode;
+        this.numberOfDevelopers = numberOfDevelopers;
+        this.taskSwitchOverheadAfterOneHour = taskSwitchOverheadAfterOneHour;
+        this.maxTaskSwitchOverhead = maxTaskSwitchOverhead;
+        this.seed = 764;
+    }
+
     @Override
     public Parameters create(Model owner) {
         final Random r = new Random(this.seed);
@@ -128,6 +131,7 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
                         b.posNormal("implementationTimeDist", this.implementationTimeMode),
                         b.posNormal("fixTimeDist", this.fixTimeMode),
                         b.posNormal("globalBugSuspendTimeDist", this.globalBugSuspendTimeMode),
+                        b.posNormal("bugAssessmentTimeDist", this.bugAssessmentTimeMode),
                         b.posNormal("conflictResolutionTimeDist", this.conflictResolutionTimeMode),
                         b.exp("bugActivationTimeDist", this.bugActivationTimeExpectedValue),
                         b.posNormal("planningTimeDist", this.planningTimeMode),

@@ -16,7 +16,7 @@ class GlobalBug extends Bug {
     }
 
     @Override
-    protected void explode() {
+    protected void becomeVisible() {
         for (final Task t : this.getBoard().getAllTasksInImplementation()) {
             t.suspendImplementation(this.getModel().getParameters().getGlobalBugSuspendTimeDist().sampleTimeSpan(TimeUnit.HOURS));
         }

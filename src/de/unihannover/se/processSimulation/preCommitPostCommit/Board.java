@@ -11,6 +11,7 @@ import desmoj.core.simulator.TimeInstant;
 class Board {
 
     private final RealProcessingModel model;
+    private final Queue<NormalBug> unassessedBugs;
     private final Queue<StoryTask> openStoryTasks;
     private final Queue<BugfixTask> openBugs;
     private final Set<Task> tasksInImplementation;
@@ -22,6 +23,7 @@ class Board {
 
     public Board(RealProcessingModel owner) {
         this.model = owner;
+        this.unassessedBugs = new Queue<>(owner, "unassessedBugs", true, true);
         this.openStoryTasks = new Queue<>(owner, "openStoryTasks", true, true);
         this.openBugs = new Queue<>(owner, "openBugs", true, true);
         this.tasksInImplementation = new LinkedHashSet<>();
@@ -144,6 +146,15 @@ class Board {
 
     public int getStartedStoryCount() {
         return this.startedStoryCount;
+    }
+
+    public void addUnassessedBug(NormalBug normalBug) {
+        this.unassessedBugs.insert(normalBug);
+    }
+
+    public NormalBug getUnassessedBug() {
+        //hier wird nicht nach Task-Zugehörigkeit geguckt, weil man das vor dem Assessment ja nicht unbedingt wissen kann
+        return this.unassessedBugs.removeFirst();
     }
 
 }

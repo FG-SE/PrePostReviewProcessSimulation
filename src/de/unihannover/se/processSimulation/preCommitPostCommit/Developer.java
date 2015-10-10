@@ -26,6 +26,14 @@ class Developer extends RealModelProcess {
         while (true) {
             final Board board = this.getBoard();
 
+            final NormalBug unassessedBug = board.getUnassessedBug();
+            if (unassessedBug != null) {
+                final Task buggyTask = unassessedBug.getTask();
+                buggyTask.performBugAssessment(this, unassessedBug);
+                this.saveLastTimeIHadToDoWith(buggyTask);
+                continue;
+            }
+
             final Task taskWithReviewRemarks = board.getTaskWithReviewRemarksFor(this);
             if (taskWithReviewRemarks != null) {
                 taskWithReviewRemarks.performFixing(this);

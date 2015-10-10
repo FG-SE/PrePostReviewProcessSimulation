@@ -13,6 +13,7 @@ public class Parameters {
     private final NumericalDist<Double> implementationTimeDist;
     private final NumericalDist<Double> fixTimeDist;
     private final NumericalDist<Double> globalBugSuspendTimeDist;
+    private final NumericalDist<Double> bugAssessmentTimeDist;
     private final NumericalDist<Double> conflictResolutionTimeDist;
     private final NumericalDist<Double> bugActivationTimeDist;
     private final NumericalDist<Double> planningTimeDist;
@@ -30,6 +31,7 @@ public class Parameters {
                     NumericalDist<Double> implementationTimeDist,
                     NumericalDist<Double> fixTimeDist,
                     NumericalDist<Double> globalBugSuspendTimeDist,
+                    NumericalDist<Double> bugAssessmentTimeDist,
                     NumericalDist<Double> conflictResolutionTimeDist,
                     NumericalDist<Double> bugActivationTimeDist,
                     NumericalDist<Double> planningTimeDist,
@@ -45,6 +47,7 @@ public class Parameters {
         this.implementationTimeDist = implementationTimeDist;
         this.fixTimeDist = fixTimeDist;
         this.globalBugSuspendTimeDist = globalBugSuspendTimeDist;
+        this.bugAssessmentTimeDist = bugAssessmentTimeDist;
         this.conflictResolutionTimeDist = conflictResolutionTimeDist;
         this.bugActivationTimeDist = bugActivationTimeDist;
         this.planningTimeDist = planningTimeDist;
@@ -149,6 +152,15 @@ public class Parameters {
      */
     public NumericalDist<Double> getGlobalBugSuspendTimeDist() {
         return this.globalBugSuspendTimeDist;
+    }
+
+    /**
+     * Liefert die Verteilung, aus der die Zeit bezogen wird, die ein Entwickler für die Bewertung eines neu reingekommenen Bugs
+     * braucht.
+     * Die gesampelten Werte werden als "Stunden" interpretiert.
+     */
+    public NumericalDist<Double> getBugAssessmentTimeDist() {
+        return this.bugAssessmentTimeDist;
     }
 
     /**

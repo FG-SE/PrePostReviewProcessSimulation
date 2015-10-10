@@ -30,13 +30,13 @@ abstract class Bug extends RealModelProcess {
         this.hold(this.getActivationTime());
 
         if (!this.fixed) {
-            this.explode();
+            this.becomeVisible();
         }
     }
 
     protected abstract TimeSpan getActivationTime();
 
-    protected abstract void explode();
+    protected abstract void becomeVisible();
 
     public final void fix() {
         if (!this.fixed) {

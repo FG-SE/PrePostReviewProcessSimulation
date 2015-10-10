@@ -28,6 +28,7 @@ public class ParameterGenerator {
             implTime, // implementationTimeMode,
             this.numberBetween(0, 0.5), // fixTimeMode,
             this.numberBetween(0, 0.75), // globalBugSuspendTimeMode,
+            this.numberBetween(0, 0.75), // bugAssessmentTimeMode,
             this.numberBetween(0, 0.75), // conflictResolutionTimeMode,
             this.numberBetween(1.0, 400.0), // bugActivationTimeExpectedValue,
             this.numberBetween(0.5, 10.0), // planningTimeMode,

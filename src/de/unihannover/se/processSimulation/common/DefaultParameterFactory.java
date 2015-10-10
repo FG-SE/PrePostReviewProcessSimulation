@@ -19,6 +19,7 @@ public class DefaultParameterFactory extends ParametersFactory {
                         new ContDistConstant(owner, "implementationTimeDist", 8.0, true, true),
                         new ContDistConstant(owner, "fixTimeDist", 0.15, true, true),
                         new ContDistConstant(owner, "globalBugSuspendTimeDist", 0.25, true, true),
+                        new ContDistConstant(owner, "bugAssessmentTimeDist", 0.1, true, true),
                         new ContDistConstant(owner, "conflictResolutionTimeDist", 0.25, true, true),
                         new ContDistConstant(owner, "bugActivationTimeDist", 160, true, true),
                         new ContDistConstant(owner, "planningTimeDist", 8.0, true, true),

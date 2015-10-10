@@ -14,4 +14,10 @@ class Review {
         return this.remarks;
     }
 
+    public void addRemark(Bug bug) {
+        if (!this.remarks.contains(bug)) {
+            this.remarks.add(bug);
+        }
+    }
+
 }
