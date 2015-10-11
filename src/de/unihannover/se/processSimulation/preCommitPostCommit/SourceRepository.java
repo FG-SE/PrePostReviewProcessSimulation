@@ -7,36 +7,49 @@ import java.util.Map.Entry;
 
 import desmoj.core.simulator.TimeInstant;
 
-class SourceRepository {
+class SourceRepository<U> {
 
-    private final Map<Task, TimeInstant> startTimes = new LinkedHashMap<>();
-    private final Map<Task, TimeInstant> commitTimes = new LinkedHashMap<>();
+    public static interface SourceRepositoryDependencies {
+        public abstract TimeInstant presentTime();
 
-    public void startWork(Task task) {
+        public abstract boolean sampleConflictDist();
+
+        public abstract void sendTraceNote(String description);
+    }
+
+    private final SourceRepositoryDependencies deps;
+    private final Map<U, TimeInstant> startTimes = new LinkedHashMap<>();
+    private final Map<U, TimeInstant> commitTimes = new LinkedHashMap<>();
+
+    public SourceRepository(SourceRepositoryDependencies deps) {
+        this.deps = deps;
+    }
+
+    public void startWork(U task) {
         assert !this.startTimes.containsKey(task);
         this.restartWork(task);
     }
 
-    public void restartWork(Task task) {
+    public void restartWork(U task) {
         assert !this.commitTimes.containsKey(task);
-        this.startTimes.put(task, task.presentTime());
+        this.startTimes.put(task, this.deps.presentTime());
     }
 
-    public boolean tryCommit(Task task) {
+    public boolean tryCommit(U task) {
         final TimeInstant startTime = this.startTimes.get(task);
-        for (final Entry<Task, TimeInstant> e : this.commitTimes.entrySet()) {
+        for (final Entry<U, TimeInstant> e : this.commitTimes.entrySet()) {
             //wenn der Commit nach dem Start stattgefunden hat besteht Konfliktgefahr
             if (TimeInstant.isAfter(e.getValue(), startTime)) {
-                if (task.getModel().getParameters().getConflictDist().sample()) {
+                if (this.deps.sampleConflictDist()) {
                     //Konflikt!
-                    task.getModel().sendTraceNote("conflict between " + task + " and " + e.getKey());
+                    this.deps.sendTraceNote("conflict between " + task + " and " + e.getKey());
                     return false;
                 }
             }
         }
 
         //kein Konflikt => Commit möglich
-        this.commitTimes.put(task, task.presentTime());
+        this.commitTimes.put(task, this.deps.presentTime());
         this.startTimes.remove(task);
 
         this.removeUnnecessaryTasks();
@@ -46,7 +59,7 @@ class SourceRepository {
 
     private void removeUnnecessaryTasks() {
         TimeInstant earliestStart = null;
-        for (final Entry<Task, TimeInstant> e : this.startTimes.entrySet()) {
+        for (final Entry<U, TimeInstant> e : this.startTimes.entrySet()) {
             if (earliestStart == null || TimeInstant.isBefore(e.getValue(), earliestStart)) {
                 earliestStart = e.getValue();
             }
@@ -55,14 +68,18 @@ class SourceRepository {
         if (earliestStart == null) {
             this.commitTimes.clear();
         } else {
-            final Iterator<Entry<Task, TimeInstant>> iter = this.commitTimes.entrySet().iterator();
+            final Iterator<Entry<U, TimeInstant>> iter = this.commitTimes.entrySet().iterator();
             while (iter.hasNext()) {
-                final Entry<Task, TimeInstant> e = iter.next();
+                final Entry<U, TimeInstant> e = iter.next();
                 if (TimeInstant.isBefore(e.getValue(), earliestStart)) {
                     iter.remove();
                 }
             }
         }
+    }
+
+    int countRemainingSavedCommits() {
+        return this.commitTimes.size();
     }
 
 }

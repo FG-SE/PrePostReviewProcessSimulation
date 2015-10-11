@@ -6,9 +6,11 @@ import java.util.List;
 import de.unihannover.se.processSimulation.common.Parameters;
 import de.unihannover.se.processSimulation.common.ParametersFactory;
 import de.unihannover.se.processSimulation.common.ReviewMode;
+import de.unihannover.se.processSimulation.preCommitPostCommit.SourceRepository.SourceRepositoryDependencies;
 import desmoj.core.dist.LinearCongruentialRandomGenerator;
 import desmoj.core.dist.UniformRandomGenerator;
 import desmoj.core.simulator.Model;
+import desmoj.core.simulator.TimeInstant;
 import desmoj.core.simulator.TimeSpan;
 import desmoj.core.statistic.Count;
 import desmoj.core.statistic.Tally;
@@ -17,7 +19,7 @@ public class RealProcessingModel extends Model {
 
     private final ReviewMode reviewMode;
     private Board board;
-    private SourceRepository sourceRepository;
+    private SourceRepository<Task> sourceRepository;
 
     private Count finishedStoryPoints;
     private Count remainingBugs;
@@ -46,7 +48,20 @@ public class RealProcessingModel extends Model {
         this.genericRandom = new LinearCongruentialRandomGenerator(this.getParameters().getGenericRandomSeed());
 
         this.board = new Board(this);
-        this.sourceRepository = new SourceRepository();
+        this.sourceRepository = new SourceRepository<Task>(new SourceRepositoryDependencies() {
+            @Override
+            public TimeInstant presentTime() {
+                return RealProcessingModel.this.presentTime();
+            }
+            @Override
+            public boolean sampleConflictDist() {
+                return RealProcessingModel.this.getParameters().getConflictDist().sample();
+            }
+            @Override
+            public void sendTraceNote(String description) {
+                RealProcessingModel.this.sendTraceNote(description);
+            }
+        });
 
         this.finishedStoryPoints = new Count(this, "finishedStoryPoints", true, true);
         this.storyCycleTime = new Tally(this, "storyCycleTime", true, true);
