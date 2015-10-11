@@ -1,5 +1,6 @@
 package de.unihannover.se.processSimulation.preCommitPostCommit;
 
+import java.util.ArrayList;
 import java.util.List;
 
 class Review {
@@ -7,7 +8,7 @@ class Review {
     private final List<Bug> remarks;
 
     public Review(List<Bug> foundBugs) {
-        this.remarks = foundBugs;
+        this.remarks = new ArrayList<>(foundBugs);
     }
 
     public List<Bug> getRemarks() {

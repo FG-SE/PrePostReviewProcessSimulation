@@ -1,8 +1,25 @@
 package de.unihannover.se.processSimulation.preCommitPostCommit;
 
+import desmoj.core.simulator.ExternalEvent;
+import desmoj.core.simulator.Model;
 import desmoj.core.simulator.TimeSpan;
 
-abstract class Bug extends RealModelProcess {
+abstract class Bug extends RealModelEntity {
+
+    private final class BugBecomesVisibleEvent extends ExternalEvent {
+
+        public BugBecomesVisibleEvent(Model owner, String name) {
+            super(owner, name, true);
+        }
+
+        @Override
+        public void eventRoutine() {
+            if (!Bug.this.fixed) {
+                Bug.this.becomeVisible();
+            }
+        }
+
+    }
 
     private boolean started;
     private boolean fixed;
@@ -17,21 +34,7 @@ abstract class Bug extends RealModelProcess {
             return;
         }
         this.started = true;
-        this.activate();
-    }
-
-    @Override
-    public void lifeCycle() {
-        assert this.started;
-        if (this.fixed) {
-            return;
-        }
-
-        this.hold(this.getActivationTime());
-
-        if (!this.fixed) {
-            this.becomeVisible();
-        }
+        new BugBecomesVisibleEvent(this.getModel(), this.getName()).schedule(this.getActivationTime());
     }
 
     protected abstract TimeSpan getActivationTime();

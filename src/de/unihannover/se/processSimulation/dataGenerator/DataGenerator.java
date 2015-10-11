@@ -21,8 +21,8 @@ public class DataGenerator {
     private static final String STARTED_STORIES = "startedStories";
     private static final String REMAINING_BUGS = "remainingBugs";
 
-    private static final int MAX_PARAM_CONFIGS = 5;
-    private static final int RUNS_PER_CONFIG = 1;
+    private static final int MAX_PARAM_CONFIGS = 15;
+    private static final int RUNS_PER_CONFIG = 10;
 
     public static void main(String[] args) throws IOException {
         initTimeUnits();
@@ -40,6 +40,8 @@ public class DataGenerator {
             rawResultWriter.addNumericAttribute(ReviewMode.POST_COMMIT + REMAINING_BUGS);
 
             final ParameterGenerator gen = new ParameterGenerator();
+            int total = 0;
+            final long startTime = System.currentTimeMillis();
             for (int i = 0; i < MAX_PARAM_CONFIGS; i++) {
                 BulkParameterFactory fac = gen.next();
                 if (i == 0) {
@@ -49,12 +51,16 @@ public class DataGenerator {
                     System.out.println("parameter set " + i + "/" + MAX_PARAM_CONFIGS + ", run " + j + "/" + RUNS_PER_CONFIG);
                     final Map<String, Object> experimentData = new HashMap<>();
                     fac.saveData(experimentData);
-                    runExperiment(fac, ReviewMode.PRE_COMMIT, experimentData, true);
-                    runExperiment(fac, ReviewMode.POST_COMMIT, experimentData, true);
+                    runExperiment(fac, ReviewMode.PRE_COMMIT, experimentData, false);
+                    runExperiment(fac, ReviewMode.POST_COMMIT, experimentData, false);
                     rawResultWriter.writeTuple(experimentData);
                     rawResultWriter.flush();
+                    total++;
                     fac = fac.copyWithChangedSeed();
                 }
+                final long diffTime = (System.currentTimeMillis() - startTime) / 1000L;
+                final long remaining = (MAX_PARAM_CONFIGS * RUNS_PER_CONFIG - total) * diffTime / total;
+                System.out.println("Finished " + total + " runs after " + diffTime + " seconds, approx " + remaining + " seconds remaining");
             }
         }
     }
