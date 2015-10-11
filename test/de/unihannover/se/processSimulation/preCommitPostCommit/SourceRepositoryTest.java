@@ -263,4 +263,53 @@ public class SourceRepositoryTest {
         assertTrue(success2);
         assertEquals(0, r.countRemainingSavedCommits());
     }
+
+    @Test
+    public void testWorkMultipleTimesAtTheSameTask() {
+        final StubSourceRepositoryDependencies deps = createDepsNoConflicts();
+        final SourceRepository<StubTask> r = new SourceRepository<>(deps);
+
+        final StubTask t1 = new StubTask("t1");
+        r.startWork(t1);
+        deps.incrementTime();
+        final boolean successFirstTime = r.tryCommit(t1);
+        assertTrue(successFirstTime);
+        deps.incrementTime();
+
+        r.startWork(t1);
+        deps.incrementTime();
+        final boolean successSecondTime = r.tryCommit(t1);
+        assertTrue(successSecondTime);
+    }
+
+    @Test
+    public void testWorkMultipleTimesAtTheSameTaskWithAnotherTaskParallel() {
+        final StubSourceRepositoryDependencies deps = createDepsConflictsAlways();
+        final SourceRepository<StubTask> r = new SourceRepository<>(deps);
+
+        final StubTask t1 = new StubTask("t1");
+        r.startWork(t1);
+
+        final StubTask t2 = new StubTask("t2");
+        r.startWork(t2);
+        deps.incrementTime();
+        final boolean success2FirstTime = r.tryCommit(t2);
+        assertTrue(success2FirstTime);
+        deps.incrementTime();
+
+        final boolean success1FirstTime = r.tryCommit(t1);
+        assertFalse(success1FirstTime);
+
+        r.startWork(t2);
+        deps.incrementTime();
+        final boolean success2SecondTime = r.tryCommit(t2);
+        assertTrue(success2SecondTime);
+
+        final boolean success1SecondTime = r.tryCommit(t1);
+        assertFalse(success1SecondTime);
+
+        assertEquals("conflict between t1 and t2\n"
+                        + "conflict between t1 and t2\n",
+                        deps.getTraces());
+    }
 }

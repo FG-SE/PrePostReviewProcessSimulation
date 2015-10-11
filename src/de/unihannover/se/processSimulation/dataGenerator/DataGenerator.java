@@ -21,8 +21,13 @@ public class DataGenerator {
     private static final String STARTED_STORIES = "startedStories";
     private static final String REMAINING_BUGS = "remainingBugs";
 
+    private static final int MAX_PARAM_CONFIGS = 5;
+    private static final int RUNS_PER_CONFIG = 1;
+
     public static void main(String[] args) throws IOException {
-        try (final DataWriter rawResultWriter = new CsvWriter(new FileWriter("rawResults.arff"))) {
+        initTimeUnits();
+
+        try (final DataWriter rawResultWriter = new CsvWriter(new FileWriter("rawResults.csv"))) {
             rawResultWriter.addNumericAttribute(ReviewMode.PRE_COMMIT + STORYPOINTS);
             rawResultWriter.addNumericAttribute(ReviewMode.PRE_COMMIT + CYCLETIME_MEAN);
             rawResultWriter.addNumericAttribute(ReviewMode.PRE_COMMIT + CYCLETIME_STD_DEV);
@@ -35,12 +40,13 @@ public class DataGenerator {
             rawResultWriter.addNumericAttribute(ReviewMode.POST_COMMIT + REMAINING_BUGS);
 
             final ParameterGenerator gen = new ParameterGenerator();
-            for (int i = 0; i < 5; i++) {
+            for (int i = 0; i < MAX_PARAM_CONFIGS; i++) {
                 BulkParameterFactory fac = gen.next();
                 if (i == 0) {
                     fac.addAttributesTo(rawResultWriter);
                 }
-                for (int j = 0; j < 1; j++) {
+                for (int j = 0; j < RUNS_PER_CONFIG; j++) {
+                    System.out.println("parameter set " + i + "/" + MAX_PARAM_CONFIGS + ", run " + j + "/" + RUNS_PER_CONFIG);
                     final Map<String, Object> experimentData = new HashMap<>();
                     fac.saveData(experimentData);
                     runExperiment(fac, ReviewMode.PRE_COMMIT, experimentData, true);
@@ -53,17 +59,22 @@ public class DataGenerator {
         }
     }
 
+    private static void initTimeUnits() {
+        //Designfehler in DESMO-J: Die Zeiteinheiten können im Experiment-Konstruktor angegeben werden, sind in
+        //  Wirklichkeit aber statische Felder. Deshalb einmal am Anfang initialisieren und danach als Defaults nutzen.
+        new Experiment("TimeUnitDummyExperiment", ".", TimeUnit.MINUTES, TimeUnit.HOURS, null, noOutputs(), noOutputs(), noOutputs(), noOutputs());
+    }
+
     private static void runExperiment(
                     final ParametersFactory p, ReviewMode mode, Map<String, Object> experimentDataBuffer, boolean report) {
         final RealProcessingModel model = new RealProcessingModel("RealProcessingModel", mode, p);
         final Experiment exp;
         if (report) {
             exp = new Experiment("DevelopmentProcessModelTestExperiment" + mode + p.hashCode(),
-                            TimeUnit.MINUTES, TimeUnit.HOURS, null);
+                            null, null, null);
         } else {
-            final ArrayList<String> noOutputs = new ArrayList<>();
             exp = new Experiment("DevelopmentProcessModelTestExperiment" + mode + p.hashCode(),
-                        ".", TimeUnit.MINUTES, TimeUnit.HOURS, null, noOutputs, noOutputs, noOutputs, noOutputs);
+                        ".", null, null, null, noOutputs(), noOutputs(), noOutputs(), noOutputs());
         }
         model.connectToExperiment(exp);
 
@@ -82,6 +93,11 @@ public class DataGenerator {
         experimentDataBuffer.put(mode + CYCLETIME_STD_DEV, model.getStoryCycleTimeStdDev());
         experimentDataBuffer.put(mode + STARTED_STORIES, model.getStartedStoryCount());
         experimentDataBuffer.put(mode + REMAINING_BUGS, model.getRemainingBugCount());
+    }
+
+    private static ArrayList<String> noOutputs() {
+        final ArrayList<String> noOutputs = new ArrayList<>();
+        return noOutputs;
     }
 
 }

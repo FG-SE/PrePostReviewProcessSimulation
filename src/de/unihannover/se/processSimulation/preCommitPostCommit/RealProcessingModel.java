@@ -86,7 +86,7 @@ public class RealProcessingModel extends Model {
         return this.board;
     }
 
-    public SourceRepository getSourceRepository() {
+    public SourceRepository<Task> getSourceRepository() {
         return this.sourceRepository;
     }
 

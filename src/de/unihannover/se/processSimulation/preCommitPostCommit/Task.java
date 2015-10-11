@@ -184,6 +184,7 @@ abstract class Task extends RealModelEntity implements MemoryItem {
             break;
         case READY_FOR_REVIEW:
             //Task ist bereit für Review: Bug-Assessment zählt als ein Review-Durchlauf
+            this.getBoard().removeTaskFromReviewQueue(this);
             this.currentReview = new Review(Collections.singletonList(bug));
             this.endReviewWithRemarks();
             break;
@@ -192,7 +193,7 @@ abstract class Task extends RealModelEntity implements MemoryItem {
             this.bugsFoundByOthersDuringReview.add(bug);
             break;
         case REJECTED:
-            //TODO Task wurde bereits /wird gerade gereviewt: Bug als zusätzliche Anmerkung aufnehmen
+            //Task wurde bereits /wird gerade gereviewt: Bug als zusätzliche Anmerkung aufnehmen
             this.currentReview.addRemark(bug);
             break;
         case DONE:

@@ -12,7 +12,7 @@ class RealModelEntity extends Entity {
         return this.getModel().getBoard();
     }
 
-    protected SourceRepository getSourceRepository() {
+    protected SourceRepository<Task> getSourceRepository() {
         return this.getModel().getSourceRepository();
     }
 

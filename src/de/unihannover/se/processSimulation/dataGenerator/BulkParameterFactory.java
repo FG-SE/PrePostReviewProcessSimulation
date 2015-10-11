@@ -31,8 +31,8 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
     private final double planningTimeMode;
     private final double reviewTimeMode;
     private final int numberOfDevelopers;
-    private final TimeSpan taskSwitchOverheadAfterOneHour;
-    private final TimeSpan maxTaskSwitchOverhead;
+    private final double taskSwitchOverheadAfterOneHour;
+    private final double maxTaskSwitchOverhead;
 
     private int seed;
 
@@ -114,8 +114,8 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
         this.planningTimeMode = planningTimeMode;
         this.reviewTimeMode = reviewTimeMode;
         this.numberOfDevelopers = numberOfDevelopers;
-        this.taskSwitchOverheadAfterOneHour = taskSwitchOverheadAfterOneHour;
-        this.maxTaskSwitchOverhead = maxTaskSwitchOverhead;
+        this.taskSwitchOverheadAfterOneHour = taskSwitchOverheadAfterOneHour.getTimeAsDouble(TimeUnit.HOURS);
+        this.maxTaskSwitchOverhead = maxTaskSwitchOverhead.getTimeAsDouble(TimeUnit.HOURS);
         this.seed = 764;
     }
 
@@ -137,8 +137,8 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
                         b.posNormal("planningTimeDist", this.planningTimeMode),
                         b.posNormal("reviewTimeDist", this.reviewTimeMode),
                         this.numberOfDevelopers,
-                        this.taskSwitchOverheadAfterOneHour,
-                        this.maxTaskSwitchOverhead,
+                        new TimeSpan(this.taskSwitchOverheadAfterOneHour, TimeUnit.HOURS),
+                        new TimeSpan(this.maxTaskSwitchOverhead, TimeUnit.HOURS),
                         r.nextLong());
     }
 
@@ -165,8 +165,8 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
         experimentData.put("planningTimeMode", this.planningTimeMode);
         experimentData.put("reviewTimeMode", this.reviewTimeMode);
         experimentData.put("numberOfDevelopers", this.numberOfDevelopers);
-        experimentData.put("taskSwitchOverheadAfterOneHour", this.taskSwitchOverheadAfterOneHour.getTimeAsDouble(TimeUnit.HOURS));
-        experimentData.put("maxTaskSwitchOverhead", this.maxTaskSwitchOverhead.getTimeAsDouble(TimeUnit.HOURS));
+        experimentData.put("taskSwitchOverheadAfterOneHour", this.taskSwitchOverheadAfterOneHour);
+        experimentData.put("maxTaskSwitchOverhead", this.maxTaskSwitchOverhead);
         experimentData.put("seed", this.seed);
     }
 

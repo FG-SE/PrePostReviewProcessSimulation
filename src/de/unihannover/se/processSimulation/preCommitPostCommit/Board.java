@@ -157,4 +157,8 @@ class Board {
         return this.unassessedBugs.removeFirst();
     }
 
+    public void removeTaskFromReviewQueue(Task task) {
+        this.tasksReadyForReview.remove(task);
+    }
+
 }
