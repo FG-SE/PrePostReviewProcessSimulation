@@ -2,6 +2,7 @@ package de.unihannover.se.processSimulation.preCommitPostCommit;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 class StoryTask extends Task {
 
@@ -10,7 +11,7 @@ class StoryTask extends Task {
     private final List<StoryTask> prerequisites;
 
     public StoryTask(RealProcessingModel model, Story story) {
-        super(model, "story-task");
+        super(model, "story-task", model.getParameters().getImplementationTimeDist().sampleTimeSpan(TimeUnit.HOURS));
         this.story = story;
         this.prerequisites = new ArrayList<>();
         story.addTaskHelper(this);

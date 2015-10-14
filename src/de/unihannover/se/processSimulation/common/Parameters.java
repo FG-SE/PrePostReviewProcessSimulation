@@ -12,7 +12,8 @@ public class Parameters {
     private final NumericalDist<Double> globalBugDist;
     private final BoolDist conflictDist;
     private final NumericalDist<Double> implementationTimeDist;
-    private final NumericalDist<Double> fixTimeDist;
+    private final NumericalDist<Double> bugfixTaskTimeDist;
+    private final NumericalDist<Double> reviewRemarkFixTimeDist;
     private final NumericalDist<Double> globalBugSuspendTimeDist;
     private final NumericalDist<Double> bugAssessmentTimeDist;
     private final NumericalDist<Double> conflictResolutionTimeDist;
@@ -31,7 +32,8 @@ public class Parameters {
                     NumericalDist<Double> globalBugDist,
                     BoolDist conflictDist,
                     NumericalDist<Double> implementationTimeDist,
-                    NumericalDist<Double> fixTimeDist,
+                    NumericalDist<Double> bugfixTaskTimeDist,
+                    NumericalDist<Double> reviewRemarkFixTimeDist,
                     NumericalDist<Double> globalBugSuspendTimeDist,
                     NumericalDist<Double> bugAssessmentTimeDist,
                     NumericalDist<Double> conflictResolutionTimeDist,
@@ -48,7 +50,8 @@ public class Parameters {
         this.globalBugDist = globalBugDist;
         this.conflictDist = conflictDist;
         this.implementationTimeDist = implementationTimeDist;
-        this.fixTimeDist = fixTimeDist;
+        this.bugfixTaskTimeDist = bugfixTaskTimeDist;
+        this.reviewRemarkFixTimeDist = reviewRemarkFixTimeDist;
         this.globalBugSuspendTimeDist = globalBugSuspendTimeDist;
         this.bugAssessmentTimeDist = bugAssessmentTimeDist;
         this.conflictResolutionTimeDist = conflictResolutionTimeDist;
@@ -101,7 +104,7 @@ public class Parameters {
     }
 
     /**
-     * Liefert die Verteilung, aus der die Implementierungsdauer von Tasks bezogen wird.
+     * Liefert die Verteilung, aus der die Implementierungsdauer von Story-Tasks bezogen wird.
      * Die gesampelten Werte werden als "Stunden" interpretiert.
      */
     public NumericalDist<Double> getImplementationTimeDist() {
@@ -109,11 +112,19 @@ public class Parameters {
     }
 
     /**
+     * Liefert die Verteilung, aus der die Implementierungsdauer von Bugfix-Tasks bezogen wird.
+     * Die gesampelten Werte werden als "Stunden" interpretiert.
+     */
+    public NumericalDist<Double> getBugfixTaskTimeDist() {
+        return this.bugfixTaskTimeDist;
+    }
+
+    /**
      * Liefert die Verteilung, aus der benötigte Zeit für die Korrektur EINER Review-Anmerkung bezogen wird.
      * Die gesampelten Werte werden als "Stunden" interpretiert.
      */
-    public NumericalDist<Double> getFixTimeDist() {
-        return this.fixTimeDist;
+    public NumericalDist<Double> getReviewRemarkFixTimeDist() {
+        return this.reviewRemarkFixTimeDist;
     }
 
     /**

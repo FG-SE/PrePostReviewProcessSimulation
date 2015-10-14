@@ -31,12 +31,12 @@ abstract class Task extends RealModelEntity implements MemoryItem {
 
     private final TimeSpan implementationTime;
 
-    public Task(RealProcessingModel model, String name) {
+    public Task(RealProcessingModel model, String name, TimeSpan implementationTime) {
         super(model, name);
         this.state = State.OPEN;
         this.lurkingBugs = new ArrayList<>();
         this.implementationInterruptions = new ArrayList<>();
-        this.implementationTime = model.getParameters().getImplementationTimeDist().sampleTimeSpan(TimeUnit.HOURS);
+        this.implementationTime = implementationTime;
     }
 
     public void performImplementation(Developer dev) {
@@ -158,7 +158,7 @@ abstract class Task extends RealModelEntity implements MemoryItem {
 
         double hoursForFixing = 0.0;
         for (final Bug b : this.currentReview.getRemarks()) {
-            hoursForFixing += this.getModel().getParameters().getFixTimeDist().sample();
+            hoursForFixing += this.getModel().getParameters().getReviewRemarkFixTimeDist().sample();
         }
         final TimeSpan fixingTime = new TimeSpan(hoursForFixing, TimeUnit.HOURS);
         dev.hold(fixingTime);
@@ -180,7 +180,7 @@ abstract class Task extends RealModelEntity implements MemoryItem {
             throw new RuntimeException("Should not happen: Bug in open task " + this);
         case IN_IMPLEMENTATION:
             //Task ist gerade in Arbeit: Problem wird gleich miterledigt und verlängert die Implementierung
-            this.suspendImplementation(this.getModel().getParameters().getFixTimeDist().sampleTimeSpan(TimeUnit.HOURS));
+            this.suspendImplementation(this.getModel().getParameters().getReviewRemarkFixTimeDist().sampleTimeSpan(TimeUnit.HOURS));
             break;
         case READY_FOR_REVIEW:
             //Task ist bereit für Review: Bug-Assessment zählt als ein Review-Durchlauf

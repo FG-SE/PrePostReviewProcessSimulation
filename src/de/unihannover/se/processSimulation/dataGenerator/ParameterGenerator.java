@@ -19,7 +19,7 @@ public class ParameterGenerator {
     }
 
     public BulkParameterFactory next() {
-        final double implTime = this.numberBetween(0.0, 0.4);
+        final double implTime = this.numberBetween(0.75, 20.0);
         final double taskSwitchOverheadAfterHour = this.numberBetween(0.0, 0.25);
         return new BulkParameterFactory(
             this.numberBetween(0.0, 2.0), // implementationSkillMode,
@@ -27,7 +27,8 @@ public class ParameterGenerator {
             this.numberBetween(0.0, 0.3), // globalBugMode,
             this.numberBetween(0.0, 0.2), // conflictPropability,
             implTime, // implementationTimeMode,
-            this.numberBetween(0, 0.5), // fixTimeMode,
+            this.numberBetween(0.5, implTime), //bugfixTaskTimeMode
+            this.numberBetween(0, 0.5), // reviewRemarkfixTimeMode,
             this.numberBetween(0, 0.75), // globalBugSuspendTimeMode,
             this.numberBetween(0, 0.75), // bugAssessmentTimeMode,
             this.numberBetween(0, 0.75), // conflictResolutionTimeMode,
