@@ -1,5 +1,6 @@
 package de.unihannover.se.processSimulation.common;
 
+import de.unihannover.se.processSimulation.preCommitPostCommit.DependencyGraphConstellation;
 import desmoj.core.dist.BoolDist;
 import desmoj.core.dist.NumericalDist;
 import desmoj.core.simulator.TimeSpan;
@@ -22,6 +23,7 @@ public class Parameters {
     private final TimeSpan taskSwitchOverheadAfterOneHour;
     private final TimeSpan maxTaskSwitchOverhead;
     private final long genericRandomSeed;
+    private final DependencyGraphConstellation dependencyGraphConstellation;
 
     public Parameters(
                     NumericalDist<Double> implementationSkillDist,
@@ -39,7 +41,8 @@ public class Parameters {
                     int numDevelopers,
                     TimeSpan taskSwitchOverheadAfterOneHour,
                     TimeSpan maxTaskSwitchOverhead,
-                    long genericRandomSeed) {
+                    long genericRandomSeed,
+                    DependencyGraphConstellation dependencyGraphConstellation) {
         this.implementationSkillDist = implementationSkillDist;
         this.reviewSkillDist = reviewSkillDist;
         this.globalBugDist = globalBugDist;
@@ -56,6 +59,7 @@ public class Parameters {
         this.taskSwitchOverheadAfterOneHour = taskSwitchOverheadAfterOneHour;
         this.maxTaskSwitchOverhead = maxTaskSwitchOverhead;
         this.genericRandomSeed = genericRandomSeed;
+        this.dependencyGraphConstellation = dependencyGraphConstellation;
     }
 
     /**
@@ -184,6 +188,10 @@ public class Parameters {
 
     public long getGenericRandomSeed() {
         return this.genericRandomSeed;
+    }
+
+    public DependencyGraphConstellation getDependencyGraphConstellation() {
+        return this.dependencyGraphConstellation;
     }
 
 }

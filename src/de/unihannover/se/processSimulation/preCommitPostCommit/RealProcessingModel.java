@@ -2,6 +2,7 @@ package de.unihannover.se.processSimulation.preCommitPostCommit;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import de.unihannover.se.processSimulation.common.Parameters;
 import de.unihannover.se.processSimulation.common.ParametersFactory;
@@ -30,6 +31,7 @@ public class RealProcessingModel extends Model {
     private Parameters parameters;
 
     private UniformRandomGenerator genericRandom;
+    private GraphGenerator dependencyGraphGenerator;
 
     public RealProcessingModel(String name, ReviewMode reviewMode, ParametersFactory parameterFactory) {
         super(null, name, true, true);
@@ -46,6 +48,8 @@ public class RealProcessingModel extends Model {
     public void init() {
         this.parameters = this.parameterFactory.create(this);
         this.genericRandom = new LinearCongruentialRandomGenerator(this.getParameters().getGenericRandomSeed());
+        this.dependencyGraphGenerator = this.parameters.getDependencyGraphConstellation().createGenerator(
+                        new Random(this.getParameters().getGenericRandomSeed() + 8654));
 
         this.board = new Board(this);
         this.sourceRepository = new SourceRepository<Task>(new SourceRepositoryDependencies() {
@@ -141,6 +145,10 @@ public class RealProcessingModel extends Model {
 
     void countBugFixed() {
         this.remainingBugs.update(-1);
+    }
+
+    public GraphGenerator getGraphGenerator() {
+        return this.dependencyGraphGenerator;
     }
 
 }

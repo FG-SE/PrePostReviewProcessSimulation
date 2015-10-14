@@ -32,6 +32,24 @@ public class ArffWriter implements DataWriter {
     }
 
     @Override
+    public void addNominalAttribute(String name, Object[] enumConstants) throws IOException {
+        assert !this.dataStarted;
+        this.writer.write("@attribute " + name);
+        boolean first = true;
+        for (final Object enumConstant : enumConstants) {
+            if (first) {
+                first = false;
+                this.writer.write(" {");
+            } else {
+                this.writer.write(",");
+            }
+            this.writer.write(enumConstant.toString());
+        }
+        this.writer.write("}\n");
+        this.attributes.add(name);
+    }
+
+    @Override
     public void writeTuple(Map<String, Object> experimentData) throws IOException {
         if (!this.dataStarted) {
             this.dataStarted = true;

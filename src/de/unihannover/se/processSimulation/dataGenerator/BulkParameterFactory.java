@@ -3,11 +3,13 @@ package de.unihannover.se.processSimulation.dataGenerator;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import de.unihannover.se.processSimulation.common.Parameters;
 import de.unihannover.se.processSimulation.common.ParametersFactory;
+import de.unihannover.se.processSimulation.preCommitPostCommit.DependencyGraphConstellation;
 import desmoj.core.dist.BoolDistBernoulli;
 import desmoj.core.dist.ContDistBeta;
 import desmoj.core.dist.ContDistExponential;
@@ -33,6 +35,7 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
     private final int numberOfDevelopers;
     private final double taskSwitchOverheadAfterOneHour;
     private final double maxTaskSwitchOverhead;
+    private final DependencyGraphConstellation dependencyGraphConstellation;
 
     private int seed;
 
@@ -100,7 +103,8 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
                     double reviewTimeMode,
                     int numberOfDevelopers,
                     TimeSpan taskSwitchOverheadAfterOneHour,
-                    TimeSpan maxTaskSwitchOverhead) {
+                    TimeSpan maxTaskSwitchOverhead,
+                    DependencyGraphConstellation dependencyGraphConstellation) {
         this.implementationSkillMode = implementationSkillMode;
         this.reviewSkillMode = reviewSkillMode;
         this.globalBugMode = globalBugMode;
@@ -116,6 +120,7 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
         this.numberOfDevelopers = numberOfDevelopers;
         this.taskSwitchOverheadAfterOneHour = taskSwitchOverheadAfterOneHour.getTimeAsDouble(TimeUnit.HOURS);
         this.maxTaskSwitchOverhead = maxTaskSwitchOverhead.getTimeAsDouble(TimeUnit.HOURS);
+        this.dependencyGraphConstellation = dependencyGraphConstellation;
         this.seed = 764;
     }
 
@@ -139,7 +144,8 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
                         this.numberOfDevelopers,
                         new TimeSpan(this.taskSwitchOverheadAfterOneHour, TimeUnit.HOURS),
                         new TimeSpan(this.maxTaskSwitchOverhead, TimeUnit.HOURS),
-                        r.nextLong());
+                        r.nextLong(),
+                        this.dependencyGraphConstellation);
     }
 
     public BulkParameterFactory copyWithChangedSeed() {
@@ -167,15 +173,26 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
         experimentData.put("numberOfDevelopers", this.numberOfDevelopers);
         experimentData.put("taskSwitchOverheadAfterOneHour", this.taskSwitchOverheadAfterOneHour);
         experimentData.put("maxTaskSwitchOverhead", this.maxTaskSwitchOverhead);
+        experimentData.put("dependencyGraphConstellation", this.dependencyGraphConstellation);
         experimentData.put("seed", this.seed);
     }
 
     public void addAttributesTo(DataWriter rawResultWriter) throws IOException {
         final LinkedHashMap<String, Object> hs = new LinkedHashMap<>();
         this.saveData(hs);
-        for (final String name : hs.keySet()) {
-            rawResultWriter.addNumericAttribute(name);
+        for (final Entry<String, Object> e : hs.entrySet()) {
+            final String name = e.getKey();
+            if (e.getValue() instanceof Enum) {
+                rawResultWriter.addNominalAttribute(name, e.getValue().getClass().getSuperclass().getEnumConstants());
+            } else {
+                rawResultWriter.addNumericAttribute(name);
+            }
         }
+    }
+
+    @Override
+    public long getSeed() {
+        return this.seed;
     }
 
 }

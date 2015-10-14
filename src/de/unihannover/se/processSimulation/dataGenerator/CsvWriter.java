@@ -24,6 +24,11 @@ public class CsvWriter implements DataWriter {
     }
 
     @Override
+    public void addNominalAttribute(String name, Object[] enumValues) throws IOException {
+        this.addNumericAttribute(name);
+    }
+
+    @Override
     public void writeTuple(Map<String, Object> experimentData) throws IOException {
         if (!this.dataStarted) {
             this.dataStarted = true;

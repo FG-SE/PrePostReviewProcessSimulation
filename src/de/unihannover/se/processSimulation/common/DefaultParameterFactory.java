@@ -2,6 +2,7 @@ package de.unihannover.se.processSimulation.common;
 
 import java.util.concurrent.TimeUnit;
 
+import de.unihannover.se.processSimulation.preCommitPostCommit.DependencyGraphConstellation;
 import desmoj.core.dist.BoolDistBernoulli;
 import desmoj.core.dist.ContDistConstant;
 import desmoj.core.simulator.Model;
@@ -37,7 +38,13 @@ public class DefaultParameterFactory extends ParametersFactory {
                         2,
                         new TimeSpan(5, TimeUnit.MINUTES),
                         new TimeSpan(1, TimeUnit.HOURS),
-                        8654);
+                        this.getSeed(),
+                        DependencyGraphConstellation.DIAMONDS);
+    }
+
+    @Override
+    public long getSeed() {
+        return 8654;
     }
 
 }

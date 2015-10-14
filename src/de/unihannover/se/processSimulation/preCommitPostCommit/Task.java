@@ -214,6 +214,9 @@ abstract class Task extends RealModelEntity implements MemoryItem {
 
     private void handleTaskSwitchOverhead(Developer dev) {
         final TimeSpan taskSwitchOverhead = this.determineTaskSwitchOverhead(dev);
+        assert taskSwitchOverhead.getTimeAsDouble(TimeUnit.HOURS) < 8.0 :
+            "more than a day? something must be wrong " + taskSwitchOverhead;
+
         if (taskSwitchOverhead.getTimeInEpsilon() != 0) {
             this.sendTraceNote("has task switch overhead switching to " + this);
             dev.hold(taskSwitchOverhead);

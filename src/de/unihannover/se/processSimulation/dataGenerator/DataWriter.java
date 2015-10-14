@@ -8,6 +8,8 @@ public interface DataWriter extends Closeable {
 
     public abstract void addNumericAttribute(String name) throws IOException;
 
+    public abstract void addNominalAttribute(String name, Object[] enumConstants) throws IOException;
+
     public abstract void writeTuple(Map<String, Object> experimentData) throws IOException;
 
     public abstract void flush() throws IOException;

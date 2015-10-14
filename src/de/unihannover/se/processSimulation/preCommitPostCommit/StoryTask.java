@@ -1,17 +1,18 @@
 package de.unihannover.se.processSimulation.preCommitPostCommit;
 
+import java.util.ArrayList;
 import java.util.List;
 
 class StoryTask extends Task {
 
     private final Story story;
 
-    private final List<? extends Task> prerequisites;
+    private final List<StoryTask> prerequisites;
 
-    public StoryTask(RealProcessingModel model, Story story, List<? extends Task> prerequisites) {
+    public StoryTask(RealProcessingModel model, Story story) {
         super(model, "story-task");
         this.story = story;
-        this.prerequisites = prerequisites;
+        this.prerequisites = new ArrayList<>();
         story.addTaskHelper(this);
     }
 
@@ -36,6 +37,10 @@ class StoryTask extends Task {
     @Override
     public String toString() {
         return super.toString() + " (" + this.story.toString() + ")";
+    }
+
+    void addPrerequisite(StoryTask t) {
+        this.prerequisites.add(t);
     }
 
     @Override

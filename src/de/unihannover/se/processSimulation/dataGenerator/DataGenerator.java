@@ -20,24 +20,27 @@ public class DataGenerator {
     private static final String CYCLETIME_STD_DEV = "cycletimeStdDev";
     private static final String STARTED_STORIES = "startedStories";
     private static final String REMAINING_BUGS = "remainingBugs";
+    private static final String SIMULATION_DURATION = "simulationDuration";
 
-    private static final int MAX_PARAM_CONFIGS = 15;
+    private static final int MAX_PARAM_CONFIGS = 2;
     private static final int RUNS_PER_CONFIG = 10;
 
     public static void main(String[] args) throws IOException {
         initTimeUnits();
 
-        try (final DataWriter rawResultWriter = new CsvWriter(new FileWriter("rawResults.csv"))) {
+        try (final DataWriter rawResultWriter = new ArffWriter(new FileWriter("rawResults.arff"), "rawResults")) {
             rawResultWriter.addNumericAttribute(ReviewMode.PRE_COMMIT + STORYPOINTS);
             rawResultWriter.addNumericAttribute(ReviewMode.PRE_COMMIT + CYCLETIME_MEAN);
             rawResultWriter.addNumericAttribute(ReviewMode.PRE_COMMIT + CYCLETIME_STD_DEV);
             rawResultWriter.addNumericAttribute(ReviewMode.PRE_COMMIT + STARTED_STORIES);
             rawResultWriter.addNumericAttribute(ReviewMode.PRE_COMMIT + REMAINING_BUGS);
+            rawResultWriter.addNumericAttribute(ReviewMode.PRE_COMMIT + SIMULATION_DURATION);
             rawResultWriter.addNumericAttribute(ReviewMode.POST_COMMIT + STORYPOINTS);
             rawResultWriter.addNumericAttribute(ReviewMode.POST_COMMIT + CYCLETIME_MEAN);
             rawResultWriter.addNumericAttribute(ReviewMode.POST_COMMIT + CYCLETIME_STD_DEV);
             rawResultWriter.addNumericAttribute(ReviewMode.POST_COMMIT + STARTED_STORIES);
             rawResultWriter.addNumericAttribute(ReviewMode.POST_COMMIT + REMAINING_BUGS);
+            rawResultWriter.addNumericAttribute(ReviewMode.POST_COMMIT + SIMULATION_DURATION);
 
             final ParameterGenerator gen = new ParameterGenerator();
             int total = 0;
@@ -49,6 +52,13 @@ public class DataGenerator {
                 }
                 for (int j = 0; j < RUNS_PER_CONFIG; j++) {
                     System.out.println("parameter set " + i + "/" + MAX_PARAM_CONFIGS + ", run " + j + "/" + RUNS_PER_CONFIG);
+                    System.out.println("hash=" + fac.hashCode() + ", fac=" + fac);
+//                    if (i != 53) {
+//                        //TEST
+//                        total++;
+//                        fac = fac.copyWithChangedSeed();
+//                        continue;
+//                    }
                     final Map<String, Object> experimentData = new HashMap<>();
                     fac.saveData(experimentData);
                     runExperiment(fac, ReviewMode.PRE_COMMIT, experimentData, false);
@@ -82,8 +92,10 @@ public class DataGenerator {
             exp = new Experiment("DevelopmentProcessModelTestExperiment" + mode + p.hashCode(),
                         ".", null, null, null, noOutputs(), noOutputs(), noOutputs(), noOutputs());
         }
+        exp.setSeedGenerator(p.getSeed());
         model.connectToExperiment(exp);
 
+        final long expStartTime = System.currentTimeMillis();
         exp.setSilent(!report);
         exp.getOutputPath();
         exp.setShowProgressBar(false);
@@ -93,12 +105,15 @@ public class DataGenerator {
             exp.report();
         }
         exp.finish();
+        final long expDuration = System.currentTimeMillis() - expStartTime;
 
         experimentDataBuffer.put(mode + STORYPOINTS, model.getFinishedStoryPoints());
         experimentDataBuffer.put(mode + CYCLETIME_MEAN, model.getStoryCycleTimeMean());
         experimentDataBuffer.put(mode + CYCLETIME_STD_DEV, model.getStoryCycleTimeStdDev());
         experimentDataBuffer.put(mode + STARTED_STORIES, model.getStartedStoryCount());
         experimentDataBuffer.put(mode + REMAINING_BUGS, model.getRemainingBugCount());
+        experimentDataBuffer.put(mode + SIMULATION_DURATION, expDuration);
+
     }
 
     private static ArrayList<String> noOutputs() {

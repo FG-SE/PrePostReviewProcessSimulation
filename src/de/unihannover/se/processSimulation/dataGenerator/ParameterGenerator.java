@@ -3,6 +3,7 @@ package de.unihannover.se.processSimulation.dataGenerator;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import de.unihannover.se.processSimulation.preCommitPostCommit.DependencyGraphConstellation;
 import desmoj.core.simulator.TimeSpan;
 
 public class ParameterGenerator {
@@ -35,7 +36,8 @@ public class ParameterGenerator {
             implTime * this.numberBetween(0.01, 1.0), // reviewTimeMode,
             (int) this.numberBetween(2, 30), // numberOfDevelopers,
             new TimeSpan(taskSwitchOverheadAfterHour, TimeUnit.HOURS), // taskSwitchOverheadAfterOneHour,
-            new TimeSpan(taskSwitchOverheadAfterHour * this.numberBetween(1.1, 6.0), TimeUnit.HOURS)); // maxTaskSwitchOverhead
+            new TimeSpan(taskSwitchOverheadAfterHour * this.numberBetween(1.1, 6.0), TimeUnit.HOURS), // maxTaskSwitchOverhead
+            DependencyGraphConstellation.values()[this.r.nextInt(DependencyGraphConstellation.values().length)]);
     }
 
     private double numberBetween(double min, double max) {
