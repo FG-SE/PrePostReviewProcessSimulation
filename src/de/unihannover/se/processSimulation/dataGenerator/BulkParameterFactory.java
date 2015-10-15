@@ -24,9 +24,9 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
     private final double reviewSkillMode;
     private final double globalBugMode;
     private final double conflictPropability;
-    private final double implementationTimeMode;
-    private final double bugfixTaskTimeMode;
-    private final double reviewRemarkFixTimeMode;
+    private final double implementationTimeMean;
+    private final double bugfixTaskTimeExpectedValue;
+    private final double reviewRemarkFixTimeExpectedValue;
     private final double globalBugSuspendTimeMode;
     private final double bugAssessmentTimeMode;
     private final double conflictResolutionTimeMode;
@@ -78,6 +78,13 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
             return this.setSeed(dist);
         }
 
+        public ContDistLognormal logNormal(String name, double mean, double median) {
+            final double mu = Math.log(median);
+            final double sigma = Math.sqrt(2.0 * (Math.log(mean) - mu));
+            final ContDistLognormal dist = new ContDistLognormal(this.owner, name, true, true, mu, sigma);
+            return this.setSeed(dist);
+        }
+
 //        public int numberBetween(int lowerInclusive, int upperInclusive) {
 //            return lowerInclusive + this.seedSource.nextInt(upperInclusive - lowerInclusive + 1);
 //        }
@@ -111,9 +118,9 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
         this.reviewSkillMode = reviewSkillMode;
         this.globalBugMode = globalBugMode;
         this.conflictPropability = conflictPropability;
-        this.implementationTimeMode = implementationTimeMode;
-        this.bugfixTaskTimeMode = bugfixTaskTimeMode;
-        this.reviewRemarkFixTimeMode = fixTimeMode;
+        this.implementationTimeMean = implementationTimeMode;
+        this.bugfixTaskTimeExpectedValue = bugfixTaskTimeMode;
+        this.reviewRemarkFixTimeExpectedValue = fixTimeMode;
         this.globalBugSuspendTimeMode = globalBugSuspendTimeMode;
         this.bugAssessmentTimeMode = bugAssessmentTimeMode;
         this.conflictResolutionTimeMode = conflictResolutionTimeMode;
@@ -136,9 +143,9 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
                         b.beta("reviewSkillDist", this.reviewSkillMode),
                         b.beta("globalBugDist", this.globalBugMode),
                         b.bernoulli("conflictDist", this.conflictPropability),
-                        b.posNormal("implementationTimeDist", this.implementationTimeMode),
-                        b.posNormal("bugfixTaskTimeDist", this.bugfixTaskTimeMode),
-                        b.posNormal("reviewRemarkFixTimeDist", this.reviewRemarkFixTimeMode),
+                        b.logNormal("implementationTimeDist", this.implementationTimeMean, this.implementationTimeMean / 2.0),
+                        b.exp("bugfixTaskTimeDist", this.bugfixTaskTimeExpectedValue),
+                        b.exp("reviewRemarkFixTimeDist", this.reviewRemarkFixTimeExpectedValue),
                         b.posNormal("globalBugSuspendTimeDist", this.globalBugSuspendTimeMode),
                         b.posNormal("bugAssessmentTimeDist", this.bugAssessmentTimeMode),
                         b.posNormal("conflictResolutionTimeDist", this.conflictResolutionTimeMode),
@@ -167,9 +174,9 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
         experimentData.put("reviewSkillMode", this.reviewSkillMode);
         experimentData.put("globalBugMode", this.globalBugMode);
         experimentData.put("conflictPropability", this.conflictPropability);
-        experimentData.put("implementationTimeMode", this.implementationTimeMode);
-        experimentData.put("bugfixTaskTimeMode", this.bugfixTaskTimeMode);
-        experimentData.put("reviewRemarkFixTimeMode", this.reviewRemarkFixTimeMode);
+        experimentData.put("implementationTimeMode", this.implementationTimeMean);
+        experimentData.put("bugfixTaskTimeMode", this.bugfixTaskTimeExpectedValue);
+        experimentData.put("reviewRemarkFixTimeMode", this.reviewRemarkFixTimeExpectedValue);
         experimentData.put("globalBugSuspendTimeMode", this.globalBugSuspendTimeMode);
         experimentData.put("conflictResolutionTimeMode", this.conflictResolutionTimeMode);
         experimentData.put("bugActivationTimeExpectedValue", this.bugActivationTimeExpectedValue);

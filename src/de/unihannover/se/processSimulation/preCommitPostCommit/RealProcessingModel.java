@@ -135,6 +135,10 @@ public class RealProcessingModel extends Model {
         return this.board.getStartedStoryCount();
     }
 
+    public long getFinishedStoryCount() {
+        return this.storyCycleTime.getObservations();
+    }
+
     public long getRemainingBugCount() {
         return this.remainingBugs.getValue();
     }

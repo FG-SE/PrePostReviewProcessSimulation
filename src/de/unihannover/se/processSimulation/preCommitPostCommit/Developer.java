@@ -1,6 +1,6 @@
 package de.unihannover.se.processSimulation.preCommitPostCommit;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import desmoj.core.dist.BoolDistBernoulli;
@@ -18,7 +18,7 @@ class Developer extends RealModelProcess {
         this.reviewerSkill = new BoolDistBernoulli(owner, "reviewerSkill-" + this, reviewerSkill, true, true);
         this.globalBugDist = new BoolDistBernoulli(owner, "globalBugDist-" + this, globalBugPropability, true, true);
         this.implementationSkill = implementationSkill;
-        this.memory = new HashMap<>();
+        this.memory = new LinkedHashMap<>();
     }
 
     @Override

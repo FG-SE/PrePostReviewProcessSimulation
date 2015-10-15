@@ -19,6 +19,7 @@ public class DataGenerator {
     private static final String CYCLETIME_MEAN = "cycletimeMean";
     private static final String CYCLETIME_STD_DEV = "cycletimeStdDev";
     private static final String STARTED_STORIES = "startedStories";
+    private static final String FINISHED_STORIES = "finishedStories";
     private static final String REMAINING_BUGS = "remainingBugs";
     private static final String SIMULATION_DURATION = "simulationDuration";
 
@@ -29,18 +30,7 @@ public class DataGenerator {
         initTimeUnits();
 
         try (final DataWriter rawResultWriter = new ArffWriter(new FileWriter("rawResults.arff"), "rawResults")) {
-            rawResultWriter.addNumericAttribute(ReviewMode.PRE_COMMIT + STORYPOINTS);
-            rawResultWriter.addNumericAttribute(ReviewMode.PRE_COMMIT + CYCLETIME_MEAN);
-            rawResultWriter.addNumericAttribute(ReviewMode.PRE_COMMIT + CYCLETIME_STD_DEV);
-            rawResultWriter.addNumericAttribute(ReviewMode.PRE_COMMIT + STARTED_STORIES);
-            rawResultWriter.addNumericAttribute(ReviewMode.PRE_COMMIT + REMAINING_BUGS);
-            rawResultWriter.addNumericAttribute(ReviewMode.PRE_COMMIT + SIMULATION_DURATION);
-            rawResultWriter.addNumericAttribute(ReviewMode.POST_COMMIT + STORYPOINTS);
-            rawResultWriter.addNumericAttribute(ReviewMode.POST_COMMIT + CYCLETIME_MEAN);
-            rawResultWriter.addNumericAttribute(ReviewMode.POST_COMMIT + CYCLETIME_STD_DEV);
-            rawResultWriter.addNumericAttribute(ReviewMode.POST_COMMIT + STARTED_STORIES);
-            rawResultWriter.addNumericAttribute(ReviewMode.POST_COMMIT + REMAINING_BUGS);
-            rawResultWriter.addNumericAttribute(ReviewMode.POST_COMMIT + SIMULATION_DURATION);
+            registerResultAttributes(rawResultWriter);
 
             final ParameterGenerator gen = new ParameterGenerator();
             int total = 0;
@@ -59,12 +49,7 @@ public class DataGenerator {
 //                        fac = fac.copyWithChangedSeed();
 //                        continue;
 //                    }
-                    final Map<String, Object> experimentData = new HashMap<>();
-                    fac.saveData(experimentData);
-                    runExperiment(fac, ReviewMode.PRE_COMMIT, experimentData, false);
-                    runExperiment(fac, ReviewMode.POST_COMMIT, experimentData, false);
-                    rawResultWriter.writeTuple(experimentData);
-                    rawResultWriter.flush();
+                    runExperimentWithBothModes(rawResultWriter, fac);
                     total++;
                     fac = fac.copyWithChangedSeed();
                 }
@@ -75,7 +60,33 @@ public class DataGenerator {
         }
     }
 
-    private static void initTimeUnits() {
+    static void registerResultAttributes(final DataWriter rawResultWriter) throws IOException {
+        rawResultWriter.addNumericAttribute(ReviewMode.PRE_COMMIT + STORYPOINTS);
+        rawResultWriter.addNumericAttribute(ReviewMode.PRE_COMMIT + CYCLETIME_MEAN);
+        rawResultWriter.addNumericAttribute(ReviewMode.PRE_COMMIT + CYCLETIME_STD_DEV);
+        rawResultWriter.addNumericAttribute(ReviewMode.PRE_COMMIT + STARTED_STORIES);
+        rawResultWriter.addNumericAttribute(ReviewMode.PRE_COMMIT + FINISHED_STORIES);
+        rawResultWriter.addNumericAttribute(ReviewMode.PRE_COMMIT + REMAINING_BUGS);
+        rawResultWriter.addNumericAttribute(ReviewMode.PRE_COMMIT + SIMULATION_DURATION);
+        rawResultWriter.addNumericAttribute(ReviewMode.POST_COMMIT + STORYPOINTS);
+        rawResultWriter.addNumericAttribute(ReviewMode.POST_COMMIT + CYCLETIME_MEAN);
+        rawResultWriter.addNumericAttribute(ReviewMode.POST_COMMIT + CYCLETIME_STD_DEV);
+        rawResultWriter.addNumericAttribute(ReviewMode.POST_COMMIT + STARTED_STORIES);
+        rawResultWriter.addNumericAttribute(ReviewMode.POST_COMMIT + FINISHED_STORIES);
+        rawResultWriter.addNumericAttribute(ReviewMode.POST_COMMIT + REMAINING_BUGS);
+        rawResultWriter.addNumericAttribute(ReviewMode.POST_COMMIT + SIMULATION_DURATION);
+    }
+
+    static void runExperimentWithBothModes(final DataWriter rawResultWriter, BulkParameterFactory fac) throws IOException {
+        final Map<String, Object> experimentData = new HashMap<>();
+        fac.saveData(experimentData);
+        runExperiment(fac, ReviewMode.PRE_COMMIT, experimentData, false);
+        runExperiment(fac, ReviewMode.POST_COMMIT, experimentData, false);
+        rawResultWriter.writeTuple(experimentData);
+        rawResultWriter.flush();
+    }
+
+    static void initTimeUnits() {
         //Designfehler in DESMO-J: Die Zeiteinheiten können im Experiment-Konstruktor angegeben werden, sind in
         //  Wirklichkeit aber statische Felder. Deshalb einmal am Anfang initialisieren und danach als Defaults nutzen.
         new Experiment("TimeUnitDummyExperiment", ".", TimeUnit.MINUTES, TimeUnit.HOURS, null, noOutputs(), noOutputs(), noOutputs(), noOutputs());
@@ -99,6 +110,9 @@ public class DataGenerator {
         exp.setSilent(!report);
         exp.getOutputPath();
         exp.setShowProgressBar(false);
+        if (report) {
+            exp.tracePeriod(new TimeInstant(0), new TimeInstant(160, TimeUnit.HOURS));
+        }
         exp.stop(new TimeInstant(8 * 400, TimeUnit.HOURS));
         exp.start();
         if (report) {
@@ -111,9 +125,9 @@ public class DataGenerator {
         experimentDataBuffer.put(mode + CYCLETIME_MEAN, model.getStoryCycleTimeMean());
         experimentDataBuffer.put(mode + CYCLETIME_STD_DEV, model.getStoryCycleTimeStdDev());
         experimentDataBuffer.put(mode + STARTED_STORIES, model.getStartedStoryCount());
+        experimentDataBuffer.put(mode + FINISHED_STORIES, model.getFinishedStoryCount());
         experimentDataBuffer.put(mode + REMAINING_BUGS, model.getRemainingBugCount());
         experimentDataBuffer.put(mode + SIMULATION_DURATION, expDuration);
-
     }
 
     private static ArrayList<String> noOutputs() {
