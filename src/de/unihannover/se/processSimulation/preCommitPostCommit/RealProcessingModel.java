@@ -19,6 +19,8 @@ import desmoj.core.statistic.Tally;
 public class RealProcessingModel extends Model {
 
     private final ReviewMode reviewMode;
+    private final boolean plot;
+
     private Board board;
     private SourceRepository<Task> sourceRepository;
 
@@ -33,10 +35,11 @@ public class RealProcessingModel extends Model {
     private UniformRandomGenerator genericRandom;
     private GraphGenerator dependencyGraphGenerator;
 
-    public RealProcessingModel(String name, ReviewMode reviewMode, ParametersFactory parameterFactory) {
+    public RealProcessingModel(String name, ReviewMode reviewMode, ParametersFactory parameterFactory, boolean plot) {
         super(null, name, true, true);
         this.reviewMode = reviewMode;
         this.parameterFactory = parameterFactory;
+        this.plot = plot;
     }
 
     @Override
@@ -81,6 +84,9 @@ public class RealProcessingModel extends Model {
 
     @Override
     public void doInitialSchedules() {
+        if (this.plot) {
+            new Plotter(this).activate();
+        }
         for (final Developer d : this.developers) {
             d.activate();
         }

@@ -15,15 +15,15 @@ import desmoj.core.simulator.TimeInstant;
 
 public class DataGenerator {
 
-    private static final String STORYPOINTS = "storypoints";
-    private static final String CYCLETIME_MEAN = "cycletimeMean";
-    private static final String CYCLETIME_STD_DEV = "cycletimeStdDev";
-    private static final String STARTED_STORIES = "startedStories";
-    private static final String FINISHED_STORIES = "finishedStories";
-    private static final String REMAINING_BUGS = "remainingBugs";
-    private static final String SIMULATION_DURATION = "simulationDuration";
+    public static final String STORYPOINTS = "storypoints";
+    public static final String CYCLETIME_MEAN = "cycletimeMean";
+    public static final String CYCLETIME_STD_DEV = "cycletimeStdDev";
+    public static final String STARTED_STORIES = "startedStories";
+    public static final String FINISHED_STORIES = "finishedStories";
+    public static final String REMAINING_BUGS = "remainingBugs";
+    public static final String SIMULATION_DURATION = "simulationDuration";
 
-    private static final int MAX_PARAM_CONFIGS = 2;
+    private static final int MAX_PARAM_CONFIGS = 500;
     private static final int RUNS_PER_CONFIG = 10;
 
     public static void main(String[] args) throws IOException {
@@ -49,7 +49,7 @@ public class DataGenerator {
 //                        fac = fac.copyWithChangedSeed();
 //                        continue;
 //                    }
-                    runExperimentWithBothModes(rawResultWriter, fac);
+                    runExperimentWithBothModes(rawResultWriter, fac, i + "_" + j, false);
                     total++;
                     fac = fac.copyWithChangedSeed();
                 }
@@ -77,11 +77,11 @@ public class DataGenerator {
         rawResultWriter.addNumericAttribute(ReviewMode.POST_COMMIT + SIMULATION_DURATION);
     }
 
-    static void runExperimentWithBothModes(final DataWriter rawResultWriter, BulkParameterFactory fac) throws IOException {
+    static void runExperimentWithBothModes(final DataWriter rawResultWriter, BulkParameterFactory fac, String runId, boolean report) throws IOException {
         final Map<String, Object> experimentData = new HashMap<>();
         fac.saveData(experimentData);
-        runExperiment(fac, ReviewMode.PRE_COMMIT, experimentData, false);
-        runExperiment(fac, ReviewMode.POST_COMMIT, experimentData, false);
+        runExperiment(fac, ReviewMode.PRE_COMMIT, experimentData, report, runId);
+        runExperiment(fac, ReviewMode.POST_COMMIT, experimentData, report, runId);
         rawResultWriter.writeTuple(experimentData);
         rawResultWriter.flush();
     }
@@ -93,14 +93,14 @@ public class DataGenerator {
     }
 
     private static void runExperiment(
-                    final ParametersFactory p, ReviewMode mode, Map<String, Object> experimentDataBuffer, boolean report) {
-        final RealProcessingModel model = new RealProcessingModel("RealProcessingModel", mode, p);
+                    final ParametersFactory p, ReviewMode mode, Map<String, Object> experimentDataBuffer, boolean report, String runId) {
+        final RealProcessingModel model = new RealProcessingModel("RealProcessingModel", mode, p, report);
         final Experiment exp;
         if (report) {
-            exp = new Experiment("DevelopmentProcessModelTestExperiment" + mode + p.hashCode(),
+            exp = new Experiment("Experiment" + mode + "_" + runId,
                             null, null, null);
         } else {
-            exp = new Experiment("DevelopmentProcessModelTestExperiment" + mode + p.hashCode(),
+            exp = new Experiment("Experiment" + mode + "_" + runId,
                         ".", null, null, null, noOutputs(), noOutputs(), noOutputs(), noOutputs());
         }
         exp.setSeedGenerator(p.getSeed());

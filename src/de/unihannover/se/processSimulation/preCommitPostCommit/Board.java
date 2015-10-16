@@ -161,4 +161,20 @@ class Board {
         this.tasksReadyForReview.remove(task);
     }
 
+    int countOpenStoryTasks() {
+        return this.openStoryTasks.length();
+    }
+
+    int countOpenBugfixTasks() {
+        return this.openBugs.length();
+    }
+
+    int countTasksReadyForReview() {
+        return this.tasksReadyForReview.length();
+    }
+
+    int countTasksWithReviewRemarks() {
+        return this.tasksWithReviewRemarks.length();
+    }
+
 }

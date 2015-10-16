@@ -17,7 +17,7 @@ public class Main {
     }
 
     private static void runExperiment(final DefaultParameterFactory p, ReviewMode mode) {
-        final RealProcessingModel model = new RealProcessingModel("RealProcessingModel", mode, p);
+        final RealProcessingModel model = new RealProcessingModel("RealProcessingModel", mode, p, true);
         final Experiment exp = new Experiment("DevelopmentProcessModelTestExperiment" + mode,
                         TimeUnit.MINUTES, TimeUnit.HOURS, null);
         model.connectToExperiment(exp);

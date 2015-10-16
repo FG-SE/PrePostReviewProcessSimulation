@@ -11,7 +11,7 @@ public class SensitivityAnalysis {
 
     private static final double FACTOR_UP = 1.1;
     private static final double FACTOR_DOWN = 0.9;
-    private static final int RUNS_PER_CONFIG = 10;
+    private static final int RUNS_PER_CONFIG = 2;
 
     public static void main(String[] args) {
 
@@ -70,9 +70,10 @@ public class SensitivityAnalysis {
 
         if (valueWithChange == -1 && up) {
             p.addAttributesTo(dataWriter);
+            DataGenerator.registerResultAttributes(dataWriter);
         }
 
-        performRandomizedRuns(dataWriter, p);
+        performRandomizedRuns(dataWriter, p, valueWithChange + "_" + up);
     }
 
     private static double adjustIfNeededD(Object[] params, int i, int valueWithChange, boolean up) {
@@ -99,9 +100,9 @@ public class SensitivityAnalysis {
         }
     }
 
-    private static void performRandomizedRuns(DataWriter dataWriter, BulkParameterFactory p) throws IOException {
+    private static void performRandomizedRuns(DataWriter dataWriter, BulkParameterFactory p, String runIdPrefix) throws IOException {
         for (int i = 0; i < RUNS_PER_CONFIG; i++) {
-            DataGenerator.runExperimentWithBothModes(dataWriter, p);
+            DataGenerator.runExperimentWithBothModes(dataWriter, p, runIdPrefix + "_" + i, true);
             p = p.copyWithChangedSeed();
         }
     }
