@@ -99,4 +99,11 @@ class Story extends RealModelEntity implements MemoryItem {
         return this.tasks;
     }
 
+    public void finish() {
+        this.getModel().countFinishedStory(this);
+        for (final StoryTask t : this.getTasks()) {
+            t.startLurkingBugsForCustomer();
+        }
+    }
+
 }

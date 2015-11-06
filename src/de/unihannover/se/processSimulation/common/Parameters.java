@@ -144,10 +144,20 @@ public class Parameters {
     }
 
     /**
-     * Liefert die Verteilung, aus der Zeit, nach der ein normaler Bug auftritt (gezählt ab Commit), bezogen wird.
+     * Liefert die Verteilung, aus der Zeit, nach der ein normaler Bug von einem Entwickler gefunden wird (gezählt ab Commit), bezogen wird.
      * Die gesampelten Werte werden als "Stunden" interpretiert.
      */
-    public NumericalDist<Double> getBugActivationTimeDist() {
+    public NumericalDist<Double> getBugActivationTimeDeveloperDist() {
+        //TODO unterschiedliche Verteilungen Kunde/Entwickler
+        return this.bugActivationTimeDist;
+    }
+
+    /**
+     * Liefert die Verteilung, aus der Zeit, nach der ein normaler Bug vom Kunden gefunden wird (gezählt ab Veröffentlichung für Kunden), bezogen wird.
+     * Die gesampelten Werte werden als "Stunden" interpretiert.
+     */
+    public NumericalDist<Double> getBugActivationTimeCustomerDist() {
+        //TODO unterschiedliche Verteilungen Kunde/Entwickler
         return this.bugActivationTimeDist;
     }
 

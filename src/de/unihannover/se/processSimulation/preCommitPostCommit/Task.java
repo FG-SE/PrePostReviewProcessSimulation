@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import de.unihannover.se.processSimulation.common.ReviewMode;
+import de.unihannover.se.processSimulation.preCommitPostCommit.NormalBug.BugType;
 import desmoj.core.simulator.TimeInstant;
 import desmoj.core.simulator.TimeSpan;
 
@@ -24,6 +25,7 @@ abstract class Task extends RealModelEntity implements MemoryItem {
     private Developer implementor;
 
     private final List<Bug> lurkingBugs;
+    private final List<Bug> bugsFixedInCommit;
     private final List<TimeSpan> implementationInterruptions;
     private Review currentReview;
     private List<NormalBug> bugsFoundByOthersDuringReview;
@@ -35,6 +37,7 @@ abstract class Task extends RealModelEntity implements MemoryItem {
         super(model, name);
         this.state = State.OPEN;
         this.lurkingBugs = new ArrayList<>();
+        this.bugsFixedInCommit = new ArrayList<>();
         this.implementationInterruptions = new ArrayList<>();
         this.implementationTime = implementationTime;
     }
@@ -47,10 +50,9 @@ abstract class Task extends RealModelEntity implements MemoryItem {
         this.setState(State.IN_IMPLEMENTATION);
         this.implementor = dev;
 
-        this.handleTaskSwitchOverhead(dev);
-
-        //der "Konfliktzeitraum" soll erst beginnen, nachdem die Task-Switch/Einarbeitungsphase durch ist
+        //mit Jens abgestimmt: erst update, dann Task-Switch-Overhead
         this.getSourceRepository().startWork(this);
+        this.handleTaskSwitchOverhead(dev);
         this.implementor.hold(this.implementationTime);
 
         this.createBugs(this.implementationTime);
@@ -70,13 +72,16 @@ abstract class Task extends RealModelEntity implements MemoryItem {
 
     private void createBugs(TimeSpan relevantTime) {
         //TODO hier fehlt mir noch ein bisschen Zufall
+        //TODO Bug-Typ zufällig erzeugen
+        //TODO   dabei beachten: Bugs die nicht vom Entwickler erkannt werden können hängen nicht vom Entwicklerskill ab
+        //TODO Bug-Tasks haben eine geringere Wahrscheinlichkeit, Kundenrelevante Bugs einzubauen (und insb. "nur Kunde"-Bugs)
         double bugsCreated = this.implementor.getImplementationSkill() * relevantTime.getTimeAsDouble(TimeUnit.HOURS);
         while (bugsCreated > 1) {
-            this.lurkingBugs.add(new NormalBug(this));
+            this.lurkingBugs.add(new NormalBug(this, BugType.DEVELOPER_AND_CUSTOMER));
             bugsCreated -= 1.0;
         }
         if (this.getModel().getRandomBool(bugsCreated)) {
-            this.lurkingBugs.add(new NormalBug(this));
+            this.lurkingBugs.add(new NormalBug(this, BugType.DEVELOPER_AND_CUSTOMER));
         }
 
         if (this.implementor.makesBlockerBug()) {
@@ -142,8 +147,10 @@ abstract class Task extends RealModelEntity implements MemoryItem {
             this.commit(reviewer);
         }
         this.setState(State.DONE);
-        this.getBoard().addFinishedTask(this);
+        this.handleFinishedTask();
     }
+
+    protected abstract void handleFinishedTask();
 
     public void performFixing(Developer dev) {
         assert this.state == State.REJECTED;
@@ -151,12 +158,13 @@ abstract class Task extends RealModelEntity implements MemoryItem {
         assert this.implementationInterruptions.isEmpty() : this + " contains interruptions " + this.implementationInterruptions;
 
         this.setState(State.IN_IMPLEMENTATION);
-        this.handleTaskSwitchOverhead(dev);
 
         if (this.getModel().getReviewMode() == ReviewMode.POST_COMMIT) {
             //im Post-Commit-Fall wurde schon commitet und es muss nochmal "ausgecheckt" werden
             this.getSourceRepository().startWork(this);
         }
+
+        this.handleTaskSwitchOverhead(dev);
 
         //An sich kann es neben dem Einbauen neuer Bugs auch vorkommen, dass bestehende und bereits angemerkte
         //  Bugs nicht wirklich gefixt werden. Das wird hier vernachlässigt.
@@ -167,10 +175,8 @@ abstract class Task extends RealModelEntity implements MemoryItem {
         }
         final TimeSpan fixingTime = new TimeSpan(hoursForFixing, TimeUnit.HOURS);
         dev.hold(fixingTime);
-        for (final Bug b : this.currentReview.getRemarks()) {
-            this.lurkingBugs.remove(b);
-            b.fix();
-        }
+        this.lurkingBugs.removeAll(this.currentReview.getRemarks());
+        this.bugsFixedInCommit.addAll(this.currentReview.getRemarks());
 
         this.createBugs(fixingTime);
         this.endImplementation();
@@ -276,8 +282,12 @@ abstract class Task extends RealModelEntity implements MemoryItem {
 
         this.handleCommited();
         this.commited = true;
+        for (final Bug b : this.bugsFixedInCommit) {
+            b.fix();
+        }
+        this.bugsFixedInCommit.clear();
         for (final Bug b : this.lurkingBugs) {
-            b.startTicking();
+            b.handlePublishedForDevelopers();
         }
     }
 
@@ -295,6 +305,12 @@ abstract class Task extends RealModelEntity implements MemoryItem {
 
     public State getState() {
         return this.state;
+    }
+
+    public void startLurkingBugsForCustomer() {
+        for (final Bug b : this.lurkingBugs) {
+            b.handlePublishedForCustomers();
+        }
     }
 
 }

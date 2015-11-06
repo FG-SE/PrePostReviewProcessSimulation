@@ -128,15 +128,6 @@ class Board {
         this.tasksWithReviewRemarks.add(task);
     }
 
-    public void addFinishedTask(Task task) {
-        if (task instanceof StoryTask) {
-            final Story story = ((StoryTask) task).getStory();
-            if (story.allTasksFinished()) {
-                this.model.countFinishedStory(story);
-            }
-        }
-    }
-
     public void addBugToBeFixed(BugfixTask bugfixTask) {
         this.openBugs.add(bugfixTask);
     }

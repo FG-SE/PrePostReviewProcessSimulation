@@ -21,7 +21,8 @@ abstract class Bug extends RealModelEntity {
 
     }
 
-    private boolean started;
+    private boolean startedForDevelopers;
+    private boolean startedForCustomers;
     private boolean fixed;
 
     public Bug(RealProcessingModel model, String name) {
@@ -29,15 +30,30 @@ abstract class Bug extends RealModelEntity {
         model.countBugCreated();
     }
 
-    public final void startTicking() {
-        if (this.started || this.fixed) {
+    public final void handlePublishedForDevelopers() {
+        if (this.startedForDevelopers || this.fixed) {
             return;
         }
-        this.started = true;
-        new BugBecomesVisibleEvent(this.getModel(), this.getName()).schedule(this.getActivationTime());
+        this.startedForDevelopers = true;
+        final TimeSpan t = this.getActivationTimeForDevelopers();
+        if (t != null) {
+            new BugBecomesVisibleEvent(this.getModel(), this.getName()).schedule(t);
+        }
     }
 
-    protected abstract TimeSpan getActivationTime();
+    public final void handlePublishedForCustomers() {
+        if (this.startedForCustomers || this.fixed) {
+            return;
+        }
+        this.startedForCustomers = true;
+        final TimeSpan t = this.getActivationTimeForCustomers();
+        if (t != null) {
+            new BugBecomesVisibleEvent(this.getModel(), this.getName()).schedule(t);
+        }
+    }
+
+    protected abstract TimeSpan getActivationTimeForDevelopers();
+    protected abstract TimeSpan getActivationTimeForCustomers();
 
     protected abstract void becomeVisible();
 

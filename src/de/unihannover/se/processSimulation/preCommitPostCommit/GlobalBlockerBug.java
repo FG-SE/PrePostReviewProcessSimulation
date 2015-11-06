@@ -11,8 +11,13 @@ class GlobalBlockerBug extends Bug {
     }
 
     @Override
-    protected TimeSpan getActivationTime() {
+    protected TimeSpan getActivationTimeForDevelopers() {
         return new TimeSpan(0, TimeUnit.HOURS);
+    }
+
+    @Override
+    protected TimeSpan getActivationTimeForCustomers() {
+        return null;
     }
 
     @Override

@@ -11,12 +11,7 @@ import desmoj.core.simulator.TimeInstant;
 
 //TODO offener Punkt: Taskwechsel führt auch zu höherer Bugrate
 //TODO offener Punkt: Beim Mergen können auch Fehler entstehen
-//TODO offener Punkt: Update sollte vor dem Task Switch Overhead stattfinden (oder als Mischung)
-//TODO offener Punkt: Aufteilen in Bugs die vom Kunden erkannt werden und Bugs die vom Entwickler erkannt werden
-//TODO   dabei beachten: Bugs die nicht vom Entwickler erkannt werden können hängen nicht vom Entwicklerskill ab
-//TODO   dabei ggf. beachten: beim Fixing können keine "nur Kunde"-Bugs entstehen (diese kommen an sich nur in der Planung rein; stimmt allerdings auch nur halb)
 //TODO offener Punkt: offene Bugs halten eine Story davon ab, abgeschlossen zu werden
-//TODO Bugs erst dann als gefixt kennzeichnen, wenn der Fix commitet ist
 class Developer extends RealModelProcess {
 
     private final BoolDistBernoulli reviewerSkill;

@@ -32,4 +32,9 @@ class BugfixTask extends Task {
         this.bug.fix();
     }
 
+    @Override
+    protected void handleFinishedTask() {
+        this.startLurkingBugsForCustomer();
+    }
+
 }

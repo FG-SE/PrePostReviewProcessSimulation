@@ -53,4 +53,11 @@ class StoryTask extends Task {
     protected void handleCommited() {
     }
 
+    @Override
+    protected void handleFinishedTask() {
+        if (this.story.allTasksFinished()) {
+            this.story.finish();
+        }
+    }
+
 }
