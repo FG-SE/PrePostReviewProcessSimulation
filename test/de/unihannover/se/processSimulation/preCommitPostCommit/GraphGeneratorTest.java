@@ -2,12 +2,12 @@ package de.unihannover.se.processSimulation.preCommitPostCommit;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.Random;
 import java.util.TreeSet;
 
 import org.junit.Test;
 
 import de.unihannover.se.processSimulation.preCommitPostCommit.GraphGenerator.GraphItemFactory;
+import desmoj.core.dist.MersenneTwisterRandomGenerator;
 
 public class GraphGeneratorTest {
 
@@ -42,7 +42,7 @@ public class GraphGeneratorTest {
     }
 
     private static GraphGenerator createGenerator() {
-        return new GraphGenerator(new Random(7643));
+        return new GraphGenerator(new MersenneTwisterRandomGenerator(7643));
     }
 
     @Test
@@ -122,14 +122,14 @@ public class GraphGeneratorTest {
         g.addTemplate("A->B", 1);
         g.addTemplate("A;B", 1);
 
+        final SimpleGraphItemFactory testFactory2 = createFactory();
+        g.generateGraph(testFactory2);
+        assertEquals("nodes: 0 .. 1\n", testFactory2.getResults());
+
         final SimpleGraphItemFactory testFactory1 = createFactory();
         g.generateGraph(testFactory1);
         assertEquals("nodes: 0 .. 1\n"
                         + "0->1\n", testFactory1.getResults());
-
-        final SimpleGraphItemFactory testFactory2 = createFactory();
-        g.generateGraph(testFactory2);
-        assertEquals("nodes: 0 .. 1\n", testFactory2.getResults());
     }
 
 }

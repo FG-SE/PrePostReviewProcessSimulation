@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 import de.unihannover.se.processSimulation.common.ParametersFactory;
 import de.unihannover.se.processSimulation.common.ReviewMode;
 import de.unihannover.se.processSimulation.preCommitPostCommit.RealProcessingModel;
+import desmoj.core.dist.MersenneTwisterRandomGenerator;
 import desmoj.core.simulator.Experiment;
 import desmoj.core.simulator.TimeInstant;
 
@@ -98,11 +99,14 @@ public class DataGenerator {
         final Experiment exp;
         if (report) {
             exp = new Experiment("Experiment" + mode + "_" + runId,
-                            null, null, null);
+                        ".\\experimentResults", null, null, null, Experiment.DEFAULT_REPORT_OUTPUT_TYPE,
+                        Experiment.DEFAULT_TRACE_OUTPUT_TYPE, Experiment.DEFAULT_ERROR_OUTPUT_TYPE,
+                        Experiment.DEFAULT_DEBUG_OUTPUT_TYPE);
         } else {
             exp = new Experiment("Experiment" + mode + "_" + runId,
-                        ".", null, null, null, noOutputs(), noOutputs(), noOutputs(), noOutputs());
+                        ".\\experimentResults", null, null, null, noOutputs(), noOutputs(), noOutputs(), noOutputs());
         }
+        exp.setRandomNumberGenerator(MersenneTwisterRandomGenerator.class);
         exp.setSeedGenerator(p.getSeed());
         model.connectToExperiment(exp);
 
@@ -113,7 +117,7 @@ public class DataGenerator {
         if (report) {
             exp.tracePeriod(new TimeInstant(0), new TimeInstant(160, TimeUnit.HOURS));
         }
-        exp.stop(new TimeInstant(8 * 400, TimeUnit.HOURS));
+        exp.stop(new TimeInstant(RealProcessingModel.HOURS_TO_RESET + 8 * 600, TimeUnit.HOURS));
         exp.start();
         if (report) {
             exp.report();

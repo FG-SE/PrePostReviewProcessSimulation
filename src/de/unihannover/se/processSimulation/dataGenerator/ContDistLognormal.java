@@ -1,8 +1,7 @@
 package de.unihannover.se.processSimulation.dataGenerator;
 
-import java.util.Random;
-
 import desmoj.core.dist.ContDist;
+import desmoj.core.dist.ContDistNormal;
 import desmoj.core.simulator.Model;
 
 /**
@@ -10,7 +9,7 @@ import desmoj.core.simulator.Model;
  */
 public class ContDistLognormal extends ContDist {
 
-    private Random r;
+    private ContDistNormal r;
     private final double location;
     private final double scale;
 
@@ -24,7 +23,7 @@ public class ContDistLognormal extends ContDist {
     public void setSeed(long seed) {
         super.setSeed(seed);
         if (this.r == null) {
-            this.r = new Random(seed);
+            this.r = new ContDistNormal(this.getModel(), this.getName() + "-NormHelper", 0.0, 1.0, false, false);
         } else {
             this.r.setSeed(seed);
         }
@@ -34,7 +33,7 @@ public class ContDistLognormal extends ContDist {
     public Double sample() {
         this.incrementObservations();
 
-        final Double sample = Math.exp(this.location + this.scale * this.r.nextGaussian());
+        final Double sample = Math.exp(this.location + this.scale * this.r.sample());
 
         if (this.currentlySendDebugNotes()) {
             this.traceLastSample(sample+"");

@@ -4,9 +4,9 @@ import java.util.concurrent.TimeUnit;
 
 import desmoj.core.simulator.TimeSpan;
 
-class GlobalBug extends Bug {
+class GlobalBlockerBug extends Bug {
 
-    public GlobalBug(RealProcessingModel model) {
+    public GlobalBlockerBug(RealProcessingModel model) {
         super(model, "global-bug");
     }
 

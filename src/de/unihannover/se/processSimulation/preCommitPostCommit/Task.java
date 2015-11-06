@@ -44,7 +44,7 @@ abstract class Task extends RealModelEntity implements MemoryItem {
         assert this.implementor == null;
         assert this.implementationInterruptions.isEmpty();
 
-        this.state = State.IN_IMPLEMENTATION;
+        this.setState(State.IN_IMPLEMENTATION);
         this.implementor = dev;
 
         this.handleTaskSwitchOverhead(dev);
@@ -63,8 +63,8 @@ abstract class Task extends RealModelEntity implements MemoryItem {
         if (this.getModel().getReviewMode() == ReviewMode.POST_COMMIT) {
             this.commit(this.implementor);
         }
-        this.handleAdditionalWaitsForInterruptions();
-        this.state = State.READY_FOR_REVIEW;
+        assert this.implementationInterruptions.isEmpty();
+        this.setState(State.READY_FOR_REVIEW);
         this.getBoard().addTaskReadyForReview(this);
     }
 
@@ -80,7 +80,7 @@ abstract class Task extends RealModelEntity implements MemoryItem {
         }
 
         if (this.implementor.makesBlockerBug()) {
-            this.lurkingBugs.add(new GlobalBug(this.getModel()));
+            this.lurkingBugs.add(new GlobalBlockerBug(this.getModel()));
         }
     }
 
@@ -103,7 +103,7 @@ abstract class Task extends RealModelEntity implements MemoryItem {
         assert this.implementor != reviewer;
         assert this.bugsFoundByOthersDuringReview == null;
 
-        this.state = State.IN_REVIEW;
+        this.setState(State.IN_REVIEW);
         this.bugsFoundByOthersDuringReview = new ArrayList<>();
         this.handleTaskSwitchOverhead(reviewer);
 
@@ -126,9 +126,14 @@ abstract class Task extends RealModelEntity implements MemoryItem {
         }
     }
 
+    private void setState(State newState) {
+        this.getModel().sendTraceNote("changes state of task " + this + " from " + this.state + " to " + newState);
+        this.state = newState;
+    }
+
     private void endReviewWithRemarks() {
         assert this.currentReview != null;
-        this.state = State.REJECTED;
+        this.setState(State.REJECTED);
         this.getBoard().addTaskWithReviewRemarks(this);
     }
 
@@ -136,7 +141,7 @@ abstract class Task extends RealModelEntity implements MemoryItem {
         if (this.getModel().getReviewMode() == ReviewMode.PRE_COMMIT) {
             this.commit(reviewer);
         }
-        this.state = State.DONE;
+        this.setState(State.DONE);
         this.getBoard().addFinishedTask(this);
     }
 
@@ -145,7 +150,7 @@ abstract class Task extends RealModelEntity implements MemoryItem {
         assert this.implementor == dev;
         assert this.implementationInterruptions.isEmpty() : this + " contains interruptions " + this.implementationInterruptions;
 
-        this.state = State.IN_IMPLEMENTATION;
+        this.setState(State.IN_IMPLEMENTATION);
         this.handleTaskSwitchOverhead(dev);
 
         if (this.getModel().getReviewMode() == ReviewMode.POST_COMMIT) {
@@ -179,24 +184,34 @@ abstract class Task extends RealModelEntity implements MemoryItem {
         case OPEN:
             throw new RuntimeException("Should not happen: Bug in open task " + this);
         case IN_IMPLEMENTATION:
+            //TEST
+            System.out.println("task in implementation");
             //Task ist gerade in Arbeit: Problem wird gleich miterledigt und verlängert die Implementierung
             this.suspendImplementation(this.getModel().getParameters().getReviewRemarkFixTimeDist().sampleTimeSpan(TimeUnit.HOURS));
             break;
         case READY_FOR_REVIEW:
+            //TEST
+            System.out.println("task ready for review");
             //Task ist bereit für Review: Bug-Assessment zählt als ein Review-Durchlauf
             this.getBoard().removeTaskFromReviewQueue(this);
             this.currentReview = new Review(Collections.singletonList(bug));
             this.endReviewWithRemarks();
             break;
         case IN_REVIEW:
+            //TEST
+            System.out.println("task in review");
             //Task wird gerade gereviewt: Bug als zusätzliche Anmerkung aufnehmen
             this.bugsFoundByOthersDuringReview.add(bug);
             break;
         case REJECTED:
+            //TEST
+            System.out.println("task rejected");
             //Task wurde bereits /wird gerade gereviewt: Bug als zusätzliche Anmerkung aufnehmen
             this.currentReview.addRemark(bug);
             break;
         case DONE:
+            //TEST
+            System.out.println("task done");
             //Task ist bereits abgeschlossen: Fixing geschieht im Rahmen eines separaten Bugfix-Tickets
             this.getBoard().addBugToBeFixed(new BugfixTask(bug));
             break;
@@ -256,13 +271,17 @@ abstract class Task extends RealModelEntity implements MemoryItem {
             //Konflikt vorhanden => Update ziehen, anpassen, und nochmal probieren
             this.getSourceRepository().restartWork(this);
             commiter.hold(this.getModel().getParameters().getConflictResolutionTimeDist().sampleTimeSpan(TimeUnit.HOURS));
+            this.handleAdditionalWaitsForInterruptions();
         }
 
+        this.handleCommited();
         this.commited = true;
         for (final Bug b : this.lurkingBugs) {
             b.startTicking();
         }
     }
+
+    protected abstract void handleCommited();
 
     public boolean isCommited() {
         return this.commited;

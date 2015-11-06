@@ -4,6 +4,7 @@ import java.util.concurrent.TimeUnit;
 
 import de.unihannover.se.processSimulation.common.DefaultParameterFactory;
 import de.unihannover.se.processSimulation.common.ReviewMode;
+import desmoj.core.dist.MersenneTwisterRandomGenerator;
 import desmoj.core.simulator.Experiment;
 import desmoj.core.simulator.TimeInstant;
 
@@ -20,6 +21,7 @@ public class Main {
         final RealProcessingModel model = new RealProcessingModel("RealProcessingModel", mode, p, true);
         final Experiment exp = new Experiment("DevelopmentProcessModelTestExperiment" + mode,
                         TimeUnit.MINUTES, TimeUnit.HOURS, null);
+        exp.setRandomNumberGenerator(MersenneTwisterRandomGenerator.class);
         model.connectToExperiment(exp);
 
         exp.setShowProgressBar(false);

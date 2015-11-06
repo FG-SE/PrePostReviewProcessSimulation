@@ -49,4 +49,8 @@ class StoryTask extends Task {
         return this.prerequisites;
     }
 
+    @Override
+    protected void handleCommited() {
+    }
+
 }

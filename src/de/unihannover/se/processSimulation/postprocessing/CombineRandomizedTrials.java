@@ -167,7 +167,7 @@ public class CombineRandomizedTrials {
     }
 
     public static void main(String[] args) throws IOException {
-        combineRandomizeTrials("sensitivityAnalysis.arff", "sensitivityAnalysisCombined.arff");
+        combineRandomizeTrials("changingNumberOfDevelopers.arff", "changingNumberOfDevelopersCombined.arff");
     }
 
     private static void combineRandomizeTrials(String inputFilename, String outputFilename) throws IOException {

@@ -6,7 +6,6 @@ import java.util.concurrent.TimeUnit;
 
 import de.unihannover.se.processSimulation.preCommitPostCommit.GraphGenerator.GraphItemFactory;
 import desmoj.core.simulator.TimeInstant;
-import desmoj.core.simulator.TimeOperations;
 import desmoj.core.simulator.TimeSpan;
 
 class Story extends RealModelEntity implements MemoryItem {
@@ -78,7 +77,7 @@ class Story extends RealModelEntity implements MemoryItem {
     }
 
     public TimeSpan getCycleTime(TimeInstant finishTime) {
-        return new TimeSpan(finishTime.getTimeInEpsilon() - this.startTime.getTimeInEpsilon(), TimeOperations.getEpsilon());
+        return Util.timeBetween(this.startTime, finishTime);
     }
 
     public int getStoryPoints() {

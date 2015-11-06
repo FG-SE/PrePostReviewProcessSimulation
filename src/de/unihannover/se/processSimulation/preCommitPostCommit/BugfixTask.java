@@ -27,4 +27,9 @@ class BugfixTask extends Task {
         return Collections.emptyList();
     }
 
+    @Override
+    protected void handleCommited() {
+        this.bug.fix();
+    }
+
 }

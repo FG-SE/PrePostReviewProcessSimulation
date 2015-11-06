@@ -1,12 +1,12 @@
 package de.unihannover.se.processSimulation.preCommitPostCommit;
 
-import java.util.Random;
+import desmoj.core.dist.MersenneTwisterRandomGenerator;
 
 public enum DependencyGraphConstellation {
 
     SIMPLISTIC {
         @Override
-        public GraphGenerator createGenerator(Random random) {
+        public GraphGenerator createGenerator(MersenneTwisterRandomGenerator random) {
             final GraphGenerator g = new GraphGenerator(random);
             g.addTemplate("A->B;A->C", 1);
             return g;
@@ -15,7 +15,7 @@ public enum DependencyGraphConstellation {
 
     REALISTIC {
         @Override
-        public GraphGenerator createGenerator(Random random) {
+        public GraphGenerator createGenerator(MersenneTwisterRandomGenerator random) {
             final GraphGenerator g = new GraphGenerator(random);
             g.addTemplate("A", 14);
             g.addTemplate("A;B", 5);
@@ -48,7 +48,7 @@ public enum DependencyGraphConstellation {
 
     NO_DEPENDENCIES {
         @Override
-        public GraphGenerator createGenerator(Random random) {
+        public GraphGenerator createGenerator(MersenneTwisterRandomGenerator random) {
             final GraphGenerator g = new GraphGenerator(random);
             g.addTemplate("A", 28);
             g.addTemplate("A;B", 22);
@@ -72,7 +72,7 @@ public enum DependencyGraphConstellation {
 
     CHAINS {
         @Override
-        public GraphGenerator createGenerator(Random random) {
+        public GraphGenerator createGenerator(MersenneTwisterRandomGenerator random) {
             final GraphGenerator g = new GraphGenerator(random);
             g.addTemplate("A->B", 32);
             g.addTemplate("A->B->C", 20);
@@ -95,7 +95,7 @@ public enum DependencyGraphConstellation {
 
     DIAMONDS {
         @Override
-        public GraphGenerator createGenerator(Random random) {
+        public GraphGenerator createGenerator(MersenneTwisterRandomGenerator random) {
             final GraphGenerator g = new GraphGenerator(random);
             g.addTemplate("A->C->B", 32);
             g.addTemplate("A->C->B;A->D->B;", 22);
@@ -115,6 +115,6 @@ public enum DependencyGraphConstellation {
         }
     };
 
-    public abstract GraphGenerator createGenerator(Random random);
+    public abstract GraphGenerator createGenerator(MersenneTwisterRandomGenerator random);
 
 }

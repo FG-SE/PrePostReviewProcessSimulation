@@ -1,22 +1,28 @@
 package de.unihannover.se.processSimulation.preCommitPostCommit;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Random;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import de.unihannover.se.processSimulation.common.Parameters;
 import de.unihannover.se.processSimulation.common.ParametersFactory;
 import de.unihannover.se.processSimulation.common.ReviewMode;
 import de.unihannover.se.processSimulation.preCommitPostCommit.SourceRepository.SourceRepositoryDependencies;
-import desmoj.core.dist.LinearCongruentialRandomGenerator;
+import desmoj.core.dist.MersenneTwisterRandomGenerator;
 import desmoj.core.dist.UniformRandomGenerator;
+import desmoj.core.simulator.ExternalEventReset;
 import desmoj.core.simulator.Model;
 import desmoj.core.simulator.TimeInstant;
 import desmoj.core.simulator.TimeSpan;
+import desmoj.core.statistic.Aggregate;
 import desmoj.core.statistic.Count;
 import desmoj.core.statistic.Tally;
 
 public class RealProcessingModel extends Model {
+
+    public static final int HOURS_TO_RESET = 8 * 400;
 
     private final ReviewMode reviewMode;
     private final boolean plot;
@@ -27,6 +33,7 @@ public class RealProcessingModel extends Model {
     private Count finishedStoryPoints;
     private Count remainingBugs;
     private Tally storyCycleTime;
+    private final Map<String, Aggregate> timeCounters = new HashMap<>();
 
     private final List<Developer> developers = new ArrayList<>();
     private final ParametersFactory parameterFactory;
@@ -50,9 +57,9 @@ public class RealProcessingModel extends Model {
     @Override
     public void init() {
         this.parameters = this.parameterFactory.create(this);
-        this.genericRandom = new LinearCongruentialRandomGenerator(this.getParameters().getGenericRandomSeed());
+        this.genericRandom = new MersenneTwisterRandomGenerator(this.getParameters().getGenericRandomSeed());
         this.dependencyGraphGenerator = this.parameters.getDependencyGraphConstellation().createGenerator(
-                        new Random(this.getParameters().getGenericRandomSeed() + 8654));
+                        new MersenneTwisterRandomGenerator(this.getParameters().getGenericRandomSeed() + 8654));
 
         this.board = new Board(this);
         this.sourceRepository = new SourceRepository<Task>(new SourceRepositoryDependencies() {
@@ -90,6 +97,8 @@ public class RealProcessingModel extends Model {
         for (final Developer d : this.developers) {
             d.activate();
         }
+        //reset after some time, so that starting effects are not measured
+        new ExternalEventReset(this, true).schedule(new TimeInstant(HOURS_TO_RESET, TimeUnit.HOURS));
     }
 
     public Board getBoard() {
@@ -131,7 +140,7 @@ public class RealProcessingModel extends Model {
     }
 
     public double getStoryCycleTimeStdDev() {
-        if (this.storyCycleTime.getObservations() <= 0) {
+        if (this.storyCycleTime.getObservations() <= 1) {
             return -1.0;
         }
         return this.storyCycleTime.getStdDev();
@@ -159,6 +168,16 @@ public class RealProcessingModel extends Model {
 
     public GraphGenerator getGraphGenerator() {
         return this.dependencyGraphGenerator;
+    }
+
+    public void countTime(String typeOfWork, TimeInstant startTime) {
+        Aggregate agg = this.timeCounters.get(typeOfWork);
+        if (agg == null) {
+            agg = new Aggregate(this, "timeFor_" + typeOfWork, true, true);
+            agg.setShowTimeSpansInReport(true);
+            this.timeCounters.put(typeOfWork, agg);
+        }
+        agg.update(Util.timeBetween(startTime, this.presentTime()));
     }
 
 }

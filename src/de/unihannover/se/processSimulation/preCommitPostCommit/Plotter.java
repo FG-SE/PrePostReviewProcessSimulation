@@ -1,5 +1,6 @@
 package de.unihannover.se.processSimulation.preCommitPostCommit;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
@@ -30,7 +31,9 @@ public class Plotter extends RealModelProcess {
 
     @Override
     public void lifeCycle() {
-        try (CsvWriter w = new CsvWriter(new FileWriter(this.getModel().getExperiment().getName() + "plot.csv"))) {
+        final String filename = this.getModel().getExperiment().getName() + "plot.csv";
+        final File file = new File(this.getModel().getExperiment().getOutputPath(), filename);
+        try (CsvWriter w = new CsvWriter(new FileWriter(file))) {
             w.addNumericAttribute(TIME);
             w.addNumericAttribute(STARTED_STORIES);
             w.addNumericAttribute(FINISHED_STORIES);

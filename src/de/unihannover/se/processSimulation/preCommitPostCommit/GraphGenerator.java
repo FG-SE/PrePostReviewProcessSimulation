@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
+
+import desmoj.core.dist.MersenneTwisterRandomGenerator;
 
 public class GraphGenerator {
 
@@ -13,10 +14,10 @@ public class GraphGenerator {
         public abstract void connect(N from, N to);
     }
 
-    private final Random random;
+    private final MersenneTwisterRandomGenerator random;
     private final List<String> descriptions;
 
-    public GraphGenerator(Random random) {
+    public GraphGenerator(MersenneTwisterRandomGenerator random) {
         this.descriptions = new ArrayList<>();
         this.random = random;
     }
@@ -28,7 +29,7 @@ public class GraphGenerator {
     }
 
     public<NODE> void generateGraph(GraphItemFactory<NODE> factory) {
-        this.parseDescription(this.descriptions.get(this.random.nextInt(this.descriptions.size())), factory);
+        this.parseDescription(this.descriptions.get(this.random.nextInt(16) % this.descriptions.size()), factory);
     }
 
     private<NODE> void parseDescription(String string, GraphItemFactory<NODE> fac) {

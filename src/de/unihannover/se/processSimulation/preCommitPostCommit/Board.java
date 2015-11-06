@@ -2,33 +2,34 @@ package de.unihannover.se.processSimulation.preCommitPostCommit;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import desmoj.core.simulator.Queue;
 import desmoj.core.simulator.TimeInstant;
 
 class Board {
 
     private final RealProcessingModel model;
-    private final Queue<NormalBug> unassessedBugs;
-    private final Queue<StoryTask> openStoryTasks;
-    private final Queue<BugfixTask> openBugs;
+    private final List<NormalBug> unassessedBugs;
+    private final List<StoryTask> openStoryTasks;
+    private final List<BugfixTask> openBugs;
     private final Set<Task> tasksInImplementation;
-    private final Queue<Task> tasksReadyForReview;
-    private final Queue<Task> tasksWithReviewRemarks;
+    private final List<Task> tasksReadyForReview;
+    private final List<Task> tasksWithReviewRemarks;
     private Story storyInPlanning;
 
     private int startedStoryCount;
 
     public Board(RealProcessingModel owner) {
         this.model = owner;
-        this.unassessedBugs = new Queue<>(owner, "unassessedBugs", true, true);
-        this.openStoryTasks = new Queue<>(owner, "openStoryTasks", true, true);
-        this.openBugs = new Queue<>(owner, "openBugs", true, true);
+        //DESMO-J queues are slow when large, therefore use lists instead
+        this.unassessedBugs = new LinkedList<>();
+        this.openStoryTasks = new LinkedList<>();
+        this.openBugs = new LinkedList<>();
         this.tasksInImplementation = new LinkedHashSet<>();
-        this.tasksReadyForReview = new Queue<>(owner, "tasksReadyForReview", true, true);
-        this.tasksWithReviewRemarks = new Queue<>(owner, "taskWithReviewRemarks", true, true);
+        this.tasksReadyForReview = new LinkedList<>();
+        this.tasksWithReviewRemarks = new LinkedList<>();
     }
 
     public Story getStoryToPlan() {
@@ -43,7 +44,7 @@ class Board {
         assert this.storyInPlanning == story;
         this.storyInPlanning = null;
         for (final StoryTask task : story.getTasks()) {
-            this.openStoryTasks.insert(task);
+            this.openStoryTasks.add(task);
         }
     }
 
@@ -76,7 +77,7 @@ class Board {
     public void addTaskReadyForReview(Task task) {
         assert this.tasksInImplementation.contains(task);
         this.tasksInImplementation.remove(task);
-        this.tasksReadyForReview.insert(task);
+        this.tasksReadyForReview.add(task);
     }
 
     public Task getTaskToReviewFor(Developer developer) {
@@ -124,7 +125,7 @@ class Board {
     }
 
     public void addTaskWithReviewRemarks(Task task) {
-        this.tasksWithReviewRemarks.insert(task);
+        this.tasksWithReviewRemarks.add(task);
     }
 
     public void addFinishedTask(Task task) {
@@ -137,7 +138,7 @@ class Board {
     }
 
     public void addBugToBeFixed(BugfixTask bugfixTask) {
-        this.openBugs.insert(bugfixTask);
+        this.openBugs.add(bugfixTask);
     }
 
     public Set<Task> getAllTasksInImplementation() {
@@ -149,12 +150,12 @@ class Board {
     }
 
     public void addUnassessedBug(NormalBug normalBug) {
-        this.unassessedBugs.insert(normalBug);
+        this.unassessedBugs.add(normalBug);
     }
 
     public NormalBug getUnassessedBug() {
         //hier wird nicht nach Task-Zugehörigkeit geguckt, weil man das vor dem Assessment ja nicht unbedingt wissen kann
-        return this.unassessedBugs.removeFirst();
+        return this.unassessedBugs.isEmpty() ? null : this.unassessedBugs.remove(0);
     }
 
     public void removeTaskFromReviewQueue(Task task) {
@@ -162,19 +163,19 @@ class Board {
     }
 
     int countOpenStoryTasks() {
-        return this.openStoryTasks.length();
+        return this.openStoryTasks.size();
     }
 
     int countOpenBugfixTasks() {
-        return this.openBugs.length();
+        return this.openBugs.size();
     }
 
     int countTasksReadyForReview() {
-        return this.tasksReadyForReview.length();
+        return this.tasksReadyForReview.size();
     }
 
     int countTasksWithReviewRemarks() {
-        return this.tasksWithReviewRemarks.length();
+        return this.tasksWithReviewRemarks.size();
     }
 
 }
