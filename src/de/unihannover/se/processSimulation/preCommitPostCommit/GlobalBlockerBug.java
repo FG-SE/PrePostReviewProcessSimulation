@@ -12,7 +12,8 @@ class GlobalBlockerBug extends Bug {
 
     @Override
     protected TimeSpan getActivationTimeForDevelopers() {
-        return new TimeSpan(0, TimeUnit.HOURS);
+        //TODO ggf. auch als Parameter?
+        return new TimeSpan(1, TimeUnit.MINUTES);
     }
 
     @Override

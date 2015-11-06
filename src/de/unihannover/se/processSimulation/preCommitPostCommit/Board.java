@@ -75,9 +75,13 @@ class Board {
     }
 
     public void addTaskReadyForReview(Task task) {
+        this.removeTaskFromInImplementation(task);
+        this.tasksReadyForReview.add(task);
+    }
+
+    public void removeTaskFromInImplementation(Task task) {
         assert this.tasksInImplementation.contains(task);
         this.tasksInImplementation.remove(task);
-        this.tasksReadyForReview.add(task);
     }
 
     public Task getTaskToReviewFor(Developer developer) {

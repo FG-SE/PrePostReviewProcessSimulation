@@ -62,12 +62,18 @@ abstract class Task extends RealModelEntity implements MemoryItem {
     private void endImplementation() {
         this.handleAdditionalWaitsForInterruptions();
 
-        if (this.getModel().getReviewMode() == ReviewMode.POST_COMMIT) {
+        if (this.getModel().getReviewMode() == ReviewMode.POST_COMMIT || this.getModel().getReviewMode() == ReviewMode.NO_REVIEW) {
             this.commit(this.implementor);
         }
         assert this.implementationInterruptions.isEmpty();
-        this.setState(State.READY_FOR_REVIEW);
-        this.getBoard().addTaskReadyForReview(this);
+        if (this.getModel().getReviewMode() == ReviewMode.NO_REVIEW) {
+            this.setState(State.DONE);
+            this.getBoard().removeTaskFromInImplementation(this);
+            this.handleFinishedTask();
+        } else {
+            this.setState(State.READY_FOR_REVIEW);
+            this.getBoard().addTaskReadyForReview(this);
+        }
     }
 
     private void createBugs(TimeSpan relevantTime) {
@@ -107,6 +113,7 @@ abstract class Task extends RealModelEntity implements MemoryItem {
         assert this.implementor != null;
         assert this.implementor != reviewer;
         assert this.bugsFoundByOthersDuringReview == null;
+        assert this.getModel().getReviewMode() != ReviewMode.NO_REVIEW;
 
         this.setState(State.IN_REVIEW);
         this.bugsFoundByOthersDuringReview = new ArrayList<>();
@@ -154,6 +161,7 @@ abstract class Task extends RealModelEntity implements MemoryItem {
 
     public void performFixing(Developer dev) {
         assert this.state == State.REJECTED;
+        assert this.getModel().getReviewMode() != ReviewMode.NO_REVIEW;
         assert this.implementor == dev;
         assert this.implementationInterruptions.isEmpty() : this + " contains interruptions " + this.implementationInterruptions;
 

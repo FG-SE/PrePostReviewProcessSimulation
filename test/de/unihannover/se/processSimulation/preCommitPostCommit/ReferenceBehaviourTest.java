@@ -163,4 +163,16 @@ public class ReferenceBehaviourTest {
         final RealProcessingModel modelPost = runExperiment(p, ReviewMode.POST_COMMIT);
         assertThat(modelPre.getFinishedStoryPoints(), isSimilarTo(modelPost.getFinishedStoryPoints()));
     }
+
+    @Test
+    public void testNoReviewIsWorseThanReview() {
+        final ParametersFactory p = BulkParameterFactory
+                        .forCommercial();
+        final RealProcessingModel modelPre = runExperiment(p, ReviewMode.PRE_COMMIT);
+        final RealProcessingModel modelPost = runExperiment(p, ReviewMode.POST_COMMIT);
+        final RealProcessingModel modelNo = runExperiment(p, ReviewMode.NO_REVIEW);
+        assertThat(modelPre.getFinishedStoryPoints(), isSignificantlyLargerThan(modelNo.getFinishedStoryPoints()));
+        assertThat(modelPost.getFinishedStoryPoints(), isSignificantlyLargerThan(modelNo.getFinishedStoryPoints()));
+    }
+
 }
