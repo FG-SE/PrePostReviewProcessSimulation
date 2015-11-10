@@ -66,14 +66,14 @@ public class Parameters {
     }
 
     /**
-     * Liefert die Verteilung für den "Entwickler-Skill", gemessen in Bugs/Stunde Implementierung.
+     * Liefert die Verteilung fÃ¼r den "Entwickler-Skill", gemessen in Bugs/Stunde Implementierung.
      */
     public NumericalDist<Double> getImplementationSkillDist() {
         return this.implementationSkillDist;
     }
 
     /**
-     * Liefert die Verteilung für die Wahrscheinlichkeit, einen Bug zu finden (je Entwickler)
+     * Liefert die Verteilung fÃ¼r die Wahrscheinlichkeit, einen Bug zu finden (je Entwickler)
      * (1.0 = Bug wird mit Sicherheit gefunden, 0.0 = Bug wird mit Sicherheit nicht gefunden).
      */
     public NumericalDist<Double> getReviewSkillDist() {
@@ -81,8 +81,8 @@ public class Parameters {
     }
 
     /**
-     * Liefert die Verteilung für die Wahrscheinlichkeit, einen globalen "Blocker-Bug" einzufügen (je Entwickler)
-     * (1.0 = In jeden Task wird ein Global-Bug eingefügt, 0.0 = Global-Bugs werden nie eingefügt).
+     * Liefert die Verteilung fÃ¼r die Wahrscheinlichkeit, einen globalen "Blocker-Bug" einzufÃ¼gen (je Entwickler)
+     * (1.0 = In jeden Task wird ein Global-Bug eingefÃ¼gt, 0.0 = Global-Bugs werden nie eingefÃ¼gt).
      */
     public NumericalDist<Double> getGlobalBugDist() {
         return this.globalBugDist;
@@ -90,7 +90,7 @@ public class Parameters {
 
     /**
      * Liefert die Wahrscheinlichkeit, dass ein Task mit einem anderen Task in Konflikt steht,
-     * unter der Bedingung dass der zweitere während der Arbeit am ersten commitet wurde.
+     * unter der Bedingung dass der zweitere wÃ¤hrend der Arbeit am ersten commitet wurde.
      */
     public BoolDist getConflictDist() {
         return this.conflictDist;
@@ -120,7 +120,7 @@ public class Parameters {
     }
 
     /**
-     * Liefert die Verteilung, aus der benötigte Zeit für die Korrektur EINER Review-Anmerkung bezogen wird.
+     * Liefert die Verteilung, aus der benÃ¶tigte Zeit fÃ¼r die Korrektur EINER Review-Anmerkung bezogen wird.
      * Die gesampelten Werte werden als "Stunden" interpretiert.
      */
     public NumericalDist<Double> getReviewRemarkFixTimeDist() {
@@ -128,7 +128,7 @@ public class Parameters {
     }
 
     /**
-     * Liefert die Verteilung, aus der benötigte Zeit für das Review eines Tasks bezogen wird.
+     * Liefert die Verteilung, aus der benÃ¶tigte Zeit fÃ¼r das Review eines Tasks bezogen wird.
      * Die gesampelten Werte werden als "Stunden" interpretiert.
      */
     public NumericalDist<Double> getReviewTimeDist() {
@@ -136,7 +136,7 @@ public class Parameters {
     }
 
     /**
-     * Liefert die Verteilung, aus der benötigte Zeit für die Planung einer Story bezogen wird.
+     * Liefert die Verteilung, aus der benÃ¶tigte Zeit fÃ¼r die Planung einer Story bezogen wird.
      * Die gesampelten Werte werden als "Stunden" interpretiert.
      */
     public NumericalDist<Double> getPlanningTimeDist() {
@@ -144,7 +144,7 @@ public class Parameters {
     }
 
     /**
-     * Liefert die Verteilung, aus der Zeit, nach der ein normaler Bug von einem Entwickler gefunden wird (gezählt ab Commit), bezogen wird.
+     * Liefert die Verteilung, aus der Zeit, nach der ein normaler Bug von einem Entwickler gefunden wird (gezÃ¤hlt ab Commit), bezogen wird.
      * Die gesampelten Werte werden als "Stunden" interpretiert.
      */
     public NumericalDist<Double> getBugActivationTimeDeveloperDist() {
@@ -153,7 +153,7 @@ public class Parameters {
     }
 
     /**
-     * Liefert die Verteilung, aus der Zeit, nach der ein normaler Bug vom Kunden gefunden wird (gezählt ab Veröffentlichung für Kunden), bezogen wird.
+     * Liefert die Verteilung, aus der Zeit, nach der ein normaler Bug vom Kunden gefunden wird (gezÃ¤hlt ab VerÃ¶ffentlichung fÃ¼r Kunden), bezogen wird.
      * Die gesampelten Werte werden als "Stunden" interpretiert.
      */
     public NumericalDist<Double> getBugActivationTimeCustomerDist() {
@@ -162,8 +162,8 @@ public class Parameters {
     }
 
     /**
-     * Liefert die Verteilung, aus der die für das Auflösen eines Konflikts mit einem oder mehreren parallel bearbeiteten Tasks
-     * benötigte Zeit bezogen wird.
+     * Liefert die Verteilung, aus der die fÃ¼r das AuflÃ¶sen eines Konflikts mit einem oder mehreren parallel bearbeiteten Tasks
+     * benÃ¶tigte Zeit bezogen wird.
      * Die gesampelten Werte werden als "Stunden" interpretiert.
      */
     public NumericalDist<Double> getConflictResolutionTimeDist() {
@@ -171,7 +171,7 @@ public class Parameters {
     }
 
     /**
-     * Liefert die Verteilung, aus der die Zeit bezogen wird, die ein Entwickler durch das Auftreten eines "globalen Bugs" während der Implementierung
+     * Liefert die Verteilung, aus der die Zeit bezogen wird, die ein Entwickler durch das Auftreten eines "globalen Bugs" wÃ¤hrend der Implementierung
      * verliert.
      * Die gesampelten Werte werden als "Stunden" interpretiert.
      */
@@ -180,7 +180,7 @@ public class Parameters {
     }
 
     /**
-     * Liefert die Verteilung, aus der die Zeit bezogen wird, die ein Entwickler für die Bewertung eines neu reingekommenen Bugs
+     * Liefert die Verteilung, aus der die Zeit bezogen wird, die ein Entwickler fÃ¼r die Bewertung eines neu reingekommenen Bugs
      * braucht.
      * Die gesampelten Werte werden als "Stunden" interpretiert.
      */
@@ -189,21 +189,21 @@ public class Parameters {
     }
 
     /**
-     * Taskwechsel-Overhead der angesetzt wird, nachdem ein Entwickler für eine Stunde von einer anderen Aufgabe unterbrochen wurde.
-     * Wird zusammen mit {@link #getMaxTaskSwitchOverhead()} verwendet, um die Parameter für die Ebbinghaussche Vergessenskurve zu bestimmen.
+     * Taskwechsel-Overhead der angesetzt wird, nachdem ein Entwickler fÃ¼r eine Stunde von einer anderen Aufgabe unterbrochen wurde.
+     * Wird zusammen mit {@link #getMaxTaskSwitchOverhead()} verwendet, um die Parameter fÃ¼r die Ebbinghaussche Vergessenskurve zu bestimmen.
      */
     public TimeSpan getTaskSwitchOverheadAfterOneHourInterruption() {
         return this.taskSwitchOverheadAfterOneHour;
     }
 
     /**
-     * Obergrenze für den angesetzten Taskwechsel-Overhead.
-     * Wird zusammen mit {@link #getTaskSwitchOverheadAfterFiveMinuteInterruption()} verwendet, um die Parameter für die
+     * Obergrenze fÃ¼r den angesetzten Taskwechsel-Overhead.
+     * Wird zusammen mit {@link #getTaskSwitchOverheadAfterFiveMinuteInterruption()} verwendet, um die Parameter fÃ¼r die
      * Ebbinghaussche Vergessenskurve zu bestimmen.
      */
     public TimeSpan getMaxTaskSwitchOverhead() {
-        //TODO: besser als Anteil des Gesamtaufwands der Story (abhängig von der Anzahl Story Points) angeben
-        //TODO: vielleicht auch noch unterscheiden zwischen "Zeit für komplettes Neu-Einarbeiten" und "Zeit für Wieder-Einarbeiten nach langer Zeit"
+        //TODO: besser als Anteil des Gesamtaufwands der Story (abhÃ¤ngig von der Anzahl Story Points) angeben
+        //TODO: vielleicht auch noch unterscheiden zwischen "Zeit fÃ¼r komplettes Neu-Einarbeiten" und "Zeit fÃ¼r Wieder-Einarbeiten nach langer Zeit"
         return this.maxTaskSwitchOverhead;
     }
 

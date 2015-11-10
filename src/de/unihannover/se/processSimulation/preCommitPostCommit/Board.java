@@ -118,12 +118,18 @@ class Board {
     private static <T extends Task> T determineBestFit(Iterable<T> possibleTasks, Developer developer) {
         TimeInstant bestTime = null;
         T best = null;
+        int iterCount = 0;
         for (final T t : possibleTasks) {
             final TimeInstant lastTimeForT = developer.getLastTimeYouHadToDoWith(t);
             if (best == null || (lastTimeForT != null && (bestTime == null || TimeInstant.isAfter(bestTime, lastTimeForT)))) {
                 bestTime = lastTimeForT;
                 best = t;
             }
+            //TODO parametrisierbar machen oder weghauen
+            if (iterCount > 100) {
+                break;
+            }
+            iterCount++;
         }
         return best;
     }
@@ -149,7 +155,7 @@ class Board {
     }
 
     public NormalBug getUnassessedBug() {
-        //hier wird nicht nach Task-Zugehörigkeit geguckt, weil man das vor dem Assessment ja nicht unbedingt wissen kann
+        //hier wird nicht nach Task-ZugehÃ¶rigkeit geguckt, weil man das vor dem Assessment ja nicht unbedingt wissen kann
         return this.unassessedBugs.isEmpty() ? null : this.unassessedBugs.remove(0);
     }
 

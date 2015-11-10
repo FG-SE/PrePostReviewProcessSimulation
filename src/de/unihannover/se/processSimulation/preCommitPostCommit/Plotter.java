@@ -7,12 +7,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import co.paralleluniverse.fibers.SuspendExecution;
 import de.unihannover.se.processSimulation.dataGenerator.CsvWriter;
 import desmoj.core.simulator.TimeSpan;
 
 /**
- * Hilfsklasse, die regelm‰ﬂig die aktuellen Queue-L‰ngen in eine Datei ausgibt.
- * Auf Basis dieser Datei kann dann sp‰ter z.B. eine grafische Darstellung erstellt werden.
+ * Hilfsklasse, die regelm√§√üig die aktuellen Queue-L√§ngen in eine Datei ausgibt.
+ * Auf Basis dieser Datei kann dann sp√§ter z.B. eine grafische Darstellung erstellt werden.
  */
 public class Plotter extends RealModelProcess {
 
@@ -30,7 +31,7 @@ public class Plotter extends RealModelProcess {
     }
 
     @Override
-    public void lifeCycle() {
+    public void lifeCycle() throws SuspendExecution {
         final String filename = this.getModel().getExperiment().getName() + "plot.csv";
         final File file = new File(this.getModel().getExperiment().getOutputPath(), filename);
         try (CsvWriter w = new CsvWriter(new FileWriter(file))) {

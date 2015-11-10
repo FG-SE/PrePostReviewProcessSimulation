@@ -78,7 +78,7 @@ class SourceRepository<U> {
             }
         }
 
-        //kein Konflikt => Commit mˆglich
+        //kein Konflikt => Commit m√∂glich
         this.commitTimes.put(task, this.deps.presentTime());
         this.startTimes.remove(task);
 

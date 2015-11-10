@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import co.paralleluniverse.fibers.SuspendExecution;
 import de.unihannover.se.processSimulation.common.ReviewMode;
 import de.unihannover.se.processSimulation.preCommitPostCommit.NormalBug.BugType;
 import desmoj.core.simulator.TimeInstant;
@@ -42,7 +43,7 @@ abstract class Task extends RealModelEntity implements MemoryItem {
         this.implementationTime = implementationTime;
     }
 
-    public void performImplementation(Developer dev) {
+    public void performImplementation(Developer dev) throws SuspendExecution {
         assert this.state == State.OPEN;
         assert this.implementor == null;
         assert this.implementationInterruptions.isEmpty();
@@ -59,7 +60,7 @@ abstract class Task extends RealModelEntity implements MemoryItem {
         this.endImplementation();
     }
 
-    private void endImplementation() {
+    private void endImplementation() throws SuspendExecution {
         this.handleAdditionalWaitsForInterruptions();
 
         if (this.getModel().getReviewMode() == ReviewMode.POST_COMMIT || this.getModel().getReviewMode() == ReviewMode.NO_REVIEW) {
@@ -78,8 +79,8 @@ abstract class Task extends RealModelEntity implements MemoryItem {
 
     private void createBugs(TimeSpan relevantTime) {
         //TODO hier fehlt mir noch ein bisschen Zufall
-        //TODO Bug-Typ zuf‰llig erzeugen
-        //TODO   dabei beachten: Bugs die nicht vom Entwickler erkannt werden kˆnnen h‰ngen nicht vom Entwicklerskill ab
+        //TODO Bug-Typ zuf√§llig erzeugen
+        //TODO   dabei beachten: Bugs die nicht vom Entwickler erkannt werden k√∂nnen h√§ngen nicht vom Entwicklerskill ab
         //TODO Bug-Tasks haben eine geringere Wahrscheinlichkeit, Kundenrelevante Bugs einzubauen (und insb. "nur Kunde"-Bugs)
         double bugsCreated = this.implementor.getImplementationSkill() * relevantTime.getTimeAsDouble(TimeUnit.HOURS);
         while (bugsCreated > 1) {
@@ -95,7 +96,7 @@ abstract class Task extends RealModelEntity implements MemoryItem {
         }
     }
 
-    private void handleAdditionalWaitsForInterruptions() {
+    private void handleAdditionalWaitsForInterruptions() throws SuspendExecution {
         while (!this.implementationInterruptions.isEmpty()) {
             final TimeSpan interruption = this.implementationInterruptions.remove(0);
             this.implementor.hold(interruption);
@@ -108,7 +109,7 @@ abstract class Task extends RealModelEntity implements MemoryItem {
         this.implementationInterruptions.add(timeSpan);
     }
 
-    public void performReview(Developer reviewer) {
+    public void performReview(Developer reviewer) throws SuspendExecution {
         assert this.state == State.READY_FOR_REVIEW;
         assert this.implementor != null;
         assert this.implementor != reviewer;
@@ -149,7 +150,7 @@ abstract class Task extends RealModelEntity implements MemoryItem {
         this.getBoard().addTaskWithReviewRemarks(this);
     }
 
-    private void endReviewWithoutRemarks(Developer reviewer) {
+    private void endReviewWithoutRemarks(Developer reviewer) throws SuspendExecution {
         if (this.getModel().getReviewMode() == ReviewMode.PRE_COMMIT) {
             this.commit(reviewer);
         }
@@ -159,7 +160,7 @@ abstract class Task extends RealModelEntity implements MemoryItem {
 
     protected abstract void handleFinishedTask();
 
-    public void performFixing(Developer dev) {
+    public void performFixing(Developer dev) throws SuspendExecution {
         assert this.state == State.REJECTED;
         assert this.getModel().getReviewMode() != ReviewMode.NO_REVIEW;
         assert this.implementor == dev;
@@ -175,7 +176,7 @@ abstract class Task extends RealModelEntity implements MemoryItem {
         this.handleTaskSwitchOverhead(dev);
 
         //An sich kann es neben dem Einbauen neuer Bugs auch vorkommen, dass bestehende und bereits angemerkte
-        //  Bugs nicht wirklich gefixt werden. Das wird hier vernachl‰ssigt.
+        //  Bugs nicht wirklich gefixt werden. Das wird hier vernachl√§ssigt.
 
         double hoursForFixing = 0.0;
         for (final Bug b : this.currentReview.getRemarks()) {
@@ -190,7 +191,7 @@ abstract class Task extends RealModelEntity implements MemoryItem {
         this.endImplementation();
     }
 
-    public void performBugAssessment(Developer dev, NormalBug bug) {
+    public void performBugAssessment(Developer dev, NormalBug bug) throws SuspendExecution {
         this.handleTaskSwitchOverhead(dev);
         dev.hold(this.getModel().getParameters().getBugAssessmentTimeDist().sampleTimeSpan(TimeUnit.HOURS));
 
@@ -198,50 +199,40 @@ abstract class Task extends RealModelEntity implements MemoryItem {
         case OPEN:
             throw new RuntimeException("Should not happen: Bug in open task " + this);
         case IN_IMPLEMENTATION:
-            //TEST
-            System.out.println("task in implementation");
-            //Task ist gerade in Arbeit: Problem wird gleich miterledigt und verl‰ngert die Implementierung
+            //Task ist gerade in Arbeit: Problem wird gleich miterledigt und verl√§ngert die Implementierung
             this.suspendImplementation(this.getModel().getParameters().getReviewRemarkFixTimeDist().sampleTimeSpan(TimeUnit.HOURS));
             break;
         case READY_FOR_REVIEW:
-            //TEST
-            System.out.println("task ready for review");
-            //Task ist bereit f¸r Review: Bug-Assessment z‰hlt als ein Review-Durchlauf
+            //Task ist bereit f√ºr Review: Bug-Assessment z√§hlt als ein Review-Durchlauf
             this.getBoard().removeTaskFromReviewQueue(this);
             this.currentReview = new Review(Collections.singletonList(bug));
             this.endReviewWithRemarks();
             break;
         case IN_REVIEW:
-            //TEST
-            System.out.println("task in review");
-            //Task wird gerade gereviewt: Bug als zus‰tzliche Anmerkung aufnehmen
+            //Task wird gerade gereviewt: Bug als zus√§tzliche Anmerkung aufnehmen
             this.bugsFoundByOthersDuringReview.add(bug);
             break;
         case REJECTED:
-            //TEST
-            System.out.println("task rejected");
-            //Task wurde bereits /wird gerade gereviewt: Bug als zus‰tzliche Anmerkung aufnehmen
+            //Task wurde bereits /wird gerade gereviewt: Bug als zus√§tzliche Anmerkung aufnehmen
             this.currentReview.addRemark(bug);
             break;
         case DONE:
-            //TEST
-            System.out.println("task done");
             //Task ist bereits abgeschlossen: Fixing geschieht im Rahmen eines separaten Bugfix-Tickets
             this.getBoard().addBugToBeFixed(new BugfixTask(bug));
             break;
         }
 
-        //TODO Abarbeitung dauert l‰nger, wenn auf dem Buggy-Task andere Dinge aufgebaut haben (propabilistisch)
-        //TODO noch in Arbeit befindliche abh‰ngige Tasks verzˆgern sich (propabilitisch)
+        //TODO Abarbeitung dauert l√§nger, wenn auf dem Buggy-Task andere Dinge aufgebaut haben (propabilistisch)
+        //TODO noch in Arbeit befindliche abh√§ngige Tasks verz√∂gern sich (propabilitisch)
         //z.B.: Bug hat Auswirkungen auf Nachfolger-Task:
-        //wenn der Nachfolger bereits vollst‰ndig abgeschlossen ist, verl‰ngert sich der Bugfix-Task
-        //wenn der Nachfolger gerade in der Implementierung ist, verl‰ngert sich die Implementierung
+        //wenn der Nachfolger bereits vollst√§ndig abgeschlossen ist, verl√§ngert sich der Bugfix-Task
+        //wenn der Nachfolger gerade in der Implementierung ist, verl√§ngert sich die Implementierung
         //wenn der Nachfolger gerade vor der Implementierung ist, passiert nichts
         //wenn der Nachfolger schon
 
     }
 
-    private void handleTaskSwitchOverhead(Developer dev) {
+    private void handleTaskSwitchOverhead(Developer dev) throws SuspendExecution {
         final TimeSpan taskSwitchOverhead = this.determineTaskSwitchOverhead(dev);
         assert taskSwitchOverhead.getTimeAsDouble(TimeUnit.HOURS) < 8.0 :
             "more than a day? something must be wrong " + taskSwitchOverhead;
@@ -279,7 +270,7 @@ abstract class Task extends RealModelEntity implements MemoryItem {
         return this.state == State.DONE;
     }
 
-    private void commit(Developer commiter) {
+    private void commit(Developer commiter) throws SuspendExecution {
 
         while (!this.getSourceRepository().tryCommit(this)) {
             //Konflikt vorhanden => Update ziehen, anpassen, und nochmal probieren

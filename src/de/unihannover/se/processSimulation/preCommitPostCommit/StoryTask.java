@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import co.paralleluniverse.fibers.SuspendExecution;
+
 class StoryTask extends Task {
 
     private final Story story;

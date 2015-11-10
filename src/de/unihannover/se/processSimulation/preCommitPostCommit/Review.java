@@ -7,7 +7,7 @@ class Review {
 
     private final List<Bug> remarks;
 
-    public Review(List<Bug> foundBugs) {
+    public Review(List<? extends Bug> foundBugs) {
         this.remarks = new ArrayList<>(foundBugs);
     }
 

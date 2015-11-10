@@ -37,7 +37,7 @@ abstract class Bug extends RealModelEntity {
         this.startedForDevelopers = true;
         final TimeSpan t = this.getActivationTimeForDevelopers();
         if (t != null) {
-            new BugBecomesVisibleEvent(this.getModel(), this.getName()).schedule(t);
+            new BugBecomesVisibleEvent(this.getModel(), this.getName()).scheduleNoPreempt(t);
         }
     }
 
@@ -48,7 +48,7 @@ abstract class Bug extends RealModelEntity {
         this.startedForCustomers = true;
         final TimeSpan t = this.getActivationTimeForCustomers();
         if (t != null) {
-            new BugBecomesVisibleEvent(this.getModel(), this.getName()).schedule(t);
+            new BugBecomesVisibleEvent(this.getModel(), this.getName()).scheduleNoPreempt(t);
         }
     }
 

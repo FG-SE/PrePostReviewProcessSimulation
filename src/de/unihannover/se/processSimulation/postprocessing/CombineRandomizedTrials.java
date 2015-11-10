@@ -137,13 +137,15 @@ public class CombineRandomizedTrials {
         private void combineToMeanStdDev(String key, List<Map<String, String>> dataWithSameInputParams,
                         Map<String, Object> outputRowBuffer) {
             final double[] values = this.getValuesWithKey(key, dataWithSameInputParams);
-            //TODO das ist aktuell der Mittelwert für die Grundgesamtheit aber die Standardabweichung für eine Stichprobe, das passt nicht
+            //TODO das ist aktuell der Mittelwert fÃ¼r die Grundgesamtheit aber die Standardabweichung fÃ¼r eine Stichprobe, das passt nicht
             outputRowBuffer.put(key + MEAN, MathUtil.determineMean(values));
             outputRowBuffer.put(key + STD_DEV, MathUtil.determineStdDev(values));
         }
 
         private double[] getValuesWithKey(String key, List<Map<String, String>> dataWithSameInputParams) {
-            return dataWithSameInputParams.stream().mapToDouble(m -> Double.parseDouble(m.get(key))).toArray();
+            //TODO ggf. auf Java 7 umbauen
+            throw new RuntimeException("currently not supported");
+//            return dataWithSameInputParams.stream().mapToDouble(m -> Double.parseDouble(m.get(key))).toArray();
         }
 
         private void combineCycleTime(ReviewMode mode, List<Map<String, String>> dataWithSameInputParams, Map<String, Object> outputRowBuffer) {

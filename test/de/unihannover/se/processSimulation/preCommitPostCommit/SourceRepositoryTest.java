@@ -9,9 +9,15 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 
 import de.unihannover.se.processSimulation.preCommitPostCommit.SourceRepository.SourceRepositoryDependencies;
+import desmoj.core.simulator.Experiment;
 import desmoj.core.simulator.TimeInstant;
 
 public class SourceRepositoryTest {
+
+    static {
+        Experiment.setEpsilon(TimeUnit.MINUTES);
+        Experiment.setReferenceUnit(TimeUnit.HOURS);
+    }
 
     private static final class StubSourceRepositoryDependencies implements SourceRepositoryDependencies {
 

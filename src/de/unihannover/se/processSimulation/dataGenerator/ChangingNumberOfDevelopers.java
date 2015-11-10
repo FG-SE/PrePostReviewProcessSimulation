@@ -8,8 +8,6 @@ public class ChangingNumberOfDevelopers {
     private static final int RUNS_PER_CONFIG = 1;
 
     public static void main(String[] args) {
-        DataGenerator.initTimeUnits();
-
         final BulkParameterFactory base = BulkParameterFactory.forCommercial();
 
         try (DataWriter dataWriter = new ArffWriter(new FileWriter("changingNumberOfDevelopers.arff"), "changingNumberOfDevelopers")) {

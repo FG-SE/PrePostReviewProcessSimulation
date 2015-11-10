@@ -2,6 +2,7 @@ package de.unihannover.se.processSimulation.preCommitPostCommit;
 
 import java.util.concurrent.TimeUnit;
 
+import co.paralleluniverse.fibers.SuspendExecution;
 import de.unihannover.se.processSimulation.common.DefaultParameterFactory;
 import de.unihannover.se.processSimulation.common.ReviewMode;
 import desmoj.core.dist.MersenneTwisterRandomGenerator;

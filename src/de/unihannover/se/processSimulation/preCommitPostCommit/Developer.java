@@ -3,14 +3,15 @@ package de.unihannover.se.processSimulation.preCommitPostCommit;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import co.paralleluniverse.fibers.SuspendExecution;
 import desmoj.core.dist.BoolDistBernoulli;
 import desmoj.core.dist.ContDist;
 import desmoj.core.dist.ContDistConstant;
 import desmoj.core.simulator.TimeInstant;
 
 
-//TODO offener Punkt: Taskwechsel führt auch zu höherer Bugrate
-//TODO offener Punkt: Beim Mergen können auch Fehler entstehen
+//TODO offener Punkt: Taskwechsel fÃ¼hrt auch zu hÃ¶herer Bugrate
+//TODO offener Punkt: Beim Mergen kÃ¶nnen auch Fehler entstehen
 //TODO offener Punkt: offene Bugs halten eine Story davon ab, abgeschlossen zu werden
 class Developer extends RealModelProcess {
 
@@ -29,7 +30,7 @@ class Developer extends RealModelProcess {
     }
 
     @Override
-    public void lifeCycle() {
+    public void lifeCycle() throws SuspendExecution {
         while (true) {
             final Board board = this.getBoard();
 

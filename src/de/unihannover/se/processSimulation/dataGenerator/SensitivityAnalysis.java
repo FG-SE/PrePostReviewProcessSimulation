@@ -11,8 +11,6 @@ public class SensitivityAnalysis {
 
     public static void main(String[] args) {
 
-        DataGenerator.initTimeUnits();
-
         BulkParameterFactory p = BulkParameterFactory.forCommercial();
 
         try (DataWriter dataWriter = new ArffWriter(new FileWriter("sensitivityAnalysis.arff"), "sensitivityAnalysis")) {

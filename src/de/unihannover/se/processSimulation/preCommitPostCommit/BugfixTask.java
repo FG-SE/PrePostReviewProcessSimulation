@@ -7,10 +7,12 @@ import java.util.concurrent.TimeUnit;
 class BugfixTask extends Task {
 
     private final NormalBug bug;
+    private final String cachedMemoryKey;
 
     public BugfixTask(NormalBug bug) {
         super(bug.getModel(), "bug", bug.getModel().getParameters().getBugfixTaskTimeDist().sampleTimeSpan(TimeUnit.HOURS));
         this.bug = bug;
+        this.cachedMemoryKey = this.bug.getTask().getMemoryKey();
     }
 
     public NormalBug getBug() {
@@ -19,7 +21,7 @@ class BugfixTask extends Task {
 
     @Override
     public String getMemoryKey() {
-        return this.bug.getTask().getMemoryKey();
+        return this.cachedMemoryKey;
     }
 
     @Override

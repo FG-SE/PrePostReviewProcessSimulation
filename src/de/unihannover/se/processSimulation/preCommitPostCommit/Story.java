@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import co.paralleluniverse.fibers.SuspendExecution;
 import de.unihannover.se.processSimulation.preCommitPostCommit.GraphGenerator.GraphItemFactory;
 import desmoj.core.simulator.TimeInstant;
 import desmoj.core.simulator.TimeSpan;
@@ -22,7 +23,7 @@ class Story extends RealModelEntity implements MemoryItem {
         this.planningTime = owner.getParameters().getPlanningTimeDist().sampleTimeSpan(TimeUnit.HOURS);
     }
 
-    public void plan(Developer developer) {
+    public void plan(Developer developer) throws SuspendExecution {
         assert !this.planned;
         if (this.startTime == null) {
             this.doMainPlanning(developer);
@@ -31,14 +32,14 @@ class Story extends RealModelEntity implements MemoryItem {
         }
     }
 
-    private void joinPlanning(Developer developer) {
+    private void joinPlanning(Developer developer) throws SuspendExecution {
         this.additionalPlanners.add(developer);
         developer.sendTraceNote("joins planning of " + this);
         assert !this.planned;
         developer.passivate();
     }
 
-    private void doMainPlanning(Developer developer) {
+    private void doMainPlanning(Developer developer) throws SuspendExecution {
         this.startTime = this.presentTime();
         developer.sendTraceNote("starts planning of " + this);
         developer.hold(this.planningTime);
@@ -82,7 +83,7 @@ class Story extends RealModelEntity implements MemoryItem {
 
     public int getStoryPoints() {
         assert !this.tasks.isEmpty();
-        //Story-Points werden der Einfachheit halber über die Summe der Netto-Implementierungszeit bestimmt
+        //Story-Points werden der Einfachheit halber Ã¼ber die Summe der Netto-Implementierungszeit bestimmt
         double totalTime = this.planningTime.getTimeAsDouble(TimeUnit.HOURS);
         for (final Task t : this.tasks) {
             totalTime += t.getImplementationTime().getTimeAsDouble(TimeUnit.HOURS);

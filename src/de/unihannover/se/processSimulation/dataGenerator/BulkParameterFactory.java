@@ -18,18 +18,10 @@ import desmoj.core.dist.ContDistExponential;
 import desmoj.core.dist.ContDistNormal;
 import desmoj.core.dist.Distribution;
 import desmoj.core.dist.MersenneTwisterRandomGenerator;
-import desmoj.core.simulator.Experiment;
 import desmoj.core.simulator.Model;
 import desmoj.core.simulator.TimeSpan;
 
 public class BulkParameterFactory extends ParametersFactory implements Cloneable {
-
-    static {
-        //Designfehler in DESMO-J: Die Zeiteinheiten können im Experiment-Konstruktor angegeben werden, sind in
-        //  Wirklichkeit aber statische Felder. Deshalb einmal am Anfang initialisieren und danach als Defaults nutzen.
-        final ArrayList<String> noOutputs = new ArrayList<>();
-        new Experiment("TimeUnitDummyExperiment", ".", TimeUnit.MINUTES, TimeUnit.HOURS, null, noOutputs, noOutputs, noOutputs, noOutputs);
-    }
 
     public static final String IMPLEMENTATION_SKILL_MODE = "implementationSkillMode";
     public static final String REVIEW_SKILL_MODE = "reviewSkillMode";
@@ -203,7 +195,7 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
                 0.15, // globalBugSuspendTimeMode??
                 0.5, // bugAssessmentTimeMode??
                 0.3, // conflictResolutionTimeMode??
-                500.0, // bugActivationTimeExpectedValue??
+                1000.0, // bugActivationTimeExpectedValue??
                 4.0, // planningTimeMode??
                 3.0, // reviewTimeMode
                 12, // numberOfDevelopers

@@ -12,6 +12,7 @@ import de.unihannover.se.processSimulation.common.ReviewMode;
 import de.unihannover.se.processSimulation.preCommitPostCommit.SourceRepository.SourceRepositoryDependencies;
 import desmoj.core.dist.MersenneTwisterRandomGenerator;
 import desmoj.core.dist.UniformRandomGenerator;
+import desmoj.core.simulator.Experiment;
 import desmoj.core.simulator.ExternalEventReset;
 import desmoj.core.simulator.Model;
 import desmoj.core.simulator.TimeInstant;
@@ -21,6 +22,11 @@ import desmoj.core.statistic.Count;
 import desmoj.core.statistic.Tally;
 
 public class RealProcessingModel extends Model {
+
+    static {
+        Experiment.setEpsilon(TimeUnit.MINUTES);
+        Experiment.setReferenceUnit(TimeUnit.HOURS);
+    }
 
     public static final int HOURS_TO_RESET = 8 * 400;
 
@@ -98,7 +104,7 @@ public class RealProcessingModel extends Model {
             d.activate();
         }
         //reset after some time, so that starting effects are not measured
-        new ExternalEventReset(this, true).schedule(new TimeInstant(HOURS_TO_RESET, TimeUnit.HOURS));
+        new ExternalEventReset(this, true).scheduleNoPreempt(new TimeInstant(HOURS_TO_RESET, TimeUnit.HOURS));
     }
 
     public Board getBoard() {

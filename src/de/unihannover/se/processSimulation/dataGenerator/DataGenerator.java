@@ -28,8 +28,6 @@ public class DataGenerator {
     private static final int RUNS_PER_CONFIG = 10;
 
     public static void main(String[] args) throws IOException {
-        initTimeUnits();
-
         try (final DataWriter rawResultWriter = new ArffWriter(new FileWriter("rawResults.arff"), "rawResults")) {
             registerResultAttributes(rawResultWriter);
 
@@ -87,24 +85,18 @@ public class DataGenerator {
         rawResultWriter.flush();
     }
 
-    static void initTimeUnits() {
-        //Designfehler in DESMO-J: Die Zeiteinheiten können im Experiment-Konstruktor angegeben werden, sind in
-        //  Wirklichkeit aber statische Felder. Deshalb einmal am Anfang initialisieren und danach als Defaults nutzen.
-        new Experiment("TimeUnitDummyExperiment", ".", TimeUnit.MINUTES, TimeUnit.HOURS, null, noOutputs(), noOutputs(), noOutputs(), noOutputs());
-    }
-
-    private static void runExperiment(
-                    final ParametersFactory p, ReviewMode mode, Map<String, Object> experimentDataBuffer, boolean report, String runId) {
+    public static ExperimentResult runExperiment(
+                    final ParametersFactory p, ReviewMode mode, boolean report, String runId) {
         final RealProcessingModel model = new RealProcessingModel("RealProcessingModel", mode, p, report);
         final Experiment exp;
         if (report) {
             exp = new Experiment("Experiment" + mode + "_" + runId,
-                        ".\\experimentResults", null, null, null, Experiment.DEFAULT_REPORT_OUTPUT_TYPE,
+                        ".\\experimentResults", null, Experiment.DEFAULT_REPORT_OUTPUT_TYPE,
                         Experiment.DEFAULT_TRACE_OUTPUT_TYPE, Experiment.DEFAULT_ERROR_OUTPUT_TYPE,
                         Experiment.DEFAULT_DEBUG_OUTPUT_TYPE);
         } else {
             exp = new Experiment("Experiment" + mode + "_" + runId,
-                        ".\\experimentResults", null, null, null, noOutputs(), noOutputs(), noOutputs(), noOutputs());
+                        ".\\experimentResults", null, noOutputs(), noOutputs(), noOutputs(), noOutputs());
         }
         exp.setRandomNumberGenerator(MersenneTwisterRandomGenerator.class);
         exp.setSeedGenerator(p.getSeed());
@@ -125,13 +117,28 @@ public class DataGenerator {
         exp.finish();
         final long expDuration = System.currentTimeMillis() - expStartTime;
 
-        experimentDataBuffer.put(mode + STORYPOINTS, model.getFinishedStoryPoints());
-        experimentDataBuffer.put(mode + CYCLETIME_MEAN, model.getStoryCycleTimeMean());
-        experimentDataBuffer.put(mode + CYCLETIME_STD_DEV, model.getStoryCycleTimeStdDev());
-        experimentDataBuffer.put(mode + STARTED_STORIES, model.getStartedStoryCount());
-        experimentDataBuffer.put(mode + FINISHED_STORIES, model.getFinishedStoryCount());
-        experimentDataBuffer.put(mode + REMAINING_BUGS, model.getRemainingBugCount());
-        experimentDataBuffer.put(mode + SIMULATION_DURATION, expDuration);
+        return new ExperimentResult(
+                        model.getFinishedStoryPoints(),
+                        model.getStoryCycleTimeMean(),
+                        model.getStoryCycleTimeStdDev(),
+                        model.getStartedStoryCount(),
+                        model.getFinishedStoryCount(),
+                        model.getRemainingBugCount(),
+                        expDuration);
+
+    }
+
+    private static void runExperiment(
+                    final ParametersFactory p, ReviewMode mode, Map<String, Object> experimentDataBuffer, boolean report, String runId) {
+
+        final ExperimentResult result = runExperiment(p, mode, report, runId);
+        experimentDataBuffer.put(mode + STORYPOINTS, result.getFinishedStoryPoints());
+        experimentDataBuffer.put(mode + CYCLETIME_MEAN, result.getStoryCycleTimeMean());
+        experimentDataBuffer.put(mode + CYCLETIME_STD_DEV, result.getStoryCycleTimeStdDev());
+        experimentDataBuffer.put(mode + STARTED_STORIES, result.getStartedStoryCount());
+        experimentDataBuffer.put(mode + FINISHED_STORIES, result.getFinishedStoryCount());
+        experimentDataBuffer.put(mode + REMAINING_BUGS, result.getRemainingBugCount());
+        experimentDataBuffer.put(mode + SIMULATION_DURATION, result.getExperimentDuration());
     }
 
     private static ArrayList<String> noOutputs() {
