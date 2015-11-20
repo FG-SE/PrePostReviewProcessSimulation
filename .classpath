@@ -3,7 +3,6 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="C:/Users/ich/.gradle/caches/modules-2/files-2.1/co.paralleluniverse/quasar-core/0.7.3/700f4769e54b9363d19b67f8d0913b1b76fae325/quasar-core-0.7.3-jdk8.jar" sourcepath="C:/Users/ich/.gradle/caches/modules-2/files-2.1/co.paralleluniverse/quasar-core/0.7.3/fc71859a3214606c561c97766f43aa632a0dd583/quasar-core-0.7.3-sources.jar"/>
 	<classpathentry kind="lib" path="C:/Users/ich/.gradle/caches/modules-2/files-2.1/junit/junit/4.12/2973d150c0dc1fefe998f834810d68f278ea58ec/junit-4.12.jar" sourcepath="C:/Users/ich/.gradle/caches/modules-2/files-2.1/junit/junit/4.12/a6c32b40bf3d76eca54e3c601e5d1470c86fcdfa/junit-4.12-sources.jar"/>
 	<classpathentry kind="lib" path="C:/Users/ich/.gradle/caches/modules-2/files-2.1/io.dropwizard.metrics/metrics-core/3.1.2/224f03afd2521c6c94632f566beb1bb5ee32cf07/metrics-core-3.1.2.jar" sourcepath="C:/Users/ich/.gradle/caches/modules-2/files-2.1/io.dropwizard.metrics/metrics-core/3.1.2/25177c6da71f42d7934040a2f5608e3a5f81464c/metrics-core-3.1.2-sources.jar"/>
 	<classpathentry kind="lib" path="C:/Users/ich/.gradle/caches/modules-2/files-2.1/org.latencyutils/LatencyUtils/2.0.2/dcfce0d8b128638aa20e58697b1c40ff09e342db/LatencyUtils-2.0.2.jar" sourcepath="C:/Users/ich/.gradle/caches/modules-2/files-2.1/org.latencyutils/LatencyUtils/2.0.2/c51c48b983abf1747bf4ca93afd3376ceabb4e39/LatencyUtils-2.0.2-sources.jar"/>
@@ -16,6 +15,7 @@
 	<classpathentry kind="lib" path="C:/Users/ich/.gradle/caches/modules-2/files-2.1/com.google.protobuf/protobuf-java/2.6.1/d9521f2aecb909835746b7a5facf612af5e890e8/protobuf-java-2.6.1.jar" sourcepath="C:/Users/ich/.gradle/caches/modules-2/files-2.1/com.google.protobuf/protobuf-java/2.6.1/cf47bfc6a10f85d14bc4c078a48d163b5903a291/protobuf-java-2.6.1-sources.jar"/>
 	<classpathentry kind="lib" path="C:/Users/ich/.gradle/caches/modules-2/files-2.1/com.esotericsoftware.minlog/minlog/1.2/59bfcd171d82f9981a5e242b9e840191f650e209/minlog-1.2.jar" sourcepath="C:/Users/ich/.gradle/caches/modules-2/files-2.1/com.esotericsoftware.minlog/minlog/1.2/c0bf75c30b19393673253e25708aa797a545fa10/minlog-1.2-sources.jar"/>
 	<classpathentry kind="lib" path="C:/Users/ich/.gradle/caches/modules-2/files-2.1/org.objenesis/objenesis/2.1/87c0ea803b69252868d09308b4618f766f135a96/objenesis-2.1.jar" sourcepath="C:/Users/ich/.gradle/caches/modules-2/files-2.1/org.objenesis/objenesis/2.1/611a57d836e2c320d59f9851d4ad587f3c8472e/objenesis-2.1-sources.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/DESMO-J"/>
+	<classpathentry kind="lib" path="/DESMO-J/desmoj-2.4.3beta-core-bin.jar"/>
+	<classpathentry kind="lib" path="/DESMO-J/libs/quasar-core-0.7.3-jdk8.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
