@@ -2,6 +2,7 @@ package de.unihannover.se.processSimulation.preCommitPostCommit;
 
 import desmoj.core.simulator.ExternalEvent;
 import desmoj.core.simulator.Model;
+import desmoj.core.simulator.TimeOperations;
 import desmoj.core.simulator.TimeSpan;
 
 abstract class Bug extends RealModelEntity {
@@ -24,10 +25,14 @@ abstract class Bug extends RealModelEntity {
     private boolean startedForDevelopers;
     private boolean startedForCustomers;
     private boolean fixed;
+    private final TimeSpan fixTime;
+    private final Randomness reviewFindabilitySequence;
 
-    public Bug(RealProcessingModel model, String name) {
+    public Bug(RealProcessingModel model, String name, Randomness randomness) {
         super(model, name);
         model.countBugCreated();
+        this.fixTime = randomness.sampleTimeSpan(this.getModel().getParameters().getBugfixTaskTimeDist());
+        this.reviewFindabilitySequence = randomness.forkRandomNumberStream();
     }
 
     public final void handlePublishedForDevelopers() {
@@ -62,6 +67,18 @@ abstract class Bug extends RealModelEntity {
             this.fixed = true;
             this.getModel().countBugFixed();
         }
+    }
+
+    public TimeSpan getFixTaskTime() {
+        return this.fixTime;
+    }
+
+    public TimeSpan getRemarkFixTime() {
+        return TimeOperations.multiply(this.fixTime, this.getModel().getParameters().getReviewRemarkFixFactor());
+    }
+
+    public boolean isFoundBy(Developer reviewer) {
+        return this.reviewFindabilitySequence.sampleBoolean(reviewer.getReviewSkill());
     }
 
 }

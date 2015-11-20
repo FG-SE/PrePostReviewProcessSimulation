@@ -4,9 +4,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import co.paralleluniverse.fibers.SuspendExecution;
-import desmoj.core.dist.BoolDistBernoulli;
-import desmoj.core.dist.ContDist;
-import desmoj.core.dist.ContDistConstant;
 import desmoj.core.simulator.TimeInstant;
 
 
@@ -15,17 +12,16 @@ import desmoj.core.simulator.TimeInstant;
 //TODO offener Punkt: offene Bugs halten eine Story davon ab, abgeschlossen zu werden
 class Developer extends RealModelProcess {
 
-    private final BoolDistBernoulli reviewerSkill;
-    private final BoolDistBernoulli globalBugDist;
+    private final double reviewerSkill;
+    private final double blockerBugPropability;
     private final Map<String, TimeInstant> memory;
-    private final ContDist implementationSkill;
+    private final double implementationSkill;
 
     public Developer(RealProcessingModel owner, double reviewerSkill, double globalBugPropability, double implementationSkill) {
         super(owner, "developer");
-        this.reviewerSkill = new BoolDistBernoulli(owner, "reviewerSkill-" + this, reviewerSkill, true, true);
-        this.globalBugDist = new BoolDistBernoulli(owner, "globalBugDist-" + this, globalBugPropability, true, true);
-        //as distribution, so that it can be seen in the DESMO report
-        this.implementationSkill = new ContDistConstant(owner, "implementationSkill-" + this, implementationSkill, true, true);
+        this.reviewerSkill = reviewerSkill;
+        this.blockerBugPropability = globalBugPropability;
+        this.implementationSkill = implementationSkill;
         this.memory = new LinkedHashMap<>();
     }
 
@@ -83,10 +79,6 @@ class Developer extends RealModelProcess {
         }
     }
 
-    public boolean findsBug(Bug b) {
-        return this.reviewerSkill.sample();
-    }
-
     public TimeInstant getLastTimeYouHadToDoWith(MemoryItem item) {
         return this.memory.get(item.getMemoryKey());
     }
@@ -95,12 +87,16 @@ class Developer extends RealModelProcess {
         this.memory.put(task.getMemoryKey(), this.presentTime());
     }
 
-    public boolean makesBlockerBug() {
-        return this.globalBugDist.sample();
+    public double getImplementationSkill() {
+        return this.implementationSkill;
     }
 
-    public double getImplementationSkill() {
-        return this.implementationSkill.sample();
+    public double getBlockerBugPropability() {
+        return this.blockerBugPropability;
+    }
+
+    public double getReviewSkill() {
+        return this.reviewerSkill;
     }
 
 }

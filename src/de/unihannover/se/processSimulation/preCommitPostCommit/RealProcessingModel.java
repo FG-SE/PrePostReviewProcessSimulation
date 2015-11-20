@@ -11,7 +11,6 @@ import de.unihannover.se.processSimulation.common.ParametersFactory;
 import de.unihannover.se.processSimulation.common.ReviewMode;
 import de.unihannover.se.processSimulation.preCommitPostCommit.SourceRepository.SourceRepositoryDependencies;
 import desmoj.core.dist.MersenneTwisterRandomGenerator;
-import desmoj.core.dist.UniformRandomGenerator;
 import desmoj.core.simulator.Experiment;
 import desmoj.core.simulator.ExternalEventReset;
 import desmoj.core.simulator.Model;
@@ -45,7 +44,6 @@ public class RealProcessingModel extends Model {
     private final ParametersFactory parameterFactory;
     private Parameters parameters;
 
-    private UniformRandomGenerator genericRandom;
     private GraphGenerator dependencyGraphGenerator;
 
     public RealProcessingModel(String name, ReviewMode reviewMode, ParametersFactory parameterFactory, boolean plot) {
@@ -63,9 +61,8 @@ public class RealProcessingModel extends Model {
     @Override
     public void init() {
         this.parameters = this.parameterFactory.create(this);
-        this.genericRandom = new MersenneTwisterRandomGenerator(this.getParameters().getGenericRandomSeed());
         this.dependencyGraphGenerator = this.parameters.getDependencyGraphConstellation().createGenerator(
-                        new MersenneTwisterRandomGenerator(this.getParameters().getGenericRandomSeed() + 8654));
+                        new MersenneTwisterRandomGenerator(this.getParameters().getMainRandomNumberStream().sampleLong()));
 
         this.board = new Board(this);
         this.sourceRepository = new SourceRepository<Task>(new SourceRepositoryDependencies() {
@@ -89,9 +86,9 @@ public class RealProcessingModel extends Model {
 
         for (int i = 0; i < this.parameters.getNumDevelopers(); i++) {
             this.developers.add(new Developer(this,
-                            this.parameters.getReviewSkillDist().sample(),
-                            this.parameters.getGlobalBugDist().sample(),
-                            this.parameters.getImplementationSkillDist().sample()));
+                            this.getParameters().getMainRandomNumberStream().sampleDouble(this.parameters.getReviewSkillDist()),
+                            this.getParameters().getMainRandomNumberStream().sampleDouble(this.parameters.getGlobalBugDist()),
+                            this.getParameters().getMainRandomNumberStream().sampleDouble(this.parameters.getImplementationSkillDist())));
         }
     }
 
@@ -128,10 +125,6 @@ public class RealProcessingModel extends Model {
 
     public Parameters getParameters() {
         return this.parameters;
-    }
-
-    public boolean getRandomBool(double propabilityForTrue) {
-        return this.genericRandom.nextDouble() < propabilityForTrue;
     }
 
     public long getFinishedStoryPoints() {
