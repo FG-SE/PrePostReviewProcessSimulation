@@ -12,10 +12,15 @@ import org.junit.Test;
 import de.unihannover.se.processSimulation.common.ParametersFactory;
 import de.unihannover.se.processSimulation.common.ReviewMode;
 import de.unihannover.se.processSimulation.dataGenerator.BulkParameterFactory;
+import desmoj.core.simulator.CoroutineModel;
 import desmoj.core.simulator.Experiment;
 import desmoj.core.simulator.TimeInstant;
 
 public class ReferenceBehaviourTest {
+
+    static {
+        Experiment.setCoroutineModel(CoroutineModel.FIBERS);
+    }
 
     private static RealProcessingModel runExperiment(ParametersFactory p, ReviewMode mode) throws Exception {
         final RealProcessingModel model = new RealProcessingModel("RealProcessingModel", mode, p, false);

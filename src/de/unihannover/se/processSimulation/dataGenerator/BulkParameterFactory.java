@@ -29,7 +29,7 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
     public static final String CONFLICT_PROPABILITY = "conflictPropability";
     public static final String IMPLEMENTATION_TIME_MODE = "implementationTimeMode";
     public static final String BUGFIX_TASK_TIME_MODE = "bugfixTaskTimeMode";
-    public static final String REVIEW_REMARK_FIX_TIME_MODE = "reviewRemarkFixTimeMode";
+    public static final String REVIEW_REMARK_FIX_TIME_FACTOR = "reviewRemarkFixTimeFactor";
     public static final String GLOBAL_BUG_SUSPEND_TIME_MODE = "globalBugSuspendTimeMode";
     public static final String BUG_ASSESSMENT_TIME_MODE = "bugAssessmentTimeMode";
     public static final String CONFLICT_RESOLUTION_TIME_MODE = "conflictResolutionTimeMode";
@@ -49,7 +49,7 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
         CONFLICT_PROPABILITY,
         IMPLEMENTATION_TIME_MODE,
         BUGFIX_TASK_TIME_MODE,
-        REVIEW_REMARK_FIX_TIME_MODE,
+        REVIEW_REMARK_FIX_TIME_FACTOR,
         GLOBAL_BUG_SUSPEND_TIME_MODE,
         BUG_ASSESSMENT_TIME_MODE,
         CONFLICT_RESOLUTION_TIME_MODE,
@@ -69,7 +69,7 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
     private double conflictPropability;
     private double implementationTimeMean;
     private double bugfixTaskTimeExpectedValue;
-    private double reviewRemarkFixTimeExpectedValue;
+    private double reviewRemarkFixTimeFactor;
     private double globalBugSuspendTimeMode;
     private double bugAssessmentTimeMode;
     private double conflictResolutionTimeMode;
@@ -146,7 +146,7 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
                     double conflictPropability,
                     double implementationTimeMode,
                     double bugfixTaskTimeMode,
-                    double fixTimeMode,
+                    double fixTimeFactor,
                     double globalBugSuspendTimeMode,
                     double bugAssessmentTimeMode,
                     double conflictResolutionTimeMode,
@@ -163,7 +163,7 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
         this.conflictPropability = conflictPropability;
         this.implementationTimeMean = implementationTimeMode;
         this.bugfixTaskTimeExpectedValue = bugfixTaskTimeMode;
-        this.reviewRemarkFixTimeExpectedValue = fixTimeMode;
+        this.reviewRemarkFixTimeFactor = fixTimeFactor;
         this.globalBugSuspendTimeMode = globalBugSuspendTimeMode;
         this.bugAssessmentTimeMode = bugAssessmentTimeMode;
         this.conflictResolutionTimeMode = conflictResolutionTimeMode;
@@ -191,7 +191,7 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
                 0.01, // conflictPropability??
                 17.3, // implementationTimeMode
                 13.0, //bugfixTaskTimeMode
-                1.86, // reviewRemarkfixTimeMode
+                0.15, // reviewRemarkfixTimeFactor
                 0.15, // globalBugSuspendTimeMode??
                 0.5, // bugAssessmentTimeMode??
                 0.3, // conflictResolutionTimeMode??
@@ -217,7 +217,7 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
                         b.bernoulli("conflictDist", this.conflictPropability),
                         b.logNormal("implementationTimeDist", this.implementationTimeMean, this.implementationTimeMean / 2.0),
                         b.exp("bugfixTaskTimeDist", this.bugfixTaskTimeExpectedValue),
-                        b.exp("reviewRemarkFixTimeDist", this.reviewRemarkFixTimeExpectedValue),
+                        this.reviewRemarkFixTimeFactor,
                         b.posNormal("globalBugSuspendTimeDist", this.globalBugSuspendTimeMode),
                         b.posNormal("bugAssessmentTimeDist", this.bugAssessmentTimeMode),
                         b.posNormal("conflictResolutionTimeDist", this.conflictResolutionTimeMode),
@@ -288,7 +288,7 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
         case CONFLICT_PROPABILITY: return this.conflictPropability;
         case IMPLEMENTATION_TIME_MODE: return this.implementationTimeMean;
         case BUGFIX_TASK_TIME_MODE: return this.bugfixTaskTimeExpectedValue;
-        case REVIEW_REMARK_FIX_TIME_MODE: return this.reviewRemarkFixTimeExpectedValue;
+        case REVIEW_REMARK_FIX_TIME_FACTOR: return this.reviewRemarkFixTimeFactor;
         case GLOBAL_BUG_SUSPEND_TIME_MODE: return this.globalBugSuspendTimeMode;
         case BUG_ASSESSMENT_TIME_MODE: return this.bugAssessmentTimeMode;
         case CONFLICT_RESOLUTION_TIME_MODE: return this.conflictResolutionTimeMode;
@@ -324,8 +324,8 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
         case BUGFIX_TASK_TIME_MODE:
             this.bugfixTaskTimeExpectedValue = (Double) newValue;
             break;
-        case REVIEW_REMARK_FIX_TIME_MODE:
-            this.reviewRemarkFixTimeExpectedValue = (Double) newValue;
+        case REVIEW_REMARK_FIX_TIME_FACTOR:
+            this.reviewRemarkFixTimeFactor = (Double) newValue;
             break;
         case GLOBAL_BUG_SUSPEND_TIME_MODE:
             this.globalBugSuspendTimeMode = (Double) newValue;

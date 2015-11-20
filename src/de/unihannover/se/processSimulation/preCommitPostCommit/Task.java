@@ -9,6 +9,7 @@ import co.paralleluniverse.fibers.SuspendExecution;
 import de.unihannover.se.processSimulation.common.ReviewMode;
 import de.unihannover.se.processSimulation.preCommitPostCommit.NormalBug.BugType;
 import desmoj.core.simulator.TimeInstant;
+import desmoj.core.simulator.TimeOperations;
 import desmoj.core.simulator.TimeSpan;
 
 abstract class Task extends RealModelEntity implements MemoryItem {
@@ -31,16 +32,15 @@ abstract class Task extends RealModelEntity implements MemoryItem {
     private Review currentReview;
     private List<NormalBug> bugsFoundByOthersDuringReview;
     private boolean commited;
+    private final Randomness randomness;
 
-    private final TimeSpan implementationTime;
-
-    public Task(RealProcessingModel model, String name, TimeSpan implementationTime) {
+    public Task(RealProcessingModel model, String name, Randomness randomness) {
         super(model, name);
         this.state = State.OPEN;
         this.lurkingBugs = new ArrayList<>();
         this.bugsFixedInCommit = new ArrayList<>();
         this.implementationInterruptions = new ArrayList<>();
-        this.implementationTime = implementationTime;
+        this.randomness = randomness;
     }
 
     public void performImplementation(Developer dev) throws SuspendExecution {
@@ -54,9 +54,10 @@ abstract class Task extends RealModelEntity implements MemoryItem {
         //mit Jens abgestimmt: erst update, dann Task-Switch-Overhead
         this.getSourceRepository().startWork(this);
         this.handleTaskSwitchOverhead(dev);
-        this.implementor.hold(this.implementationTime);
+        final TimeSpan implementationTime = this.getImplementationTime();
+        this.implementor.hold(implementationTime);
 
-        this.createBugs(this.implementationTime);
+        this.createBugs(implementationTime);
         this.endImplementation();
     }
 
@@ -79,21 +80,27 @@ abstract class Task extends RealModelEntity implements MemoryItem {
 
     private void createBugs(TimeSpan relevantTime) {
         //TODO hier fehlt mir noch ein bisschen Zufall
-        //TODO Bug-Typ zufällig erzeugen
-        //TODO   dabei beachten: Bugs die nicht vom Entwickler erkannt werden können hängen nicht vom Entwicklerskill ab
-        //TODO Bug-Tasks haben eine geringere Wahrscheinlichkeit, Kundenrelevante Bugs einzubauen (und insb. "nur Kunde"-Bugs)
+        final Randomness implementationIncidentRandomness = this.randomness.forkRandomNumberStream();
         double bugsCreated = this.implementor.getImplementationSkill() * relevantTime.getTimeAsDouble(TimeUnit.HOURS);
+        final boolean withBlockerBug = this.randomness.sampleBoolean(this.implementor.getBlockerBugPropability());
         while (bugsCreated > 1) {
-            this.lurkingBugs.add(new NormalBug(this, BugType.DEVELOPER_AND_CUSTOMER));
+            this.createNormalBug(implementationIncidentRandomness);
             bugsCreated -= 1.0;
         }
-        if (this.getModel().getRandomBool(bugsCreated)) {
-            this.lurkingBugs.add(new NormalBug(this, BugType.DEVELOPER_AND_CUSTOMER));
+        final boolean withExtraBug = implementationIncidentRandomness.sampleBoolean(bugsCreated);
+        if (withExtraBug) {
+            this.createNormalBug(implementationIncidentRandomness);
         }
 
-        if (this.implementor.makesBlockerBug()) {
-            this.lurkingBugs.add(new GlobalBlockerBug(this.getModel()));
+        if (withBlockerBug) {
+            this.lurkingBugs.add(new GlobalBlockerBug(this.getModel(), implementationIncidentRandomness.forkRandomNumberStream()));
         }
+    }
+
+    private void createNormalBug(final Randomness implementationIncidentRandomness) {
+        final double internalBugPropability = this.getModel().getParameters().getInternalBugPropability();
+        final BugType type = implementationIncidentRandomness.sampleBoolean(internalBugPropability) ? BugType.DEVELOPER_ONLY : BugType.DEVELOPER_AND_CUSTOMER;
+        this.lurkingBugs.add(new NormalBug(this, type , implementationIncidentRandomness.forkRandomNumberStream()));
     }
 
     private void handleAdditionalWaitsForInterruptions() throws SuspendExecution {
@@ -124,7 +131,7 @@ abstract class Task extends RealModelEntity implements MemoryItem {
 
         final List<Bug> foundBugs = new ArrayList<>();
         for (final Bug b : this.lurkingBugs) {
-            if (reviewer.findsBug(b)) {
+            if (b.isFoundBy(reviewer)) {
                 foundBugs.add(b);
             }
         }
@@ -178,29 +185,28 @@ abstract class Task extends RealModelEntity implements MemoryItem {
         //An sich kann es neben dem Einbauen neuer Bugs auch vorkommen, dass bestehende und bereits angemerkte
         //  Bugs nicht wirklich gefixt werden. Das wird hier vernachlässigt.
 
-        double hoursForFixing = 0.0;
+        TimeSpan timeForFixing = new TimeSpan(0);
         for (final Bug b : this.currentReview.getRemarks()) {
-            hoursForFixing += this.getModel().getParameters().getReviewRemarkFixTimeDist().sample();
+            timeForFixing = TimeOperations.add(timeForFixing, b.getRemarkFixTime());
         }
-        final TimeSpan fixingTime = new TimeSpan(hoursForFixing, TimeUnit.HOURS);
-        dev.hold(fixingTime);
+        dev.hold(timeForFixing);
         this.lurkingBugs.removeAll(this.currentReview.getRemarks());
         this.bugsFixedInCommit.addAll(this.currentReview.getRemarks());
 
-        this.createBugs(fixingTime);
+        this.createBugs(timeForFixing);
         this.endImplementation();
     }
 
     public void performBugAssessment(Developer dev, NormalBug bug) throws SuspendExecution {
         this.handleTaskSwitchOverhead(dev);
-        dev.hold(this.getModel().getParameters().getBugAssessmentTimeDist().sampleTimeSpan(TimeUnit.HOURS));
+        dev.hold(bug.getAssessmentTime());
 
         switch (this.state) {
         case OPEN:
             throw new RuntimeException("Should not happen: Bug in open task " + this);
         case IN_IMPLEMENTATION:
             //Task ist gerade in Arbeit: Problem wird gleich miterledigt und verlängert die Implementierung
-            this.suspendImplementation(this.getModel().getParameters().getReviewRemarkFixTimeDist().sampleTimeSpan(TimeUnit.HOURS));
+            this.suspendImplementation(bug.getRemarkFixTime());
             break;
         case READY_FOR_REVIEW:
             //Task ist bereit für Review: Bug-Assessment zählt als ein Review-Durchlauf
@@ -298,9 +304,7 @@ abstract class Task extends RealModelEntity implements MemoryItem {
 
     public abstract List<? extends Task> getPrerequisites();
 
-    public TimeSpan getImplementationTime() {
-        return this.implementationTime;
-    }
+    public abstract TimeSpan getImplementationTime();
 
     public State getState() {
         return this.state;

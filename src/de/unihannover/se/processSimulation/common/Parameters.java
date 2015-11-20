@@ -1,6 +1,7 @@
 package de.unihannover.se.processSimulation.common;
 
 import de.unihannover.se.processSimulation.preCommitPostCommit.DependencyGraphConstellation;
+import de.unihannover.se.processSimulation.preCommitPostCommit.Randomness;
 import desmoj.core.dist.BoolDist;
 import desmoj.core.dist.NumericalDist;
 import desmoj.core.simulator.TimeSpan;
@@ -13,7 +14,7 @@ public class Parameters {
     private final BoolDist conflictDist;
     private final NumericalDist<Double> implementationTimeDist;
     private final NumericalDist<Double> bugfixTaskTimeDist;
-    private final NumericalDist<Double> reviewRemarkFixTimeDist;
+    private final double reviewRemarkFixTimeFactor;
     private final NumericalDist<Double> globalBugSuspendTimeDist;
     private final NumericalDist<Double> bugAssessmentTimeDist;
     private final NumericalDist<Double> conflictResolutionTimeDist;
@@ -23,7 +24,7 @@ public class Parameters {
     private final int numDevelopers;
     private final TimeSpan taskSwitchOverheadAfterOneHour;
     private final TimeSpan maxTaskSwitchOverhead;
-    private final long genericRandomSeed;
+    private final Randomness mainRandomNumberStream;
     private final DependencyGraphConstellation dependencyGraphConstellation;
 
     public Parameters(
@@ -33,7 +34,7 @@ public class Parameters {
                     BoolDist conflictDist,
                     NumericalDist<Double> implementationTimeDist,
                     NumericalDist<Double> bugfixTaskTimeDist,
-                    NumericalDist<Double> reviewRemarkFixTimeDist,
+                    double reviewRemarkFixTimeFactor,
                     NumericalDist<Double> globalBugSuspendTimeDist,
                     NumericalDist<Double> bugAssessmentTimeDist,
                     NumericalDist<Double> conflictResolutionTimeDist,
@@ -51,7 +52,7 @@ public class Parameters {
         this.conflictDist = conflictDist;
         this.implementationTimeDist = implementationTimeDist;
         this.bugfixTaskTimeDist = bugfixTaskTimeDist;
-        this.reviewRemarkFixTimeDist = reviewRemarkFixTimeDist;
+        this.reviewRemarkFixTimeFactor = reviewRemarkFixTimeFactor;
         this.globalBugSuspendTimeDist = globalBugSuspendTimeDist;
         this.bugAssessmentTimeDist = bugAssessmentTimeDist;
         this.conflictResolutionTimeDist = conflictResolutionTimeDist;
@@ -61,7 +62,7 @@ public class Parameters {
         this.numDevelopers = numDevelopers;
         this.taskSwitchOverheadAfterOneHour = taskSwitchOverheadAfterOneHour;
         this.maxTaskSwitchOverhead = maxTaskSwitchOverhead;
-        this.genericRandomSeed = genericRandomSeed;
+        this.mainRandomNumberStream =  new Randomness(genericRandomSeed);
         this.dependencyGraphConstellation = dependencyGraphConstellation;
     }
 
@@ -120,11 +121,12 @@ public class Parameters {
     }
 
     /**
-     * Liefert die Verteilung, aus der benötigte Zeit für die Korrektur EINER Review-Anmerkung bezogen wird.
-     * Die gesampelten Werte werden als "Stunden" interpretiert.
+     * Liefert den Faktor, um von der Zeit für das Fixen eines Problems, wenn es als Bugfix-Task auftritt, auf die Dauer
+     * für das Fixen des gleichen Problems, wenn es als Review-Anmerkung auftritt, zu kommen.
+     * 1 = gleicher Wert, 0.5 = 50 %, u.s.w.
      */
-    public NumericalDist<Double> getReviewRemarkFixTimeDist() {
-        return this.reviewRemarkFixTimeDist;
+    public double getReviewRemarkFixFactor() {
+        return this.reviewRemarkFixTimeFactor;
     }
 
     /**
@@ -207,12 +209,17 @@ public class Parameters {
         return this.maxTaskSwitchOverhead;
     }
 
-    public long getGenericRandomSeed() {
-        return this.genericRandomSeed;
-    }
-
     public DependencyGraphConstellation getDependencyGraphConstellation() {
         return this.dependencyGraphConstellation;
+    }
+
+    public double getInternalBugPropability() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    public Randomness getMainRandomNumberStream() {
+        return this.mainRandomNumberStream;
     }
 
 }

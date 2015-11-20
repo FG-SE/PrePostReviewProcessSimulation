@@ -1,39 +1,40 @@
 package de.unihannover.se.processSimulation.preCommitPostCommit;
 
-import java.util.concurrent.TimeUnit;
-
 import desmoj.core.simulator.TimeSpan;
 
 class NormalBug extends Bug {
 
     public enum BugType {
         DEVELOPER_ONLY,
-        CUSTOMER_ONLY,
         DEVELOPER_AND_CUSTOMER
     }
 
     private final Task task;
     private final BugType type;
+    private final TimeSpan assessmentTime;
+    private final TimeSpan activationTimeDeveloper;
+    private final TimeSpan activationTimeCustomer;
+    private final long fixTaskRandomnessSeed;
 
-    public NormalBug(Task task, BugType type) {
-        super(task.getModel(), "bug");
+    public NormalBug(Task task, BugType type, Randomness randomness) {
+        super(task.getModel(), "bug", randomness);
         this.task = task;
         this.type = type;
+        this.assessmentTime = randomness.sampleTimeSpan(this.getModel().getParameters().getBugAssessmentTimeDist());
+        this.activationTimeDeveloper = randomness.sampleTimeSpan(this.getModel().getParameters().getBugActivationTimeDeveloperDist());
+        this.activationTimeCustomer = randomness.sampleTimeSpan(this.getModel().getParameters().getBugActivationTimeCustomerDist());
+        this.fixTaskRandomnessSeed = randomness.sampleLong();
     }
 
     @Override
     protected TimeSpan getActivationTimeForDevelopers() {
-        if (this.type == BugType.DEVELOPER_AND_CUSTOMER || this.type == BugType.DEVELOPER_ONLY) {
-            return this.getModel().getParameters().getBugActivationTimeDeveloperDist().sampleTimeSpan(TimeUnit.HOURS);
-        } else {
-            return null;
-        }
+        return this.activationTimeDeveloper;
     }
 
     @Override
     protected TimeSpan getActivationTimeForCustomers() {
-        if (this.type == BugType.DEVELOPER_AND_CUSTOMER || this.type == BugType.CUSTOMER_ONLY) {
-            return this.getModel().getParameters().getBugActivationTimeCustomerDist().sampleTimeSpan(TimeUnit.HOURS);
+        if (this.type == BugType.DEVELOPER_AND_CUSTOMER) {
+            return this.activationTimeCustomer;
         } else {
             return null;
         }
@@ -46,6 +47,14 @@ class NormalBug extends Bug {
 
     public Task getTask() {
         return this.task;
+    }
+
+    public TimeSpan getAssessmentTime() {
+        return this.assessmentTime;
+    }
+
+    public Randomness getRandomnessForTask() {
+        return new Randomness(this.fixTaskRandomnessSeed);
     }
 
 }
