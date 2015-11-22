@@ -34,7 +34,7 @@ class Board {
 
     public Story getStoryToPlan() {
         if (this.storyInPlanning == null) {
-            this.storyInPlanning = new Story(this.model, this.model.getParameters().getMainRandomNumberStream().forkRandomNumberStream());
+            this.storyInPlanning = new Story(this.model, 5);
             this.startedStoryCount++;
         }
         return this.storyInPlanning;

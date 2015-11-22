@@ -6,11 +6,8 @@ import desmoj.core.simulator.TimeSpan;
 
 class GlobalBlockerBug extends Bug {
 
-    private final TimeSpan suspendTime;
-
-    public GlobalBlockerBug(RealProcessingModel model, Randomness randomness) {
-        super(model, "global-bug", randomness);
-        this.suspendTime = randomness.sampleTimeSpan(this.getModel().getParameters().getGlobalBugSuspendTimeDist());
+    public GlobalBlockerBug(RealProcessingModel model) {
+        super(model, "global-bug");
     }
 
     @Override
@@ -27,7 +24,7 @@ class GlobalBlockerBug extends Bug {
     @Override
     protected void becomeVisible() {
         for (final Task t : this.getBoard().getAllTasksInImplementation()) {
-            t.suspendImplementation(this.suspendTime);
+            t.suspendImplementation(this.getModel().getParameters().getGlobalBugSuspendTimeDist().sampleTimeSpan(TimeUnit.HOURS));
         }
     }
 

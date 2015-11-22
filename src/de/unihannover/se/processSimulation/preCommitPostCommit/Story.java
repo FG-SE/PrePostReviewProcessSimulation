@@ -16,13 +16,11 @@ class Story extends RealModelEntity implements MemoryItem {
     private boolean planned;
     private final List<StoryTask> tasks;
     private final List<Developer> additionalPlanners = new ArrayList<>();
-    private final Randomness randomness;
 
-    public Story(RealProcessingModel owner, Randomness randomness) {
+    public Story(RealProcessingModel owner, int storyPoints) {
         super(owner, "story");
         this.tasks = new ArrayList<>();
-        this.planningTime = randomness.sampleTimeSpan(owner.getParameters().getPlanningTimeDist());
-        this.randomness = randomness;
+        this.planningTime = owner.getParameters().getPlanningTimeDist().sampleTimeSpan(TimeUnit.HOURS);
     }
 
     public void plan(Developer developer) throws SuspendExecution {
@@ -49,7 +47,7 @@ class Story extends RealModelEntity implements MemoryItem {
         this.getModel().getGraphGenerator().generateGraph(new GraphItemFactory<StoryTask>() {
             @Override
             public StoryTask createNode() {
-                return new StoryTask(Story.this.getModel(), Story.this, Story.this.randomness.forkRandomNumberStream());
+                return new StoryTask(Story.this.getModel(), Story.this);
             }
             @Override
             public void connect(StoryTask from, StoryTask to) {

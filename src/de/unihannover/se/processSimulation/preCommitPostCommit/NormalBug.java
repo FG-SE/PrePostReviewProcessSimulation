@@ -1,5 +1,7 @@
 package de.unihannover.se.processSimulation.preCommitPostCommit;
 
+import java.util.concurrent.TimeUnit;
+
 import desmoj.core.simulator.TimeSpan;
 
 class NormalBug extends Bug {
@@ -11,30 +13,22 @@ class NormalBug extends Bug {
 
     private final Task task;
     private final BugType type;
-    private final TimeSpan assessmentTime;
-    private final TimeSpan activationTimeDeveloper;
-    private final TimeSpan activationTimeCustomer;
-    private final long fixTaskRandomnessSeed;
 
-    public NormalBug(Task task, BugType type, Randomness randomness) {
-        super(task.getModel(), "bug", randomness);
+    public NormalBug(Task task, BugType type) {
+        super(task.getModel(), "bug");
         this.task = task;
         this.type = type;
-        this.assessmentTime = randomness.sampleTimeSpan(this.getModel().getParameters().getBugAssessmentTimeDist());
-        this.activationTimeDeveloper = randomness.sampleTimeSpan(this.getModel().getParameters().getBugActivationTimeDeveloperDist());
-        this.activationTimeCustomer = randomness.sampleTimeSpan(this.getModel().getParameters().getBugActivationTimeCustomerDist());
-        this.fixTaskRandomnessSeed = randomness.sampleLong();
     }
 
     @Override
     protected TimeSpan getActivationTimeForDevelopers() {
-        return this.activationTimeDeveloper;
+        return this.getModel().getParameters().getBugActivationTimeDeveloperDist().sampleTimeSpan(TimeUnit.HOURS);
     }
 
     @Override
     protected TimeSpan getActivationTimeForCustomers() {
         if (this.type == BugType.DEVELOPER_AND_CUSTOMER) {
-            return this.activationTimeCustomer;
+            return this.getModel().getParameters().getBugActivationTimeCustomerDist().sampleTimeSpan(TimeUnit.HOURS);
         } else {
             return null;
         }
@@ -47,14 +41,6 @@ class NormalBug extends Bug {
 
     public Task getTask() {
         return this.task;
-    }
-
-    public TimeSpan getAssessmentTime() {
-        return this.assessmentTime;
-    }
-
-    public Randomness getRandomnessForTask() {
-        return new Randomness(this.fixTaskRandomnessSeed);
     }
 
 }

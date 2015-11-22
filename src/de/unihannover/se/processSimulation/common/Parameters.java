@@ -1,8 +1,8 @@
 package de.unihannover.se.processSimulation.common;
 
 import de.unihannover.se.processSimulation.preCommitPostCommit.DependencyGraphConstellation;
-import de.unihannover.se.processSimulation.preCommitPostCommit.Randomness;
 import desmoj.core.dist.BoolDist;
+import desmoj.core.dist.BoolDistConstant;
 import desmoj.core.dist.NumericalDist;
 import desmoj.core.simulator.TimeSpan;
 
@@ -24,8 +24,9 @@ public class Parameters {
     private final int numDevelopers;
     private final TimeSpan taskSwitchOverheadAfterOneHour;
     private final TimeSpan maxTaskSwitchOverhead;
-    private final Randomness mainRandomNumberStream;
+    private final BoolDist internalBugDist;
     private final DependencyGraphConstellation dependencyGraphConstellation;
+    private final long genericRandomSeed;
 
     public Parameters(
                     NumericalDist<Double> implementationSkillDist,
@@ -62,8 +63,10 @@ public class Parameters {
         this.numDevelopers = numDevelopers;
         this.taskSwitchOverheadAfterOneHour = taskSwitchOverheadAfterOneHour;
         this.maxTaskSwitchOverhead = maxTaskSwitchOverhead;
-        this.mainRandomNumberStream =  new Randomness(genericRandomSeed);
         this.dependencyGraphConstellation = dependencyGraphConstellation;
+        this.genericRandomSeed = genericRandomSeed;
+        //TODO auslagern
+        this.internalBugDist = new BoolDistConstant(reviewTimeDist.getModel(), "internalBugDist", false, true, true);
     }
 
     /**
@@ -126,6 +129,7 @@ public class Parameters {
      * 1 = gleicher Wert, 0.5 = 50 %, u.s.w.
      */
     public double getReviewRemarkFixFactor() {
+        //TODO ist das mit dem Faktor wirklich gut? dann haben bugfixes und remark fixes die gleiche verteilung
         return this.reviewRemarkFixTimeFactor;
     }
 
@@ -213,13 +217,12 @@ public class Parameters {
         return this.dependencyGraphConstellation;
     }
 
-    public double getInternalBugPropability() {
-        // TODO Auto-generated method stub
-        return 0;
+    public BoolDist getInternalBugDist() {
+        return this.internalBugDist;
     }
 
-    public Randomness getMainRandomNumberStream() {
-        return this.mainRandomNumberStream;
+    public long getGenericRandomSeed() {
+        return this.genericRandomSeed;
     }
 
 }

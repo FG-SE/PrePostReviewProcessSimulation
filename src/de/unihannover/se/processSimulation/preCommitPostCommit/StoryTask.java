@@ -2,21 +2,20 @@ package de.unihannover.se.processSimulation.preCommitPostCommit;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
-import desmoj.core.simulator.TimeSpan;
+import co.paralleluniverse.fibers.SuspendExecution;
 
 class StoryTask extends Task {
 
     private final Story story;
 
     private final List<StoryTask> prerequisites;
-    private final TimeSpan implementationTime;
 
-    public StoryTask(RealProcessingModel model, Story story, Randomness randomness) {
-        super(model, "story-task", randomness);
+    public StoryTask(RealProcessingModel model, Story story) {
+        super(model, "story-task", model.getParameters().getImplementationTimeDist().sampleTimeSpan(TimeUnit.HOURS));
         this.story = story;
         this.prerequisites = new ArrayList<>();
-        this.implementationTime = randomness.sampleTimeSpan(model.getParameters().getImplementationTimeDist());
         story.addTaskHelper(this);
     }
 
@@ -61,11 +60,6 @@ class StoryTask extends Task {
         if (this.story.allTasksFinished()) {
             this.story.finish();
         }
-    }
-
-    @Override
-    public TimeSpan getImplementationTime() {
-        return this.implementationTime;
     }
 
 }

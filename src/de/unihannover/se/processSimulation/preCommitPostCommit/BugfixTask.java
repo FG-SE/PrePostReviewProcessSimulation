@@ -2,8 +2,7 @@ package de.unihannover.se.processSimulation.preCommitPostCommit;
 
 import java.util.Collections;
 import java.util.List;
-
-import desmoj.core.simulator.TimeSpan;
+import java.util.concurrent.TimeUnit;
 
 class BugfixTask extends Task {
 
@@ -11,7 +10,7 @@ class BugfixTask extends Task {
     private final String cachedMemoryKey;
 
     public BugfixTask(NormalBug bug) {
-        super(bug.getModel(), "bug", bug.getRandomnessForTask());
+        super(bug.getModel(), "bug", bug.getModel().getParameters().getBugfixTaskTimeDist().sampleTimeSpan(TimeUnit.HOURS));
         this.bug = bug;
         this.cachedMemoryKey = this.bug.getTask().getMemoryKey();
     }
@@ -38,11 +37,6 @@ class BugfixTask extends Task {
     @Override
     protected void handleFinishedTask() {
         this.startLurkingBugsForCustomer();
-    }
-
-    @Override
-    public TimeSpan getImplementationTime() {
-        return this.bug.getFixTaskTime();
     }
 
 }
