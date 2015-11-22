@@ -237,9 +237,7 @@ abstract class Task extends RealModelEntity implements MemoryItem {
     }
 
     private TimeSpan sampleRemarkFixTime() {
-        return TimeOperations.multiply(
-                        this.getModel().getParameters().getBugfixTaskTimeDist().sampleTimeSpan(TimeUnit.HOURS),
-                        this.getModel().getParameters().getReviewRemarkFixFactor());
+        return this.getModel().getParameters().getReviewRemarkFixDist().sampleTimeSpan(TimeUnit.HOURS);
     }
 
     private void handleTaskSwitchOverhead(Developer dev) throws SuspendExecution {

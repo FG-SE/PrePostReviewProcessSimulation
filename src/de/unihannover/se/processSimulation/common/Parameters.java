@@ -14,7 +14,7 @@ public class Parameters {
     private final BoolDist conflictDist;
     private final NumericalDist<Double> implementationTimeDist;
     private final NumericalDist<Double> bugfixTaskTimeDist;
-    private final double reviewRemarkFixTimeFactor;
+    private final NumericalDist<Double> reviewRemarkFixTimeDist;
     private final NumericalDist<Double> globalBugSuspendTimeDist;
     private final NumericalDist<Double> bugAssessmentTimeDist;
     private final NumericalDist<Double> conflictResolutionTimeDist;
@@ -35,7 +35,7 @@ public class Parameters {
                     BoolDist conflictDist,
                     NumericalDist<Double> implementationTimeDist,
                     NumericalDist<Double> bugfixTaskTimeDist,
-                    double reviewRemarkFixTimeFactor,
+                    NumericalDist<Double> reviewRemarkFixTimeDist,
                     NumericalDist<Double> globalBugSuspendTimeDist,
                     NumericalDist<Double> bugAssessmentTimeDist,
                     NumericalDist<Double> conflictResolutionTimeDist,
@@ -53,7 +53,7 @@ public class Parameters {
         this.conflictDist = conflictDist;
         this.implementationTimeDist = implementationTimeDist;
         this.bugfixTaskTimeDist = bugfixTaskTimeDist;
-        this.reviewRemarkFixTimeFactor = reviewRemarkFixTimeFactor;
+        this.reviewRemarkFixTimeDist = reviewRemarkFixTimeDist;
         this.globalBugSuspendTimeDist = globalBugSuspendTimeDist;
         this.bugAssessmentTimeDist = bugAssessmentTimeDist;
         this.conflictResolutionTimeDist = conflictResolutionTimeDist;
@@ -124,13 +124,11 @@ public class Parameters {
     }
 
     /**
-     * Liefert den Faktor, um von der Zeit für das Fixen eines Problems, wenn es als Bugfix-Task auftritt, auf die Dauer
-     * für das Fixen des gleichen Problems, wenn es als Review-Anmerkung auftritt, zu kommen.
-     * 1 = gleicher Wert, 0.5 = 50 %, u.s.w.
+     * Liefert die Verteilung für die Zeit für das Fixen EINER Review-Anmerkung.
+     * Die gesampelten Werte werden als "Stunden" interpretiert.
      */
-    public double getReviewRemarkFixFactor() {
-        //TODO ist das mit dem Faktor wirklich gut? dann haben bugfixes und remark fixes die gleiche verteilung
-        return this.reviewRemarkFixTimeFactor;
+    public NumericalDist<Double> getReviewRemarkFixDist() {
+        return this.reviewRemarkFixTimeDist;
     }
 
     /**

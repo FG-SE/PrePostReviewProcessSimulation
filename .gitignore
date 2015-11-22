@@ -3,3 +3,5 @@
 /*.html
 /experimentResults
 /experimentResultsSave
+/build
+/.gradle

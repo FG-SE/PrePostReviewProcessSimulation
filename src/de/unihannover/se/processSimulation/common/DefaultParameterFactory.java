@@ -29,7 +29,7 @@ public class DefaultParameterFactory extends ParametersFactory {
                         new BoolDistBernoulli(owner, "conflictDist", this.conflictPropability, true, true),
                         new ContDistConstant(owner, "implementationTimeDist", 8.0, true, true),
                         new ContDistConstant(owner, "bugfixTaskTimeDist", 5.0, true, true),
-                        0.03,
+                        new ContDistConstant(owner, "reviewRemarkFixTimeDist", 0.15, true, true),
                         new ContDistConstant(owner, "globalBugSuspendTimeDist", 0.25, true, true),
                         new ContDistConstant(owner, "bugAssessmentTimeDist", 0.1, true, true),
                         new ContDistConstant(owner, "conflictResolutionTimeDist", 0.25, true, true),
