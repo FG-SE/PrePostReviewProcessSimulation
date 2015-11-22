@@ -180,6 +180,18 @@ public class ReferenceBehaviourTest {
         assertThat(modelPost.getFinishedStoryPoints(), isSignificantlyLargerThan(modelNo.getFinishedStoryPoints()));
     }
 
+    @Test
+    public void testNoReviewIsBetterThanReviewWhenThereAreNoBugs() throws Exception {
+        final ParametersFactory p = BulkParameterFactory
+                        .forCommercial()
+                        .copyWithChangedParam(BulkParameterFactory.IMPLEMENTATION_SKILL_MODE, 0.0);
+        final RealProcessingModel modelPre = runExperiment(p, ReviewMode.PRE_COMMIT);
+        final RealProcessingModel modelPost = runExperiment(p, ReviewMode.POST_COMMIT);
+        final RealProcessingModel modelNo = runExperiment(p, ReviewMode.NO_REVIEW);
+        assertThat(modelNo.getFinishedStoryPoints(), isSignificantlyLargerThan(modelPre.getFinishedStoryPoints()));
+        assertThat(modelNo.getFinishedStoryPoints(), isSignificantlyLargerThan(modelPost.getFinishedStoryPoints()));
+    }
+
     //TODO weg
     @Test
     public void testNoReviewIsWorseThanReview2() throws Exception {
@@ -219,7 +231,7 @@ public class ReferenceBehaviourTest {
     //TODO weg
     @Test
     public void testNoReviewIsWorseThanReview5() throws Exception {
-        for (int i = 0; i < 30; i++) {
+        for (int i = 0; i < 10; i++) {
             final ParametersFactory p = BulkParameterFactory
                             .forCommercial();
             final RealProcessingModel modelPre = runExperiment(p, ReviewMode.PRE_COMMIT);
