@@ -1,0 +1,33 @@
+apply plugin:'java'
+apply plugin:'eclipse'
+
+sourceCompatibility = 1.8
+version = '1.0'
+
+tasks.compileJava.options.encoding = 'UTF-8'
+
+sourceSets {
+   main {
+      java {
+         srcDir 'src'
+      }
+   }
+   test {
+      java {
+         srcDir 'test'
+      }
+   }
+}
+
+repositories {
+    flatDir {
+        dirs 'lib'
+    }
+    mavenCentral()
+}
+
+dependencies {
+    //compile 'desmoj:desmoj:2.4.2:complete-bin'
+	compile 'desmoj:desmoj:2.5.1:bin', 'co.paralleluniverse:quasar-core:0.7.3:jdk8', ':JRI', ':JRIEngine', ':REngine'
+    testCompile 'junit:junit:4.+', 'hamcrest:hamcrest-core:1.3'
+}
