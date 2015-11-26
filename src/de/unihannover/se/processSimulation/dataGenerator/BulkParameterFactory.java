@@ -1,10 +1,8 @@
 package de.unihannover.se.processSimulation.dataGenerator;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
@@ -23,64 +21,47 @@ import desmoj.core.simulator.TimeSpan;
 
 public class BulkParameterFactory extends ParametersFactory implements Cloneable {
 
-    public static final String IMPLEMENTATION_SKILL_MODE = "implementationSkillMode";
-    public static final String REVIEW_SKILL_MODE = "reviewSkillMode";
-    public static final String GLOBAL_BUG_MODE = "globalBugMode";
-    public static final String CONFLICT_PROPABILITY = "conflictPropability";
-    public static final String IMPLEMENTATION_TIME_MODE = "implementationTimeMode";
-    public static final String BUGFIX_TASK_TIME_MODE = "bugfixTaskTimeMode";
-    public static final String REVIEW_REMARK_FIX_TIME_MODE = "reviewRemarkFixTimeMode";
-    public static final String GLOBAL_BUG_SUSPEND_TIME_MODE = "globalBugSuspendTimeMode";
-    public static final String BUG_ASSESSMENT_TIME_MODE = "bugAssessmentTimeMode";
-    public static final String CONFLICT_RESOLUTION_TIME_MODE = "conflictResolutionTimeMode";
-    public static final String BUG_ACTIVATION_TIME_EXPECTED_VALUE = "bugActivationTimeExpectedValue";
-    public static final String PLANNING_TIME_MODE = "planningTimeMode";
-    public static final String REVIEW_TIME_MODE = "reviewTimeMode";
-    public static final String NUMBER_OF_DEVELOPERS = "numberOfDevelopers";
-    public static final String TASK_SWITCH_OVERHEAD_AFTER_ONE_HOUR = "taskSwitchOverheadAfterOneHour";
-    public static final String MAX_TASK_SWITCH_OVERHEAD = "maxTaskSwitchOverhead";
-    public static final String DEPENDENCY_GRAPH_CONSTELLATION = "dependencyGraphConstellation";
+    public enum ParameterType {
+        IMPLEMENTATION_SKILL_MODE(Double.class, ""),
+        REVIEW_SKILL_MODE(Double.class, ""),
+        GLOBAL_BUG_MODE(Double.class, ""),
+        CONFLICT_PROPABILITY(Double.class, ""),
+        IMPLEMENTATION_TIME_MODE(Double.class, ""),
+        BUGFIX_TASK_TIME_MODE(Double.class, ""),
+        REVIEW_REMARK_FIX_TIME_MODE(Double.class, ""),
+        GLOBAL_BUG_SUSPEND_TIME_MODE(Double.class, ""),
+        BUG_ASSESSMENT_TIME_MODE(Double.class, ""),
+        CONFLICT_RESOLUTION_TIME_MODE(Double.class, ""),
+        BUG_ACTIVATION_TIME_EXPECTED_VALUE(Double.class, ""),
+        PLANNING_TIME_MODE(Double.class, ""),
+        REVIEW_TIME_MODE(Double.class, ""),
+        NUMBER_OF_DEVELOPERS(Integer.class, ""),
+        TASK_SWITCH_OVERHEAD_AFTER_ONE_HOUR(Double.class, ""),
+        MAX_TASK_SWITCH_OVERHEAD(Double.class, ""),
+        DEPENDENCY_GRAPH_CONSTELLATION(DependencyGraphConstellation.class, "");
 
 
-    private static final String[] PARAMETER_IDS = new String[] {
-        IMPLEMENTATION_SKILL_MODE,
-        REVIEW_SKILL_MODE,
-        GLOBAL_BUG_MODE,
-        CONFLICT_PROPABILITY,
-        IMPLEMENTATION_TIME_MODE,
-        BUGFIX_TASK_TIME_MODE,
-        REVIEW_REMARK_FIX_TIME_MODE,
-        GLOBAL_BUG_SUSPEND_TIME_MODE,
-        BUG_ASSESSMENT_TIME_MODE,
-        CONFLICT_RESOLUTION_TIME_MODE,
-        BUG_ACTIVATION_TIME_EXPECTED_VALUE,
-        PLANNING_TIME_MODE,
-        REVIEW_TIME_MODE,
-        NUMBER_OF_DEVELOPERS,
-        TASK_SWITCH_OVERHEAD_AFTER_ONE_HOUR,
-        MAX_TASK_SWITCH_OVERHEAD,
-        DEPENDENCY_GRAPH_CONSTELLATION,
-        "seed"
-    };
+        private final Class<?> type;
+        private final String description;
 
-    private double implementationSkillMode;
-    private double reviewSkillMode;
-    private double globalBugMode;
-    private double conflictPropability;
-    private double implementationTimeMean;
-    private double bugfixTaskTimeExpectedValue;
-    private double reviewRemarkFixTimeExpectedValue;
-    private double globalBugSuspendTimeMode;
-    private double bugAssessmentTimeMode;
-    private double conflictResolutionTimeMode;
-    private double bugActivationTimeExpectedValue;
-    private double planningTimeMode;
-    private double reviewTimeMode;
-    private int numberOfDevelopers;
-    private double taskSwitchOverheadAfterOneHour;
-    private double maxTaskSwitchOverhead;
-    private DependencyGraphConstellation dependencyGraphConstellation;
+        private ParameterType(Class<?> type, String description) {
+            this.type = type;
+            this.description = description;
+        }
 
+        public Class<?> getType() {
+            return this.type;
+        }
+
+        public void checkType(Object newValue) {
+            if (!this.type.isInstance(newValue)) {
+                throw new RuntimeException("Value " + newValue + " (" + newValue.getClass() + ") has wrong type for parameter " + this);
+            }
+        }
+    }
+
+
+    private final EnumMap<ParameterType, Object> parameters = new EnumMap<>(ParameterType.class);
     private int seed;
 
     private static final class DistributionBuilder {
@@ -157,23 +138,23 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
                     TimeSpan taskSwitchOverheadAfterOneHour,
                     TimeSpan maxTaskSwitchOverhead,
                     DependencyGraphConstellation dependencyGraphConstellation) {
-        this.implementationSkillMode = implementationSkillMode;
-        this.reviewSkillMode = reviewSkillMode;
-        this.globalBugMode = globalBugMode;
-        this.conflictPropability = conflictPropability;
-        this.implementationTimeMean = implementationTimeMode;
-        this.bugfixTaskTimeExpectedValue = bugfixTaskTimeMode;
-        this.reviewRemarkFixTimeExpectedValue = fixTimeMode;
-        this.globalBugSuspendTimeMode = globalBugSuspendTimeMode;
-        this.bugAssessmentTimeMode = bugAssessmentTimeMode;
-        this.conflictResolutionTimeMode = conflictResolutionTimeMode;
-        this.bugActivationTimeExpectedValue = bugActivationTimeExpectedValue;
-        this.planningTimeMode = planningTimeMode;
-        this.reviewTimeMode = reviewTimeMode;
-        this.numberOfDevelopers = numberOfDevelopers;
-        this.taskSwitchOverheadAfterOneHour = taskSwitchOverheadAfterOneHour.getTimeAsDouble(TimeUnit.HOURS);
-        this.maxTaskSwitchOverhead = maxTaskSwitchOverhead.getTimeAsDouble(TimeUnit.HOURS);
-        this.dependencyGraphConstellation = dependencyGraphConstellation;
+        this.parameters.put(ParameterType.IMPLEMENTATION_SKILL_MODE, implementationSkillMode);
+        this.parameters.put(ParameterType.REVIEW_SKILL_MODE, reviewSkillMode);
+        this.parameters.put(ParameterType.GLOBAL_BUG_MODE, globalBugMode);
+        this.parameters.put(ParameterType.CONFLICT_PROPABILITY, conflictPropability);
+        this.parameters.put(ParameterType.IMPLEMENTATION_TIME_MODE, implementationTimeMode);
+        this.parameters.put(ParameterType.BUGFIX_TASK_TIME_MODE, bugfixTaskTimeMode);
+        this.parameters.put(ParameterType.REVIEW_REMARK_FIX_TIME_MODE, fixTimeMode);
+        this.parameters.put(ParameterType.GLOBAL_BUG_SUSPEND_TIME_MODE, globalBugSuspendTimeMode);
+        this.parameters.put(ParameterType.BUG_ASSESSMENT_TIME_MODE, bugAssessmentTimeMode);
+        this.parameters.put(ParameterType.CONFLICT_RESOLUTION_TIME_MODE, conflictResolutionTimeMode);
+        this.parameters.put(ParameterType.BUG_ACTIVATION_TIME_EXPECTED_VALUE, bugActivationTimeExpectedValue);
+        this.parameters.put(ParameterType.PLANNING_TIME_MODE, planningTimeMode);
+        this.parameters.put(ParameterType.REVIEW_TIME_MODE, reviewTimeMode);
+        this.parameters.put(ParameterType.NUMBER_OF_DEVELOPERS, numberOfDevelopers);
+        this.parameters.put(ParameterType.TASK_SWITCH_OVERHEAD_AFTER_ONE_HOUR, taskSwitchOverheadAfterOneHour.getTimeAsDouble(TimeUnit.HOURS));
+        this.parameters.put(ParameterType.MAX_TASK_SWITCH_OVERHEAD, maxTaskSwitchOverhead.getTimeAsDouble(TimeUnit.HOURS));
+        this.parameters.put(ParameterType.DEPENDENCY_GRAPH_CONSTELLATION, dependencyGraphConstellation);
         this.seed = 764;
     }
 
@@ -211,24 +192,24 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
         final MersenneTwisterRandomGenerator r = new MersenneTwisterRandomGenerator(this.seed);
         final DistributionBuilder b = new DistributionBuilder(r, owner);
         return new Parameters(
-                        b.posNormal("implementationSkillDist", this.implementationSkillMode),
-                        b.beta("reviewSkillDist", this.reviewSkillMode),
-                        b.beta("globalBugDist", this.globalBugMode),
-                        b.bernoulli("conflictDist", this.conflictPropability),
-                        b.logNormal("implementationTimeDist", this.implementationTimeMean, this.implementationTimeMean / 2.0),
-                        b.exp("bugfixTaskTimeDist", this.bugfixTaskTimeExpectedValue),
-                        b.exp("reviewRemarkFixTimeDist", this.reviewRemarkFixTimeExpectedValue),
-                        b.posNormal("globalBugSuspendTimeDist", this.globalBugSuspendTimeMode),
-                        b.posNormal("bugAssessmentTimeDist", this.bugAssessmentTimeMode),
-                        b.posNormal("conflictResolutionTimeDist", this.conflictResolutionTimeMode),
-                        b.exp("bugActivationTimeDist", this.bugActivationTimeExpectedValue),
-                        b.posNormal("planningTimeDist", this.planningTimeMode),
-                        b.exp("reviewTimeDist", this.reviewTimeMode),
-                        this.numberOfDevelopers,
-                        new TimeSpan(this.taskSwitchOverheadAfterOneHour, TimeUnit.HOURS),
-                        new TimeSpan(this.maxTaskSwitchOverhead, TimeUnit.HOURS),
+                        b.posNormal("implementationSkillDist", this.getParamD(ParameterType.IMPLEMENTATION_SKILL_MODE)),
+                        b.beta("reviewSkillDist", this.getParamD(ParameterType.REVIEW_SKILL_MODE)),
+                        b.beta("globalBugDist", this.getParamD(ParameterType.GLOBAL_BUG_MODE)),
+                        b.bernoulli("conflictDist", this.getParamD(ParameterType.CONFLICT_PROPABILITY)),
+                        b.logNormal("implementationTimeDist", this.getParamD(ParameterType.IMPLEMENTATION_TIME_MODE), this.getParamD(ParameterType.IMPLEMENTATION_TIME_MODE) / 2.0),
+                        b.exp("bugfixTaskTimeDist", this.getParamD(ParameterType.BUGFIX_TASK_TIME_MODE)),
+                        b.exp("reviewRemarkFixTimeDist", this.getParamD(ParameterType.REVIEW_REMARK_FIX_TIME_MODE)),
+                        b.posNormal("globalBugSuspendTimeDist", this.getParamD(ParameterType.GLOBAL_BUG_SUSPEND_TIME_MODE)),
+                        b.posNormal("bugAssessmentTimeDist", this.getParamD(ParameterType.BUG_ASSESSMENT_TIME_MODE)),
+                        b.posNormal("conflictResolutionTimeDist", this.getParamD(ParameterType.CONFLICT_RESOLUTION_TIME_MODE)),
+                        b.exp("bugActivationTimeDist", this.getParamD(ParameterType.BUG_ACTIVATION_TIME_EXPECTED_VALUE)),
+                        b.posNormal("planningTimeDist", this.getParamD(ParameterType.PLANNING_TIME_MODE)),
+                        b.exp("reviewTimeDist", this.getParamD(ParameterType.REVIEW_TIME_MODE)),
+                        this.getParamI(ParameterType.NUMBER_OF_DEVELOPERS),
+                        new TimeSpan(this.getParamD(ParameterType.TASK_SWITCH_OVERHEAD_AFTER_ONE_HOUR), TimeUnit.HOURS),
+                        new TimeSpan(this.getParamD(ParameterType.MAX_TASK_SWITCH_OVERHEAD), TimeUnit.HOURS),
                         nextLong(r),
-                        this.dependencyGraphConstellation);
+                        (DependencyGraphConstellation) this.getParam(ParameterType.DEPENDENCY_GRAPH_CONSTELLATION));
     }
 
     private static long nextLong(MersenneTwisterRandomGenerator r) {
@@ -241,12 +222,12 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
         return copy;
     }
 
-    public BulkParameterFactory copyWithChangedParamMult(String paramId, double factor) {
+    public BulkParameterFactory copyWithChangedParamMult(ParameterType paramId, double factor) {
         final BulkParameterFactory copy = this.copy();
         final Object oldValue = copy.getParam(paramId);
-        if (oldValue instanceof Double) {
+        if (paramId.getType().equals(Double.class)) {
             copy.setParam(paramId, ((Double) oldValue) * factor);
-        } else if (oldValue instanceof Integer) {
+        } else if (paramId.getType().equals(Integer.class)) {
             final double dv = ((Integer) oldValue) * factor;
             final long rounded = Math.round(dv);
             if (rounded != ((Integer) oldValue).intValue()) {
@@ -260,7 +241,7 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
         return copy;
     }
 
-    public BulkParameterFactory copyWithChangedParam(String paramId, Object newValue) {
+    public BulkParameterFactory copyWithChangedParam(ParameterType paramId, Object newValue) {
         final BulkParameterFactory copy = this.copy();
         copy.setParam(paramId, newValue);
         return copy;
@@ -275,94 +256,28 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
     }
 
     public void saveData(Map<String, Object> experimentData) {
-        for (final String param : PARAMETER_IDS) {
-            experimentData.put(param, this.getParam(param));
+        for (final ParameterType param : ParameterType.values()) {
+            experimentData.put(param.toString(), this.getParam(param));
         }
+        experimentData.put("seed", this.seed);
     }
 
-    private Object getParam(String param) {
-        switch(param) {
-        case IMPLEMENTATION_SKILL_MODE: return this.implementationSkillMode;
-        case REVIEW_SKILL_MODE: return this.reviewSkillMode;
-        case GLOBAL_BUG_MODE: return this.globalBugMode;
-        case CONFLICT_PROPABILITY: return this.conflictPropability;
-        case IMPLEMENTATION_TIME_MODE: return this.implementationTimeMean;
-        case BUGFIX_TASK_TIME_MODE: return this.bugfixTaskTimeExpectedValue;
-        case REVIEW_REMARK_FIX_TIME_MODE: return this.reviewRemarkFixTimeExpectedValue;
-        case GLOBAL_BUG_SUSPEND_TIME_MODE: return this.globalBugSuspendTimeMode;
-        case BUG_ASSESSMENT_TIME_MODE: return this.bugAssessmentTimeMode;
-        case CONFLICT_RESOLUTION_TIME_MODE: return this.conflictResolutionTimeMode;
-        case BUG_ACTIVATION_TIME_EXPECTED_VALUE: return this.bugActivationTimeExpectedValue;
-        case PLANNING_TIME_MODE: return this.planningTimeMode;
-        case REVIEW_TIME_MODE: return this.reviewTimeMode;
-        case NUMBER_OF_DEVELOPERS: return this.numberOfDevelopers;
-        case TASK_SWITCH_OVERHEAD_AFTER_ONE_HOUR: return this.taskSwitchOverheadAfterOneHour;
-        case MAX_TASK_SWITCH_OVERHEAD: return this.maxTaskSwitchOverhead;
-        case DEPENDENCY_GRAPH_CONSTELLATION: return this.dependencyGraphConstellation;
-        case "seed": return this.seed;
-        default: throw new RuntimeException("invalid parameter id: " + param);
-        }
+    private Object getParam(ParameterType param) {
+        assert this.parameters.containsKey(param);
+        return this.parameters.get(param);
     }
 
-    private void setParam(String param, Object newValue) {
-        switch(param) {
-        case IMPLEMENTATION_SKILL_MODE:
-            this.implementationSkillMode = (Double) newValue;
-            break;
-        case REVIEW_SKILL_MODE:
-            this.reviewSkillMode = (Double) newValue;
-            break;
-        case GLOBAL_BUG_MODE:
-            this.globalBugMode = (Double) newValue;
-            break;
-        case CONFLICT_PROPABILITY:
-            this.conflictPropability = (Double) newValue;
-            break;
-        case IMPLEMENTATION_TIME_MODE:
-            this.implementationTimeMean = (Double) newValue;
-            break;
-        case BUGFIX_TASK_TIME_MODE:
-            this.bugfixTaskTimeExpectedValue = (Double) newValue;
-            break;
-        case REVIEW_REMARK_FIX_TIME_MODE:
-            this.reviewRemarkFixTimeExpectedValue = (Double) newValue;
-            break;
-        case GLOBAL_BUG_SUSPEND_TIME_MODE:
-            this.globalBugSuspendTimeMode = (Double) newValue;
-            break;
-        case BUG_ASSESSMENT_TIME_MODE:
-            this.bugAssessmentTimeMode = (Double) newValue;
-            break;
-        case CONFLICT_RESOLUTION_TIME_MODE:
-            this.conflictResolutionTimeMode = (Double) newValue;
-            break;
-        case BUG_ACTIVATION_TIME_EXPECTED_VALUE:
-            this.bugActivationTimeExpectedValue = (Double) newValue;
-            break;
-        case PLANNING_TIME_MODE:
-            this.planningTimeMode = (Double) newValue;
-            break;
-        case REVIEW_TIME_MODE:
-            this.reviewTimeMode = (Double) newValue;
-            break;
-        case NUMBER_OF_DEVELOPERS:
-            this.numberOfDevelopers = (Integer) newValue;
-            break;
-        case TASK_SWITCH_OVERHEAD_AFTER_ONE_HOUR:
-            this.taskSwitchOverheadAfterOneHour = (Double) newValue;
-            break;
-        case MAX_TASK_SWITCH_OVERHEAD:
-            this.maxTaskSwitchOverhead = (Double) newValue;
-            break;
-        case DEPENDENCY_GRAPH_CONSTELLATION:
-            this.dependencyGraphConstellation = (DependencyGraphConstellation) newValue;
-            break;
-        case "seed":
-            this.seed = (Integer) newValue;
-            break;
-        default:
-            throw new RuntimeException("invalid parameter id: " + param);
-        }
+    private double getParamD(ParameterType param) {
+        return (Double) this.getParam(param);
+    }
+
+    private int getParamI(ParameterType param) {
+        return (Integer) this.getParam(param);
+    }
+
+    private void setParam(ParameterType param, Object newValue) {
+        param.checkType(newValue);
+        this.parameters.put(param, newValue);
     }
 
     public void addAttributesTo(DataWriter rawResultWriter) throws IOException {
@@ -381,13 +296,6 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
     @Override
     public long getSeed() {
         return this.seed;
-    }
-
-    public List<String> getChangeableParams() {
-        final ArrayList<String> ret = new ArrayList<>(Arrays.asList(PARAMETER_IDS));
-        ret.remove(DEPENDENCY_GRAPH_CONSTELLATION);
-        ret.remove("seed");
-        return ret;
     }
 
 }

@@ -12,6 +12,7 @@ import org.junit.Test;
 import de.unihannover.se.processSimulation.common.ParametersFactory;
 import de.unihannover.se.processSimulation.common.ReviewMode;
 import de.unihannover.se.processSimulation.dataGenerator.BulkParameterFactory;
+import de.unihannover.se.processSimulation.dataGenerator.BulkParameterFactory.ParameterType;
 import desmoj.core.simulator.CoroutineModel;
 import desmoj.core.simulator.Experiment;
 import desmoj.core.simulator.TimeInstant;
@@ -71,13 +72,13 @@ public class ReferenceBehaviourTest {
     public void testWhenAllRelevantEffectsAreOffThereIsNoDifference() throws Exception {
         final ParametersFactory p = BulkParameterFactory
                         .forCommercial()
-                        .copyWithChangedParam(BulkParameterFactory.IMPLEMENTATION_SKILL_MODE, 0.0)
-                        .copyWithChangedParam(BulkParameterFactory.NUMBER_OF_DEVELOPERS, 2)
-                        .copyWithChangedParam(BulkParameterFactory.GLOBAL_BUG_MODE, 0.0)
-                        .copyWithChangedParam(BulkParameterFactory.CONFLICT_PROPABILITY, 0.0)
-                        .copyWithChangedParam(BulkParameterFactory.TASK_SWITCH_OVERHEAD_AFTER_ONE_HOUR, 0.0)
-                        .copyWithChangedParam(BulkParameterFactory.MAX_TASK_SWITCH_OVERHEAD, 0.0)
-                        .copyWithChangedParam(BulkParameterFactory.DEPENDENCY_GRAPH_CONSTELLATION, DependencyGraphConstellation.NO_DEPENDENCIES);
+                        .copyWithChangedParam(ParameterType.IMPLEMENTATION_SKILL_MODE, 0.0)
+                        .copyWithChangedParam(ParameterType.NUMBER_OF_DEVELOPERS, 2)
+                        .copyWithChangedParam(ParameterType.GLOBAL_BUG_MODE, 0.0)
+                        .copyWithChangedParam(ParameterType.CONFLICT_PROPABILITY, 0.0)
+                        .copyWithChangedParam(ParameterType.TASK_SWITCH_OVERHEAD_AFTER_ONE_HOUR, 0.0)
+                        .copyWithChangedParam(ParameterType.MAX_TASK_SWITCH_OVERHEAD, 0.0)
+                        .copyWithChangedParam(ParameterType.DEPENDENCY_GRAPH_CONSTELLATION, DependencyGraphConstellation.NO_DEPENDENCIES);
         final RealProcessingModel modelPre = runExperiment(p, ReviewMode.PRE_COMMIT);
         final RealProcessingModel modelPost = runExperiment(p, ReviewMode.POST_COMMIT);
         assertThat(modelPre.getFinishedStoryPoints(), isSimilarTo(modelPost.getFinishedStoryPoints()));
@@ -87,13 +88,13 @@ public class ReferenceBehaviourTest {
     public void testWithLotsOfDependenciesPreCommitHasHigherCycleTime() throws Exception {
         final ParametersFactory p = BulkParameterFactory
                         .forCommercial()
-                        .copyWithChangedParam(BulkParameterFactory.IMPLEMENTATION_SKILL_MODE, 0.0)
-                        .copyWithChangedParam(BulkParameterFactory.NUMBER_OF_DEVELOPERS, 2)
-                        .copyWithChangedParam(BulkParameterFactory.GLOBAL_BUG_MODE, 0.0)
-                        .copyWithChangedParam(BulkParameterFactory.CONFLICT_PROPABILITY, 0.0)
-                        .copyWithChangedParam(BulkParameterFactory.TASK_SWITCH_OVERHEAD_AFTER_ONE_HOUR, 0.0)
-                        .copyWithChangedParam(BulkParameterFactory.MAX_TASK_SWITCH_OVERHEAD, 0.0)
-                        .copyWithChangedParam(BulkParameterFactory.DEPENDENCY_GRAPH_CONSTELLATION, DependencyGraphConstellation.CHAINS);
+                        .copyWithChangedParam(ParameterType.IMPLEMENTATION_SKILL_MODE, 0.0)
+                        .copyWithChangedParam(ParameterType.NUMBER_OF_DEVELOPERS, 2)
+                        .copyWithChangedParam(ParameterType.GLOBAL_BUG_MODE, 0.0)
+                        .copyWithChangedParam(ParameterType.CONFLICT_PROPABILITY, 0.0)
+                        .copyWithChangedParam(ParameterType.TASK_SWITCH_OVERHEAD_AFTER_ONE_HOUR, 0.0)
+                        .copyWithChangedParam(ParameterType.MAX_TASK_SWITCH_OVERHEAD, 0.0)
+                        .copyWithChangedParam(ParameterType.DEPENDENCY_GRAPH_CONSTELLATION, DependencyGraphConstellation.CHAINS);
         final RealProcessingModel modelPre = runExperiment(p, ReviewMode.PRE_COMMIT);
         final RealProcessingModel modelPost = runExperiment(p, ReviewMode.POST_COMMIT);
         assertThat(modelPre.getStoryCycleTimeMean(), isSignificantlyLargerThan(modelPost.getStoryCycleTimeMean()));
@@ -103,14 +104,14 @@ public class ReferenceBehaviourTest {
     public void testLotsOfGlobalBugsMakePreCommitBetter() throws Exception {
         final ParametersFactory p = BulkParameterFactory
                         .forCommercial()
-                        .copyWithChangedParam(BulkParameterFactory.IMPLEMENTATION_SKILL_MODE, 0.0)
-                        .copyWithChangedParam(BulkParameterFactory.NUMBER_OF_DEVELOPERS, 2)
-                        .copyWithChangedParam(BulkParameterFactory.GLOBAL_BUG_MODE, 1.0)
-                        .copyWithChangedParam(BulkParameterFactory.GLOBAL_BUG_SUSPEND_TIME_MODE, 10.0)
-                        .copyWithChangedParam(BulkParameterFactory.CONFLICT_PROPABILITY, 0.0)
-                        .copyWithChangedParam(BulkParameterFactory.TASK_SWITCH_OVERHEAD_AFTER_ONE_HOUR, 0.0)
-                        .copyWithChangedParam(BulkParameterFactory.MAX_TASK_SWITCH_OVERHEAD, 0.0)
-                        .copyWithChangedParam(BulkParameterFactory.DEPENDENCY_GRAPH_CONSTELLATION, DependencyGraphConstellation.NO_DEPENDENCIES);
+                        .copyWithChangedParam(ParameterType.IMPLEMENTATION_SKILL_MODE, 0.0)
+                        .copyWithChangedParam(ParameterType.NUMBER_OF_DEVELOPERS, 2)
+                        .copyWithChangedParam(ParameterType.GLOBAL_BUG_MODE, 1.0)
+                        .copyWithChangedParam(ParameterType.GLOBAL_BUG_SUSPEND_TIME_MODE, 10.0)
+                        .copyWithChangedParam(ParameterType.CONFLICT_PROPABILITY, 0.0)
+                        .copyWithChangedParam(ParameterType.TASK_SWITCH_OVERHEAD_AFTER_ONE_HOUR, 0.0)
+                        .copyWithChangedParam(ParameterType.MAX_TASK_SWITCH_OVERHEAD, 0.0)
+                        .copyWithChangedParam(ParameterType.DEPENDENCY_GRAPH_CONSTELLATION, DependencyGraphConstellation.NO_DEPENDENCIES);
         final RealProcessingModel modelPre = runExperiment(p, ReviewMode.PRE_COMMIT);
         final RealProcessingModel modelPost = runExperiment(p, ReviewMode.POST_COMMIT);
         assertThat(modelPre.getFinishedStoryPoints(), isSignificantlyLargerThan(modelPost.getFinishedStoryPoints()));
@@ -120,14 +121,14 @@ public class ReferenceBehaviourTest {
     public void testLotsOfConflictsMakePostCommitBetter() throws Exception {
         final ParametersFactory p = BulkParameterFactory
                         .forCommercial()
-                        .copyWithChangedParam(BulkParameterFactory.IMPLEMENTATION_SKILL_MODE, 0.0)
-                        .copyWithChangedParam(BulkParameterFactory.NUMBER_OF_DEVELOPERS, 10)
-                        .copyWithChangedParam(BulkParameterFactory.GLOBAL_BUG_MODE, 0.0)
-                        .copyWithChangedParam(BulkParameterFactory.CONFLICT_PROPABILITY, 1.0)
-                        .copyWithChangedParam(BulkParameterFactory.CONFLICT_RESOLUTION_TIME_MODE, 99.0)
-                        .copyWithChangedParam(BulkParameterFactory.TASK_SWITCH_OVERHEAD_AFTER_ONE_HOUR, 0.0)
-                        .copyWithChangedParam(BulkParameterFactory.MAX_TASK_SWITCH_OVERHEAD, 0.0)
-                        .copyWithChangedParam(BulkParameterFactory.DEPENDENCY_GRAPH_CONSTELLATION, DependencyGraphConstellation.NO_DEPENDENCIES);
+                        .copyWithChangedParam(ParameterType.IMPLEMENTATION_SKILL_MODE, 0.0)
+                        .copyWithChangedParam(ParameterType.NUMBER_OF_DEVELOPERS, 10)
+                        .copyWithChangedParam(ParameterType.GLOBAL_BUG_MODE, 0.0)
+                        .copyWithChangedParam(ParameterType.CONFLICT_PROPABILITY, 1.0)
+                        .copyWithChangedParam(ParameterType.CONFLICT_RESOLUTION_TIME_MODE, 99.0)
+                        .copyWithChangedParam(ParameterType.TASK_SWITCH_OVERHEAD_AFTER_ONE_HOUR, 0.0)
+                        .copyWithChangedParam(ParameterType.MAX_TASK_SWITCH_OVERHEAD, 0.0)
+                        .copyWithChangedParam(ParameterType.DEPENDENCY_GRAPH_CONSTELLATION, DependencyGraphConstellation.NO_DEPENDENCIES);
         final RealProcessingModel modelPre = runExperiment(p, ReviewMode.PRE_COMMIT);
         final RealProcessingModel modelPost = runExperiment(p, ReviewMode.POST_COMMIT);
         assertThat(modelPost.getFinishedStoryPoints(), isSignificantlyLargerThan(modelPre.getFinishedStoryPoints()));
@@ -137,13 +138,13 @@ public class ReferenceBehaviourTest {
     public void testHighTaskSwitchOverheadAndLotsOfDependenciesMakePostCommitBetter() throws Exception {
         final ParametersFactory p = BulkParameterFactory
                         .forCommercial()
-                        .copyWithChangedParam(BulkParameterFactory.IMPLEMENTATION_SKILL_MODE, 0.0)
-                        .copyWithChangedParam(BulkParameterFactory.NUMBER_OF_DEVELOPERS, 2)
-                        .copyWithChangedParam(BulkParameterFactory.GLOBAL_BUG_MODE, 0.0)
-                        .copyWithChangedParam(BulkParameterFactory.CONFLICT_PROPABILITY, 1.0)
-                        .copyWithChangedParam(BulkParameterFactory.TASK_SWITCH_OVERHEAD_AFTER_ONE_HOUR, 1.0)
-                        .copyWithChangedParam(BulkParameterFactory.MAX_TASK_SWITCH_OVERHEAD, 2.0)
-                        .copyWithChangedParam(BulkParameterFactory.DEPENDENCY_GRAPH_CONSTELLATION, DependencyGraphConstellation.SIMPLISTIC);
+                        .copyWithChangedParam(ParameterType.IMPLEMENTATION_SKILL_MODE, 0.0)
+                        .copyWithChangedParam(ParameterType.NUMBER_OF_DEVELOPERS, 2)
+                        .copyWithChangedParam(ParameterType.GLOBAL_BUG_MODE, 0.0)
+                        .copyWithChangedParam(ParameterType.CONFLICT_PROPABILITY, 1.0)
+                        .copyWithChangedParam(ParameterType.TASK_SWITCH_OVERHEAD_AFTER_ONE_HOUR, 1.0)
+                        .copyWithChangedParam(ParameterType.MAX_TASK_SWITCH_OVERHEAD, 2.0)
+                        .copyWithChangedParam(ParameterType.DEPENDENCY_GRAPH_CONSTELLATION, DependencyGraphConstellation.SIMPLISTIC);
         final RealProcessingModel modelPre = runExperiment(p, ReviewMode.PRE_COMMIT);
         final RealProcessingModel modelPost = runExperiment(p, ReviewMode.POST_COMMIT);
         assertThat(modelPost.getFinishedStoryPoints(), isSignificantlyLargerThan(modelPre.getFinishedStoryPoints()));
@@ -155,13 +156,13 @@ public class ReferenceBehaviourTest {
         //TEST
         final ParametersFactory p = BulkParameterFactory
                         .forCommercial()
-                        .copyWithChangedParam(BulkParameterFactory.IMPLEMENTATION_SKILL_MODE, 0.16)
-                        .copyWithChangedParam(BulkParameterFactory.NUMBER_OF_DEVELOPERS, 2)
-                        .copyWithChangedParam(BulkParameterFactory.GLOBAL_BUG_MODE, 0.0)
-                        .copyWithChangedParam(BulkParameterFactory.CONFLICT_PROPABILITY, 0.0)
-                        .copyWithChangedParam(BulkParameterFactory.TASK_SWITCH_OVERHEAD_AFTER_ONE_HOUR, 0.0)
-                        .copyWithChangedParam(BulkParameterFactory.MAX_TASK_SWITCH_OVERHEAD, 0.0)
-                        .copyWithChangedParam(BulkParameterFactory.DEPENDENCY_GRAPH_CONSTELLATION, DependencyGraphConstellation.NO_DEPENDENCIES);
+                        .copyWithChangedParam(ParameterType.IMPLEMENTATION_SKILL_MODE, 0.16)
+                        .copyWithChangedParam(ParameterType.NUMBER_OF_DEVELOPERS, 2)
+                        .copyWithChangedParam(ParameterType.GLOBAL_BUG_MODE, 0.0)
+                        .copyWithChangedParam(ParameterType.CONFLICT_PROPABILITY, 0.0)
+                        .copyWithChangedParam(ParameterType.TASK_SWITCH_OVERHEAD_AFTER_ONE_HOUR, 0.0)
+                        .copyWithChangedParam(ParameterType.MAX_TASK_SWITCH_OVERHEAD, 0.0)
+                        .copyWithChangedParam(ParameterType.DEPENDENCY_GRAPH_CONSTELLATION, DependencyGraphConstellation.NO_DEPENDENCIES);
         final RealProcessingModel modelPre = runExperiment(p, ReviewMode.PRE_COMMIT);
         //TEST
         System.out.println("-------------------------");
@@ -184,7 +185,7 @@ public class ReferenceBehaviourTest {
     public void testNoReviewIsBetterThanReviewWhenThereAreNoBugs() throws Exception {
         final ParametersFactory p = BulkParameterFactory
                         .forCommercial()
-                        .copyWithChangedParam(BulkParameterFactory.IMPLEMENTATION_SKILL_MODE, 0.0);
+                        .copyWithChangedParam(ParameterType.IMPLEMENTATION_SKILL_MODE, 0.0);
         final RealProcessingModel modelPre = runExperiment(p, ReviewMode.PRE_COMMIT);
         final RealProcessingModel modelPost = runExperiment(p, ReviewMode.POST_COMMIT);
         final RealProcessingModel modelNo = runExperiment(p, ReviewMode.NO_REVIEW);

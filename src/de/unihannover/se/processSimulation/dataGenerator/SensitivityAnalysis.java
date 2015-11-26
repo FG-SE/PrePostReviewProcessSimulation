@@ -3,6 +3,8 @@ package de.unihannover.se.processSimulation.dataGenerator;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import de.unihannover.se.processSimulation.dataGenerator.BulkParameterFactory.ParameterType;
+
 public class SensitivityAnalysis {
 
     private static final double FACTOR_UP = 1.1;
@@ -16,7 +18,7 @@ public class SensitivityAnalysis {
         try (DataWriter dataWriter = new ArffWriter(new FileWriter("sensitivityAnalysis.arff"), "sensitivityAnalysis")) {
             p.addAttributesTo(dataWriter);
             //TEST
-            p = p.copyWithChangedParam(BulkParameterFactory.NUMBER_OF_DEVELOPERS, 3);
+            p = p.copyWithChangedParam(ParameterType.NUMBER_OF_DEVELOPERS, 3);
             DataGenerator.registerResultAttributes(dataWriter);
             performRandomizedRuns(dataWriter, p, "Base");
 //            for (final String valueWithChange : p.getChangeableParams()) {
@@ -30,7 +32,7 @@ public class SensitivityAnalysis {
 
     }
 
-    private static void runComparison(DataWriter dataWriter, BulkParameterFactory baseParams, String valueWithChange, boolean up) throws IOException {
+    private static void runComparison(DataWriter dataWriter, BulkParameterFactory baseParams, ParameterType valueWithChange, boolean up) throws IOException {
 
         final BulkParameterFactory p = baseParams.copyWithChangedParamMult(valueWithChange, up ? FACTOR_UP : FACTOR_DOWN);
 
