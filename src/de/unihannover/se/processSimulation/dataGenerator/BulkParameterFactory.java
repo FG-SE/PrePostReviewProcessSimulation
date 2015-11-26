@@ -58,6 +58,27 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
                 throw new RuntimeException("Value " + newValue + " (" + newValue.getClass() + ") has wrong type for parameter " + this);
             }
         }
+
+        public String getDescription() {
+            return this.description;
+        }
+
+        public Object parse(String param) {
+            if (this.type.equals(Double.class)) {
+                return Double.valueOf(param);
+            } else if (this.type.equals(Integer.class)) {
+                return Integer.valueOf(param);
+            } else if (this.type.isEnum()) {
+                for (final Object enumValue : this.type.getEnumConstants()) {
+                    if (((Enum<?>) enumValue).name().equals(param)) {
+                        return enumValue;
+                    }
+                }
+                throw new RuntimeException("Unknown enum constant " + param + " in " + this.type);
+            } else {
+                throw new RuntimeException("Invalid type in parameter " + this);
+            }
+        }
     }
 
 
@@ -262,7 +283,7 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
         experimentData.put("seed", this.seed);
     }
 
-    private Object getParam(ParameterType param) {
+    public Object getParam(ParameterType param) {
         assert this.parameters.containsKey(param);
         return this.parameters.get(param);
     }

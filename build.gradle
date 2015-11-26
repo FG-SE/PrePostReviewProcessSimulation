@@ -27,7 +27,6 @@ repositories {
 }
 
 dependencies {
-    //compile 'desmoj:desmoj:2.4.2:complete-bin'
-	compile 'desmoj:desmoj:2.5.1:bin', 'co.paralleluniverse:quasar-core:0.7.3:jdk8', ':JRI', ':JRIEngine', ':REngine'
+	compile 'desmoj:desmoj:2.5.1:bin', 'co.paralleluniverse:quasar-core:0.7.3:jdk8', ':JRI', ':JRIEngine', ':REngine', 'org.eclipse.jetty:jetty-server:9.3.+'
     testCompile 'junit:junit:4.+', 'hamcrest:hamcrest-core:1.3'
 }

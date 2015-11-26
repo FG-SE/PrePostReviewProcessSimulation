@@ -1,6 +1,203 @@
 package de.unihannover.se.processSimulation.interactive;
 
-public class ServerMain {
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.AbstractHandler;
+
+import de.unihannover.se.processSimulation.common.ReviewMode;
+import de.unihannover.se.processSimulation.dataGenerator.BulkParameterFactory;
+import de.unihannover.se.processSimulation.dataGenerator.BulkParameterFactory.ParameterType;
+import de.unihannover.se.processSimulation.dataGenerator.ExperimentResult;
+import de.unihannover.se.processSimulation.dataGenerator.ExperimentRun;
+import de.unihannover.se.processSimulation.dataGenerator.ExperimentRun.SingleRunCallback;
+import de.unihannover.se.processSimulation.dataGenerator.StatisticsUtil;
+
+public class ServerMain extends AbstractHandler {
+
+    @Override
+    public void handle(String target,
+                       Request baseRequest,
+                       HttpServletRequest request,
+                       HttpServletResponse response)
+        throws IOException, ServletException {
+        response.setContentType("text/html;charset=utf-8");
+        response.setStatus(HttpServletResponse.SC_OK);
+        baseRequest.setHandled(true);
+
+        final PrintWriter w = response.getWriter();
+        this.printHeader(w);
+        final BulkParameterFactory f = this.getParameters(w, request);
+        final int minRuns = this.getNumberParam(w, request, "minRuns", 10);
+        final int maxRuns = this.getNumberParam(w, request, "maxRuns", 30);
+        this.printInputParameters(w, f, minRuns, maxRuns);
+        if (this.shallSimulate(request)) {
+            this.simulateAndPrintOutput(w, f, minRuns, maxRuns);
+        }
+        this.printFooter(w);
+    }
+
+    private boolean shallSimulate(HttpServletRequest request) {
+        return request.getParameter("minRuns") != null;
+    }
+
+    private int getNumberParam(PrintWriter w, HttpServletRequest request, String name, int defaultValue) {
+        final String value = request.getParameter(name);
+        if (value == null || value.isEmpty()) {
+            return defaultValue;
+        }
+        try {
+            return Integer.parseInt(value);
+        } catch (final NumberFormatException e) {
+            this.printParseError(w, name, e);
+            return defaultValue;
+        }
+    }
+
+    private BulkParameterFactory getParameters(PrintWriter w, HttpServletRequest request) {
+        BulkParameterFactory f = BulkParameterFactory.forCommercial();
+        for (final ParameterType t : ParameterType.values()) {
+            final String param = request.getParameter(t.name());
+            if (param != null && !param.isEmpty()) {
+                try {
+                    f = f.copyWithChangedParam(t, t.parse(param));
+                } catch (final RuntimeException e) {
+                    this.printParseError(w, t.toString(), e);
+                }
+            }
+        }
+        return f;
+    }
+
+    private void printParseError(PrintWriter w, String t, final RuntimeException e) {
+        w.println("<b>Fehler beim Parsen von Parameter " + t + "</b><br/>");
+        w.println(e.toString());
+        w.println("<br/>");
+    }
+
+    private void printHeader(final PrintWriter w) {
+        w.println("<html><head><title>Pre/Post commit review comparison - Process simulation</title></head><body>");
+        w.println("<h1>Pre/Post commit review comparison - Process simulation</h1>");
+    }
+
+    private void printFooter(final PrintWriter w) {
+        w.println("</body></html>");
+    }
+
+    private void printInputParameters(final PrintWriter w, BulkParameterFactory f, int minRuns, int maxRuns) {
+        w.println("<h2>Input parameters</h2>");
+        w.println("<form action=\".\">");
+        w.println("<table>");
+        for (final ParameterType t : ParameterType.values()) {
+            w.println("<tr><td>");
+            w.println(t.toString());
+            w.println("</td><td>");
+            w.println(this.getInputFor(t, f));
+            w.println("</td><td>");
+            w.println(t.getDescription());
+            w.println("</td></tr>");
+        }
+
+        w.println("<tr><td>Min number of runs</td><td><input name=\"minRuns\" value=\"" + minRuns + "\" type=\"number\"/></td><td></td></tr>");
+        w.println("<tr><td>Max number of runs</td><td><input name=\"maxRuns\" value=\"" + maxRuns + "\" type=\"number\"/></td><td></td></tr>");
+
+        w.println("</table>");
+        w.println("<button type=\"submit\">Start simulation</button>");
+        w.println("</form>");
+    }
+
+    private String getInputFor(ParameterType t, BulkParameterFactory f) {
+        if (!t.getType().isEnum()) {
+            return "<input name=\"" + t.name() + "\" value=\"" + f.getParam(t) + "\" type=\"number\" />";
+        } else {
+            final StringBuilder ret = new StringBuilder();
+            ret.append("<select name=\"").append(t.name()).append("\">");
+            for (final Object o : t.getType().getEnumConstants()) {
+                if (o.equals(f.getParam(t))) {
+                    ret.append("<option selected=\"selected\">");
+                } else {
+                    ret.append("<option>");
+                }
+                ret.append(o.toString()).append("</option>");
+            }
+            ret.append("</select>");
+            return ret.toString();
+        }
+    }
+
+    private void simulateAndPrintOutput(PrintWriter w, BulkParameterFactory f, int minRuns, int maxRuns) {
+        w.println("<h2>Simulation output</h2>");
+
+        final StringBuilder detailsTable = new StringBuilder();
+        final AtomicInteger count = new AtomicInteger(1);
+        detailsTable.append("<table border=\"1\">");
+        detailsTable.append("<tr><th>#</th><th colspan=\"3\">Story points</th><th colspan=\"3\">Cycle time</th><th colspan=\"3\">Remaining bugs</th></tr>\n");
+        detailsTable.append("<tr><th></th><th>no</th><th>pre</th><th>post</th><th>no</th><th>pre</th><th>post</th><th>no</th><th>pre</th><th>post</th></tr>\n");
+        final SingleRunCallback detailsCallback = new SingleRunCallback() {
+            @Override
+            public void handleResult(ExperimentResult no, ExperimentResult pre, ExperimentResult post) {
+                System.err.println("run " + count + " finished");
+                detailsTable.append("<tr>");
+                detailsTable.append("<td>").append(count).append("</td>");
+                detailsTable.append("<td>").append(no.getFinishedStoryPoints()).append("</td>");
+                detailsTable.append("<td>").append(pre.getFinishedStoryPoints()).append("</td>");
+                detailsTable.append("<td>").append(post.getFinishedStoryPoints()).append("</td>");
+                detailsTable.append("<td>").append(no.getStoryCycleTimeMean()).append("</td>");
+                detailsTable.append("<td>").append(pre.getStoryCycleTimeMean()).append("</td>");
+                detailsTable.append("<td>").append(post.getStoryCycleTimeMean()).append("</td>");
+                detailsTable.append("<td>").append(no.getRemainingBugCount()).append("</td>");
+                detailsTable.append("<td>").append(pre.getRemainingBugCount()).append("</td>");
+                detailsTable.append("<td>").append(post.getRemainingBugCount()).append("</td>");
+                detailsTable.append("</tr>");
+                count.incrementAndGet();
+            }
+        };
+
+        final ExperimentRun result = ExperimentRun.perform(f, minRuns, maxRuns, detailsCallback);
+
+        w.println("Summary result: " + result.getSummary() + "<br/>");
+        if (!result.isSummaryStatisticallySignificant()) {
+            w.println("Summary result not statistically significant<br/>");
+        }
+        w.println("Median finished stories (best alternative): " + result.getFinishedStoryMedian() + "<br/>");
+        w.println("Median difference pre/post story points: " + result.getFactorStoryPoints() + " %<br/>");
+        w.println("Median difference pre/post remaining bugs: " + result.getFactorBugs() + " %<br/>");
+        w.println("Median difference pre/post cycle time: " + result.getFactorCycleTime() + " %<br/>");
+        w.println("<br/>");
+
+        detailsTable.append("<tr>");
+        detailsTable.append("<td>").append(count).append("</td>");
+        detailsTable.append("<td>").append(result.getFinishedStoryPointsMedian(ReviewMode.NO_REVIEW)).append("</td>");
+        detailsTable.append("<td>").append(result.getFinishedStoryPointsMedian(ReviewMode.PRE_COMMIT)).append("</td>");
+        detailsTable.append("<td>").append(result.getFinishedStoryPointsMedian(ReviewMode.POST_COMMIT)).append("</td>");
+        detailsTable.append("<td>").append(result.getStoryCycleTimeMeanMedian(ReviewMode.NO_REVIEW)).append("</td>");
+        detailsTable.append("<td>").append(result.getStoryCycleTimeMeanMedian(ReviewMode.PRE_COMMIT)).append("</td>");
+        detailsTable.append("<td>").append(result.getStoryCycleTimeMeanMedian(ReviewMode.POST_COMMIT)).append("</td>");
+        detailsTable.append("<td>").append(result.getRemainingBugCountMedian(ReviewMode.NO_REVIEW)).append("</td>");
+        detailsTable.append("<td>").append(result.getRemainingBugCountMedian(ReviewMode.PRE_COMMIT)).append("</td>");
+        detailsTable.append("<td>").append(result.getRemainingBugCountMedian(ReviewMode.POST_COMMIT)).append("</td>");
+        detailsTable.append("</tr>");
+        detailsTable.append("</table>");
+        w.println(detailsTable);
+    }
+
+    public static void main(String[] args) throws Exception {
+        final Server server = new Server(8080);
+        server.setHandler(new ServerMain());
+
+        server.start();
+        server.join();
+
+        StatisticsUtil.close();
+    }
+}
 
 //    public static void main(final String[] args) throws IOException {
 //        final Properties settings = loadSettings(args[0]);
@@ -24,4 +221,4 @@ public class ServerMain {
 //        }
 //    }
 
-}
+
