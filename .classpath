@@ -3,7 +3,7 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="C:/workspacePromotion/ProcessSimulation/lib/desmoj-2.5.1-bin.jar"/>
+	<classpathentry kind="lib" path="C:/workspacePromotion/ProcessSimulation/lib/desmoj-2.5.1b-bin.jar"/>
 	<classpathentry kind="lib" path="C:/Users/ich/.gradle/caches/modules-2/files-2.1/co.paralleluniverse/quasar-core/0.7.3/700f4769e54b9363d19b67f8d0913b1b76fae325/quasar-core-0.7.3-jdk8.jar" sourcepath="C:/Users/ich/.gradle/caches/modules-2/files-2.1/co.paralleluniverse/quasar-core/0.7.3/fc71859a3214606c561c97766f43aa632a0dd583/quasar-core-0.7.3-sources.jar"/>
 	<classpathentry kind="lib" path="C:/workspacePromotion/ProcessSimulation/lib/JRI.jar"/>
 	<classpathentry kind="lib" path="C:/workspacePromotion/ProcessSimulation/lib/JRIEngine.jar"/>
