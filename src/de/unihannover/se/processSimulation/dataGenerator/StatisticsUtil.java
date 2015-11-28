@@ -26,7 +26,9 @@ public class StatisticsUtil {
             final double median = rengine.parseAndEval("median(x)").asDouble();
             final double lower = p / 2.0;
             final double upper = 1.0 - lower;
-            final REXP confIntv = rengine.parseAndEval("sort(x)[qbinom(c(" + lower + "," + upper + "), length(x), 0.5)]");
+            final REXP confIntv = rengine.parseAndEval("sort(x)[c(max(1,qbinom(" + lower + ", length(x), 0.5)),qbinom(" + upper + ", length(x), 0.5))]");
+            //When the array is really short, the intended p value can possibly not be reached. This is not checked here
+            //  and has to be taken care of by the researcher.
             return new MedianWithConfidenceInterval(median, confIntv.asDoubles());
         } catch (final REngineException | REXPMismatchException e) {
             throw new RuntimeException(e);

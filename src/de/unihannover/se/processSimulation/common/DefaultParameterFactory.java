@@ -36,7 +36,7 @@ public class DefaultParameterFactory extends ParametersFactory {
                         new ContDistConstant(owner, "bugActivationTimeDist", 160, true, true),
                         new ContDistConstant(owner, "planningTimeDist", 8.0, true, true),
                         new ContDistConstant(owner, "reviewTimeDist", 1.0, true, true),
-                        2,
+                        this.getNumberOfDevelopers(),
                         new TimeSpan(5, TimeUnit.MINUTES),
                         new TimeSpan(1, TimeUnit.HOURS),
                         this.getSeed(),
@@ -48,4 +48,8 @@ public class DefaultParameterFactory extends ParametersFactory {
         return 8654;
     }
 
+    @Override
+    public int getNumberOfDevelopers() {
+        return 2;
+    }
 }

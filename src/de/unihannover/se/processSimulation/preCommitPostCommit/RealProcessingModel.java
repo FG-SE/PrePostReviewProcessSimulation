@@ -104,7 +104,7 @@ public class RealProcessingModel extends Model {
             d.activate();
         }
         //reset after some time, so that starting effects are not measured
-        new ExternalEventReset(this, true).scheduleNoPreempt(new TimeInstant(HOURS_TO_RESET, TimeUnit.HOURS));
+        new ExternalEventReset(this, true).schedule(new TimeInstant(HOURS_TO_RESET, TimeUnit.HOURS));
     }
 
     public Board getBoard() {

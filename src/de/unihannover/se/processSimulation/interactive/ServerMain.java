@@ -15,9 +15,12 @@ import org.eclipse.jetty.server.handler.AbstractHandler;
 import de.unihannover.se.processSimulation.common.ReviewMode;
 import de.unihannover.se.processSimulation.dataGenerator.BulkParameterFactory;
 import de.unihannover.se.processSimulation.dataGenerator.BulkParameterFactory.ParameterType;
+import de.unihannover.se.processSimulation.dataGenerator.DataGenerator;
 import de.unihannover.se.processSimulation.dataGenerator.ExperimentResult;
 import de.unihannover.se.processSimulation.dataGenerator.ExperimentRun;
 import de.unihannover.se.processSimulation.dataGenerator.ExperimentRun.SingleRunCallback;
+import de.unihannover.se.processSimulation.dataGenerator.ExperimentRunSettings;
+import de.unihannover.se.processSimulation.dataGenerator.ExperimentRunSettings.ExperimentRunParameters;
 import de.unihannover.se.processSimulation.dataGenerator.StatisticsUtil;
 
 public class ServerMain extends AbstractHandler {
@@ -35,30 +38,16 @@ public class ServerMain extends AbstractHandler {
         final PrintWriter w = response.getWriter();
         this.printHeader(w);
         final BulkParameterFactory f = this.getParameters(w, request);
-        final int minRuns = this.getNumberParam(w, request, "minRuns", 10);
-        final int maxRuns = this.getNumberParam(w, request, "maxRuns", 30);
-        this.printInputParameters(w, f, minRuns, maxRuns);
+        final ExperimentRunSettings s = this.getExperimentSettings(w, request);
+        this.printInputParameters(w, f, s);
         if (this.shallSimulate(request)) {
-            this.simulateAndPrintOutput(w, f, minRuns, maxRuns);
+            this.simulateAndPrintOutput(w, f, s);
         }
         this.printFooter(w);
     }
 
     private boolean shallSimulate(HttpServletRequest request) {
-        return request.getParameter("minRuns") != null;
-    }
-
-    private int getNumberParam(PrintWriter w, HttpServletRequest request, String name, int defaultValue) {
-        final String value = request.getParameter(name);
-        if (value == null || value.isEmpty()) {
-            return defaultValue;
-        }
-        try {
-            return Integer.parseInt(value);
-        } catch (final NumberFormatException e) {
-            this.printParseError(w, name, e);
-            return defaultValue;
-        }
+        return request.getParameter(ExperimentRunParameters.MIN_RUNS.name()) != null;
     }
 
     private BulkParameterFactory getParameters(PrintWriter w, HttpServletRequest request) {
@@ -76,6 +65,21 @@ public class ServerMain extends AbstractHandler {
         return f;
     }
 
+    private ExperimentRunSettings getExperimentSettings(PrintWriter w, HttpServletRequest request) {
+        ExperimentRunSettings s = ExperimentRunSettings.defaultSettings();
+        for (final ExperimentRunParameters t : ExperimentRunParameters.values()) {
+            final String param = request.getParameter(t.name());
+            if (param != null && !param.isEmpty()) {
+                try {
+                    s = s.copyWithChangedParam(t, Double.parseDouble(param));
+                } catch (final RuntimeException e) {
+                    this.printParseError(w, t.toString(), e);
+                }
+            }
+        }
+        return s;
+    }
+
     private void printParseError(PrintWriter w, String t, final RuntimeException e) {
         w.println("<b>Fehler beim Parsen von Parameter " + t + "</b><br/>");
         w.println(e.toString());
@@ -91,9 +95,9 @@ public class ServerMain extends AbstractHandler {
         w.println("</body></html>");
     }
 
-    private void printInputParameters(final PrintWriter w, BulkParameterFactory f, int minRuns, int maxRuns) {
-        w.println("<h2>Input parameters</h2>");
+    private void printInputParameters(final PrintWriter w, BulkParameterFactory f, ExperimentRunSettings s) {
         w.println("<form action=\".\">");
+        w.println("<h2>Input parameters</h2>");
         w.println("<table>");
         for (final ParameterType t : ParameterType.values()) {
             w.println("<tr><td>");
@@ -104,19 +108,25 @@ public class ServerMain extends AbstractHandler {
             w.println(t.getDescription());
             w.println("</td></tr>");
         }
-
-        w.println("<tr><td>Min number of runs</td><td><input name=\"minRuns\" value=\"" + minRuns + "\" type=\"number\"/></td><td></td></tr>");
-        w.println("<tr><td>Max number of runs</td><td><input name=\"maxRuns\" value=\"" + maxRuns + "\" type=\"number\"/></td><td></td></tr>");
-
+        w.println("</table>");
+        w.println("<h2>Experiment settings</h2>");
+        w.println("<table>");
+        for (final ExperimentRunParameters t : ExperimentRunParameters.values()) {
+            w.println("<tr><td>");
+            w.println(t.toString());
+            w.println("</td><td>");
+            w.println(this.getInputFor(t, s));
+            w.println("</td><td>");
+            w.println(t.getDescription());
+            w.println("</td></tr>");
+        }
         w.println("</table>");
         w.println("<button type=\"submit\">Start simulation</button>");
         w.println("</form>");
     }
 
     private String getInputFor(ParameterType t, BulkParameterFactory f) {
-        if (!t.getType().isEnum()) {
-            return "<input name=\"" + t.name() + "\" value=\"" + f.getParam(t) + "\" type=\"number\" />";
-        } else {
+        if (t.getType().isEnum()) {
             final StringBuilder ret = new StringBuilder();
             ret.append("<select name=\"").append(t.name()).append("\">");
             for (final Object o : t.getType().getEnumConstants()) {
@@ -129,10 +139,20 @@ public class ServerMain extends AbstractHandler {
             }
             ret.append("</select>");
             return ret.toString();
+        } else if (t.getType().equals(Double.class)) {
+            return "<input name=\"" + t.name() + "\" value=\"" + f.getParam(t) + "\" type=\"number\" step=\"any\" />";
+        } else if (t.getType().equals(Integer.class)) {
+            return "<input name=\"" + t.name() + "\" value=\"" + f.getParam(t) + "\" type=\"number\" step=\"1\" />";
+        } else {
+            return "Invalid type: " + t.getType();
         }
     }
 
-    private void simulateAndPrintOutput(PrintWriter w, BulkParameterFactory f, int minRuns, int maxRuns) {
+    private String getInputFor(ExperimentRunParameters t, ExperimentRunSettings s) {
+        return "<input name=\"" + t.name() + "\" value=\"" + s.get(t) + "\" type=\"number\" step=\"any\" />";
+    }
+
+    private void simulateAndPrintOutput(PrintWriter w, BulkParameterFactory f, ExperimentRunSettings s) {
         w.println("<h2>Simulation output</h2>");
 
         final StringBuilder detailsTable = new StringBuilder();
@@ -146,13 +166,13 @@ public class ServerMain extends AbstractHandler {
                 System.err.println("run " + count + " finished");
                 detailsTable.append("<tr>");
                 detailsTable.append("<td>").append(count).append("</td>");
-                detailsTable.append("<td>").append(no.getFinishedStoryPoints()).append("</td>");
+                detailsTable.append("<td>").append(no == null ? "" : no.getFinishedStoryPoints()).append("</td>");
                 detailsTable.append("<td>").append(pre.getFinishedStoryPoints()).append("</td>");
                 detailsTable.append("<td>").append(post.getFinishedStoryPoints()).append("</td>");
-                detailsTable.append("<td>").append(no.getStoryCycleTimeMean()).append("</td>");
+                detailsTable.append("<td>").append(no == null ? "" : no.getStoryCycleTimeMean()).append("</td>");
                 detailsTable.append("<td>").append(pre.getStoryCycleTimeMean()).append("</td>");
                 detailsTable.append("<td>").append(post.getStoryCycleTimeMean()).append("</td>");
-                detailsTable.append("<td>").append(no.getRemainingBugCount()).append("</td>");
+                detailsTable.append("<td>").append(no == null ? "" : no.getRemainingBugCount()).append("</td>");
                 detailsTable.append("<td>").append(pre.getRemainingBugCount()).append("</td>");
                 detailsTable.append("<td>").append(post.getRemainingBugCount()).append("</td>");
                 detailsTable.append("</tr>");
@@ -160,29 +180,31 @@ public class ServerMain extends AbstractHandler {
             }
         };
 
-        final ExperimentRun result = ExperimentRun.perform(f, minRuns, maxRuns, detailsCallback);
+        final ExperimentRun result = ExperimentRun.perform(s, DataGenerator::runExperiment, f, detailsCallback);
 
         w.println("Summary result: " + result.getSummary() + "<br/>");
         if (!result.isSummaryStatisticallySignificant()) {
             w.println("Summary result not statistically significant<br/>");
         }
-        w.println("Median finished stories (best alternative): " + result.getFinishedStoryMedian() + "<br/>");
-        w.println("Median difference pre/post story points: " + result.getFactorStoryPoints() + " %<br/>");
-        w.println("Median difference pre/post remaining bugs: " + result.getFactorBugs() + " %<br/>");
-        w.println("Median difference pre/post cycle time: " + result.getFactorCycleTime() + " %<br/>");
+        w.println("Median finished stories (best alternative): " + result.getFinishedStoryMedian().toHtml() + "<br/>");
+        w.println("Median share of productive work: " + result.getShareProductiveWork().toHtmlPercent() + "<br/>");
+        w.println("Median share no review/review story points: " + result.getFactorNoReview().toHtmlPercent() + "<br/>");
+        w.println("Median difference pre/post story points: " + result.getFactorStoryPoints().toHtmlPercent() + "<br/>");
+        w.println("Median difference pre/post remaining bugs: " + result.getFactorBugs().toHtmlPercent() + "<br/>");
+        w.println("Median difference pre/post cycle time: " + result.getFactorCycleTime().toHtmlPercent() + "<br/>");
         w.println("<br/>");
 
         detailsTable.append("<tr>");
-        detailsTable.append("<td>").append(count).append("</td>");
-        detailsTable.append("<td>").append(result.getFinishedStoryPointsMedian(ReviewMode.NO_REVIEW)).append("</td>");
-        detailsTable.append("<td>").append(result.getFinishedStoryPointsMedian(ReviewMode.PRE_COMMIT)).append("</td>");
-        detailsTable.append("<td>").append(result.getFinishedStoryPointsMedian(ReviewMode.POST_COMMIT)).append("</td>");
-        detailsTable.append("<td>").append(result.getStoryCycleTimeMeanMedian(ReviewMode.NO_REVIEW)).append("</td>");
-        detailsTable.append("<td>").append(result.getStoryCycleTimeMeanMedian(ReviewMode.PRE_COMMIT)).append("</td>");
-        detailsTable.append("<td>").append(result.getStoryCycleTimeMeanMedian(ReviewMode.POST_COMMIT)).append("</td>");
-        detailsTable.append("<td>").append(result.getRemainingBugCountMedian(ReviewMode.NO_REVIEW)).append("</td>");
-        detailsTable.append("<td>").append(result.getRemainingBugCountMedian(ReviewMode.PRE_COMMIT)).append("</td>");
-        detailsTable.append("<td>").append(result.getRemainingBugCountMedian(ReviewMode.POST_COMMIT)).append("</td>");
+        detailsTable.append("<td></td>");
+        detailsTable.append("<td>").append(result.getFinishedStoryPointsMedian(ReviewMode.NO_REVIEW).toHtml()).append("</td>");
+        detailsTable.append("<td>").append(result.getFinishedStoryPointsMedian(ReviewMode.PRE_COMMIT).toHtml()).append("</td>");
+        detailsTable.append("<td>").append(result.getFinishedStoryPointsMedian(ReviewMode.POST_COMMIT).toHtml()).append("</td>");
+        detailsTable.append("<td>").append(result.getStoryCycleTimeMeanMedian(ReviewMode.NO_REVIEW).toHtml()).append("</td>");
+        detailsTable.append("<td>").append(result.getStoryCycleTimeMeanMedian(ReviewMode.PRE_COMMIT).toHtml()).append("</td>");
+        detailsTable.append("<td>").append(result.getStoryCycleTimeMeanMedian(ReviewMode.POST_COMMIT).toHtml()).append("</td>");
+        detailsTable.append("<td>").append(result.getRemainingBugCountMedian(ReviewMode.NO_REVIEW).toHtml()).append("</td>");
+        detailsTable.append("<td>").append(result.getRemainingBugCountMedian(ReviewMode.PRE_COMMIT).toHtml()).append("</td>");
+        detailsTable.append("<td>").append(result.getRemainingBugCountMedian(ReviewMode.POST_COMMIT).toHtml()).append("</td>");
         detailsTable.append("</tr>");
         detailsTable.append("</table>");
         w.println(detailsTable);

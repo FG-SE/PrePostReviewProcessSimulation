@@ -109,7 +109,8 @@ public class DataGenerator {
         if (report) {
             exp.tracePeriod(new TimeInstant(0), new TimeInstant(160, TimeUnit.HOURS));
         }
-        exp.stop(new TimeInstant(RealProcessingModel.HOURS_TO_RESET + 8 * 600, TimeUnit.HOURS));
+        final int relevantRunningHours = 8 * 600;
+        exp.stop(new TimeInstant(RealProcessingModel.HOURS_TO_RESET + relevantRunningHours, TimeUnit.HOURS));
         exp.start();
         if (report) {
             exp.report();
@@ -124,6 +125,7 @@ public class DataGenerator {
                         model.getStartedStoryCount(),
                         model.getFinishedStoryCount(),
                         model.getRemainingBugCount(),
+                        p.getNumberOfDevelopers() * relevantRunningHours,
                         expDuration);
 
     }

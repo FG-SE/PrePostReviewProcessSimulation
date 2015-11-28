@@ -16,4 +16,6 @@ public abstract class ParametersFactory {
 
     public abstract long getSeed();
 
+    public abstract int getNumberOfDevelopers();
+
 }

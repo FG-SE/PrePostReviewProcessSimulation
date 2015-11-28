@@ -319,4 +319,9 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
         return this.seed;
     }
 
+    @Override
+    public int getNumberOfDevelopers() {
+        return this.getParamI(ParameterType.NUMBER_OF_DEVELOPERS);
+    }
+
 }

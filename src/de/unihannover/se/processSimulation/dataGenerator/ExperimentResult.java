@@ -7,7 +7,9 @@ public class ExperimentResult {
     private final double storyCycleTimeStdDev;
     private final int startedStoryCount;
     private final long finishedStoryCount;
+    //TEST TODO Umstellen auf "Bugs not found by developers (= remaining + found by customers)
     private final long remainingBugCount;
+    private final long investedPersonHours;
     private final long expDuration;
 
     public ExperimentResult(
@@ -17,6 +19,7 @@ public class ExperimentResult {
                     int startedStoryCount,
                     long finishedStoryCount,
                     long remainingBugCount,
+                    long investedPersonHours,
                     long expDuration) {
         this.finishedStoryPoints = finishedStoryPoints;
         this.storyCycleTimeMean = storyCycleTimeMean;
@@ -24,6 +27,7 @@ public class ExperimentResult {
         this.startedStoryCount = startedStoryCount;
         this.finishedStoryCount = finishedStoryCount;
         this.remainingBugCount = remainingBugCount;
+        this.investedPersonHours = investedPersonHours;
         this.expDuration = expDuration;
     }
 
@@ -49,6 +53,10 @@ public class ExperimentResult {
 
     public long getRemainingBugCount() {
         return this.remainingBugCount;
+    }
+
+    public long getInvestedPersonHours() {
+        return this.investedPersonHours;
     }
 
     public long getExperimentDuration() {
