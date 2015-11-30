@@ -23,6 +23,7 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
 
     public enum ParameterType {
         IMPLEMENTATION_SKILL_MODE(Double.class, ""),
+        IMPLEMENTATION_SKILL_STDDEV_FACTOR(Double.class, ""),
         REVIEW_SKILL_MODE(Double.class, ""),
         GLOBAL_BUG_MODE(Double.class, ""),
         CONFLICT_PROBABILITY(Double.class, ""),
@@ -33,12 +34,14 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
         BUG_ASSESSMENT_TIME_MODE(Double.class, ""),
         CONFLICT_RESOLUTION_TIME_MODE(Double.class, ""),
         INTERNAL_BUG_SHARE(Double.class, ""),
-        BUG_ACTIVATION_TIME_EXPECTED_VALUE(Double.class, ""),
+        BUG_ACTIVATION_TIME_DEVELOPER_EXPECTED_VALUE(Double.class, ""),
+        BUG_ACTIVATION_TIME_CUSTOMER_EXPECTED_VALUE(Double.class, ""),
         PLANNING_TIME_MODE(Double.class, ""),
         REVIEW_TIME_MODE(Double.class, ""),
         NUMBER_OF_DEVELOPERS(Integer.class, ""),
         TASK_SWITCH_OVERHEAD_AFTER_ONE_HOUR(Double.class, ""),
         MAX_TASK_SWITCH_OVERHEAD(Double.class, ""),
+        BOARD_SEARCH_CUTOFF_LIMIT(Integer.class, ""),
         DEPENDENCY_GRAPH_CONSTELLATION(DependencyGraphConstellation.class, "");
 
 
@@ -119,7 +122,11 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
         }
 
         public ContDistNormal posNormal(String name, double mode) {
-            final ContDistNormal dist = new ContDistNormal(this.owner, name, mode, mode / 10.0, true, true);
+            return this.posNormal(name, mode, 0.1);
+        }
+
+        public ContDistNormal posNormal(String name, double mode, double stdDevFactor) {
+            final ContDistNormal dist = new ContDistNormal(this.owner, name, mode, mode * stdDevFactor, true, true);
             dist.setNonNegative(true);
             return this.setSeed(dist);
         }
@@ -142,43 +149,7 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
 
     }
 
-    public BulkParameterFactory(
-                    double implementationSkillMode,
-                    double reviewSkillMode,
-                    double globalBugMode,
-                    double conflictProbability,
-                    double implementationTimeMode,
-                    double bugfixTaskTimeMode,
-                    double fixTimeMode,
-                    double globalBugSuspendTimeMode,
-                    double bugAssessmentTimeMode,
-                    double conflictResolutionTimeMode,
-                    double internalBugShare,
-                    double bugActivationTimeExpectedValue,
-                    double planningTimeMode,
-                    double reviewTimeMode,
-                    int numberOfDevelopers,
-                    TimeSpan taskSwitchOverheadAfterOneHour,
-                    TimeSpan maxTaskSwitchOverhead,
-                    DependencyGraphConstellation dependencyGraphConstellation) {
-        this.parameters.put(ParameterType.IMPLEMENTATION_SKILL_MODE, implementationSkillMode);
-        this.parameters.put(ParameterType.REVIEW_SKILL_MODE, reviewSkillMode);
-        this.parameters.put(ParameterType.GLOBAL_BUG_MODE, globalBugMode);
-        this.parameters.put(ParameterType.CONFLICT_PROBABILITY, conflictProbability);
-        this.parameters.put(ParameterType.IMPLEMENTATION_TIME_MODE, implementationTimeMode);
-        this.parameters.put(ParameterType.BUGFIX_TASK_TIME_MODE, bugfixTaskTimeMode);
-        this.parameters.put(ParameterType.REVIEW_REMARK_FIX_TIME_MODE, fixTimeMode);
-        this.parameters.put(ParameterType.GLOBAL_BUG_SUSPEND_TIME_MODE, globalBugSuspendTimeMode);
-        this.parameters.put(ParameterType.BUG_ASSESSMENT_TIME_MODE, bugAssessmentTimeMode);
-        this.parameters.put(ParameterType.CONFLICT_RESOLUTION_TIME_MODE, conflictResolutionTimeMode);
-        this.parameters.put(ParameterType.INTERNAL_BUG_SHARE, internalBugShare);
-        this.parameters.put(ParameterType.BUG_ACTIVATION_TIME_EXPECTED_VALUE, bugActivationTimeExpectedValue);
-        this.parameters.put(ParameterType.PLANNING_TIME_MODE, planningTimeMode);
-        this.parameters.put(ParameterType.REVIEW_TIME_MODE, reviewTimeMode);
-        this.parameters.put(ParameterType.NUMBER_OF_DEVELOPERS, numberOfDevelopers);
-        this.parameters.put(ParameterType.TASK_SWITCH_OVERHEAD_AFTER_ONE_HOUR, taskSwitchOverheadAfterOneHour.getTimeAsDouble(TimeUnit.HOURS));
-        this.parameters.put(ParameterType.MAX_TASK_SWITCH_OVERHEAD, maxTaskSwitchOverhead.getTimeAsDouble(TimeUnit.HOURS));
-        this.parameters.put(ParameterType.DEPENDENCY_GRAPH_CONSTELLATION, dependencyGraphConstellation);
+    private BulkParameterFactory() {
         this.seed = 764;
     }
 
@@ -189,26 +160,29 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
         //  and rough guess of about 1000 more problems in the same tasks
         //  => 4196/46879 + 2000/(1900*15) = 0.09 + 0.07 = 0.16
 
-        return new BulkParameterFactory(
-                0.16, // implementationSkillMode
-                0.56, // reviewSkillMode
-                0.001, // globalBugMode??
-                0.01, // conflictProbability??
-                17.3, // implementationTimeMode
-                13.0, //bugfixTaskTimeMode
-                1.86, // reviewRemarkfixTimeMode
-                0.15, // globalBugSuspendTimeMode??
-                0.5, // bugAssessmentTimeMode??
-                0.3, // conflictResolutionTimeMode??
-                0.6, //internalBugShare?
-                1000.0, // bugActivationTimeExpectedValue??
-                4.0, // planningTimeMode??
-                3.0, // reviewTimeMode
-                12, // numberOfDevelopers
-                new TimeSpan(5, TimeUnit.MINUTES), // taskSwitchOverheadAfterOneHour
-                new TimeSpan(30, TimeUnit.MINUTES), // maxTaskSwitchOverhead
-                DependencyGraphConstellation.REALISTIC
-        );
+        final BulkParameterFactory ret = new BulkParameterFactory();
+        ret.parameters.put(ParameterType.IMPLEMENTATION_SKILL_MODE, 0.16);
+        ret.parameters.put(ParameterType.IMPLEMENTATION_SKILL_STDDEV_FACTOR, 0.1);
+        ret.parameters.put(ParameterType.REVIEW_SKILL_MODE, 0.56);
+        ret.parameters.put(ParameterType.GLOBAL_BUG_MODE, 0.001);
+        ret.parameters.put(ParameterType.CONFLICT_PROBABILITY, 0.01);
+        ret.parameters.put(ParameterType.IMPLEMENTATION_TIME_MODE, 17.3);
+        ret.parameters.put(ParameterType.BUGFIX_TASK_TIME_MODE, 13.0);
+        ret.parameters.put(ParameterType.REVIEW_REMARK_FIX_TIME_MODE, 1.86);
+        ret.parameters.put(ParameterType.GLOBAL_BUG_SUSPEND_TIME_MODE, 0.15);
+        ret.parameters.put(ParameterType.BUG_ASSESSMENT_TIME_MODE, 0.5);
+        ret.parameters.put(ParameterType.CONFLICT_RESOLUTION_TIME_MODE, 0.3);
+        ret.parameters.put(ParameterType.INTERNAL_BUG_SHARE, 0.6);
+        ret.parameters.put(ParameterType.BUG_ACTIVATION_TIME_DEVELOPER_EXPECTED_VALUE, 1000.0);
+        ret.parameters.put(ParameterType.BUG_ACTIVATION_TIME_CUSTOMER_EXPECTED_VALUE, 1000.0);
+        ret.parameters.put(ParameterType.PLANNING_TIME_MODE, 4.0);
+        ret.parameters.put(ParameterType.REVIEW_TIME_MODE, 3.0);
+        ret.parameters.put(ParameterType.NUMBER_OF_DEVELOPERS, 12);
+        ret.parameters.put(ParameterType.TASK_SWITCH_OVERHEAD_AFTER_ONE_HOUR, new TimeSpan(5, TimeUnit.MINUTES).getTimeAsDouble(TimeUnit.HOURS));
+        ret.parameters.put(ParameterType.MAX_TASK_SWITCH_OVERHEAD, new TimeSpan(30, TimeUnit.MINUTES).getTimeAsDouble(TimeUnit.HOURS));
+        ret.parameters.put(ParameterType.BOARD_SEARCH_CUTOFF_LIMIT, 100);
+        ret.parameters.put(ParameterType.DEPENDENCY_GRAPH_CONSTELLATION, DependencyGraphConstellation.REALISTIC);
+        return ret;
     }
 
 
@@ -217,7 +191,7 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
         final MersenneTwisterRandomGenerator r = new MersenneTwisterRandomGenerator(this.seed);
         final DistributionBuilder b = new DistributionBuilder(r, owner);
         return new Parameters(
-                        b.posNormal("implementationSkillDist", this.getParamD(ParameterType.IMPLEMENTATION_SKILL_MODE)),
+                        b.posNormal("implementationSkillDist", this.getParamD(ParameterType.IMPLEMENTATION_SKILL_MODE), this.getParamD(ParameterType.IMPLEMENTATION_SKILL_STDDEV_FACTOR)),
                         b.beta("reviewSkillDist", this.getParamD(ParameterType.REVIEW_SKILL_MODE)),
                         b.beta("globalBugDist", this.getParamD(ParameterType.GLOBAL_BUG_MODE)),
                         b.bernoulli("conflictDist", this.getParamD(ParameterType.CONFLICT_PROBABILITY)),
@@ -228,12 +202,14 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
                         b.posNormal("bugAssessmentTimeDist", this.getParamD(ParameterType.BUG_ASSESSMENT_TIME_MODE)),
                         b.posNormal("conflictResolutionTimeDist", this.getParamD(ParameterType.CONFLICT_RESOLUTION_TIME_MODE)),
                         b.bernoulli("internalBugDist", this.getParamD(ParameterType.INTERNAL_BUG_SHARE)),
-                        b.exp("bugActivationTimeDist", this.getParamD(ParameterType.BUG_ACTIVATION_TIME_EXPECTED_VALUE)),
+                        b.exp("bugActivationTimeDeveloperDist", this.getParamD(ParameterType.BUG_ACTIVATION_TIME_DEVELOPER_EXPECTED_VALUE)),
+                        b.exp("bugActivationTimeCustomerDist", this.getParamD(ParameterType.BUG_ACTIVATION_TIME_CUSTOMER_EXPECTED_VALUE)),
                         b.posNormal("planningTimeDist", this.getParamD(ParameterType.PLANNING_TIME_MODE)),
                         b.exp("reviewTimeDist", this.getParamD(ParameterType.REVIEW_TIME_MODE)),
                         this.getParamI(ParameterType.NUMBER_OF_DEVELOPERS),
                         new TimeSpan(this.getParamD(ParameterType.TASK_SWITCH_OVERHEAD_AFTER_ONE_HOUR), TimeUnit.HOURS),
                         new TimeSpan(this.getParamD(ParameterType.MAX_TASK_SWITCH_OVERHEAD), TimeUnit.HOURS),
+                        this.getParamI(ParameterType.BOARD_SEARCH_CUTOFF_LIMIT),
                         nextLong(r),
                         (DependencyGraphConstellation) this.getParam(ParameterType.DEPENDENCY_GRAPH_CONSTELLATION));
     }

@@ -13,6 +13,15 @@ public enum DependencyGraphConstellation {
         }
     },
 
+    NO_SUBDIVISION {
+        @Override
+        public GraphGenerator createGenerator(MersenneTwisterRandomGenerator random) {
+            final GraphGenerator g = new GraphGenerator(random);
+            g.addTemplate("A", 1);
+            return g;
+        }
+    },
+
     REALISTIC {
         @Override
         public GraphGenerator createGenerator(MersenneTwisterRandomGenerator random) {

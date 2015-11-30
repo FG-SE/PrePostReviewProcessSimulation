@@ -17,7 +17,8 @@ public class Parameters {
     private final NumericalDist<Double> globalBugSuspendTimeDist;
     private final NumericalDist<Double> bugAssessmentTimeDist;
     private final NumericalDist<Double> conflictResolutionTimeDist;
-    private final NumericalDist<Double> bugActivationTimeDist;
+    private final NumericalDist<Double> bugActivationTimeDeveloperDist;
+    private final NumericalDist<Double> bugActivationTimeCustomerDist;
     private final NumericalDist<Double> planningTimeDist;
     private final NumericalDist<Double> reviewTimeDist;
     private final int numDevelopers;
@@ -25,6 +26,7 @@ public class Parameters {
     private final TimeSpan maxTaskSwitchOverhead;
     private final BoolDist internalBugDist;
     private final DependencyGraphConstellation dependencyGraphConstellation;
+    private final int boardSearchCutoffLimit;
     private final long genericRandomSeed;
 
     public Parameters(
@@ -39,12 +41,14 @@ public class Parameters {
                     NumericalDist<Double> bugAssessmentTimeDist,
                     NumericalDist<Double> conflictResolutionTimeDist,
                     BoolDist internalBugDist,
-                    NumericalDist<Double> bugActivationTimeDist,
+                    NumericalDist<Double> bugActivationTimeDeveloperDist,
+                    NumericalDist<Double> bugActivationTimeCustomerDist,
                     NumericalDist<Double> planningTimeDist,
                     NumericalDist<Double> reviewTimeDist,
                     int numDevelopers,
                     TimeSpan taskSwitchOverheadAfterOneHour,
                     TimeSpan maxTaskSwitchOverhead,
+                    int boardSearchCutoffLimit,
                     long genericRandomSeed,
                     DependencyGraphConstellation dependencyGraphConstellation) {
         this.implementationSkillDist = implementationSkillDist;
@@ -57,13 +61,15 @@ public class Parameters {
         this.globalBugSuspendTimeDist = globalBugSuspendTimeDist;
         this.bugAssessmentTimeDist = bugAssessmentTimeDist;
         this.conflictResolutionTimeDist = conflictResolutionTimeDist;
-        this.bugActivationTimeDist = bugActivationTimeDist;
+        this.bugActivationTimeDeveloperDist = bugActivationTimeDeveloperDist;
+        this.bugActivationTimeCustomerDist = bugActivationTimeCustomerDist;
         this.planningTimeDist = planningTimeDist;
         this.reviewTimeDist = reviewTimeDist;
         this.numDevelopers = numDevelopers;
         this.taskSwitchOverheadAfterOneHour = taskSwitchOverheadAfterOneHour;
         this.maxTaskSwitchOverhead = maxTaskSwitchOverhead;
         this.dependencyGraphConstellation = dependencyGraphConstellation;
+        this.boardSearchCutoffLimit = boardSearchCutoffLimit;
         this.genericRandomSeed = genericRandomSeed;
         this.internalBugDist = internalBugDist;
     }
@@ -151,8 +157,9 @@ public class Parameters {
      * Die gesampelten Werte werden als "Stunden" interpretiert.
      */
     public NumericalDist<Double> getBugActivationTimeDeveloperDist() {
-        //TODO unterschiedliche Verteilungen Kunde/Entwickler
-        return this.bugActivationTimeDist;
+        //Both the time for finding internal bugs as well as external bugs depends mostly on the intensity with which the developers are
+        //  dealing with old code in their daily work. Therefore we use the same distribution for these two times.
+        return this.bugActivationTimeDeveloperDist;
     }
 
     /**
@@ -160,8 +167,7 @@ public class Parameters {
      * Die gesampelten Werte werden als "Stunden" interpretiert.
      */
     public NumericalDist<Double> getBugActivationTimeCustomerDist() {
-        //TODO unterschiedliche Verteilungen Kunde/Entwickler
-        return this.bugActivationTimeDist;
+        return this.bugActivationTimeCustomerDist;
     }
 
     /**
@@ -216,6 +222,10 @@ public class Parameters {
 
     public BoolDist getInternalBugDist() {
         return this.internalBugDist;
+    }
+
+    public int getBoardSearchCutoffLimit() {
+        return this.boardSearchCutoffLimit;
     }
 
     public long getGenericRandomSeed() {

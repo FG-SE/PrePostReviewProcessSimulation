@@ -3,7 +3,10 @@ package de.unihannover.se.processSimulation.preCommitPostCommit;
 import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 import org.hamcrest.CustomTypeSafeMatcher;
 import org.hamcrest.Matcher;
@@ -41,11 +44,24 @@ public class ReferenceBehaviourTest {
         return model;
     }
 
+    private static<T extends Comparable<T>> T runExperimentAndGetMedianResult(
+                    BulkParameterFactory p, ReviewMode mode, Function<RealProcessingModel, T> getter) throws Exception {
+
+        final List<T> results = new ArrayList<>();
+        for (int i = 0; i < 7; i++) {
+            final RealProcessingModel model = runExperiment(p, mode);
+            p = p.copyWithChangedSeed();
+            results.add(getter.apply(model));
+        }
+        Collections.sort(results);
+        return results.get(results.size() / 2);
+    }
+
     private static Matcher<Long> isSimilarTo(long finishedStoryPoints) {
         return new CustomTypeSafeMatcher<Long>("is similar to " + finishedStoryPoints) {
             @Override
             protected boolean matchesSafely(Long arg0) {
-                return Math.abs(arg0 - finishedStoryPoints) < 10;
+                return Math.abs(arg0 - finishedStoryPoints) < 0.005 * 0.5 * (arg0 + finishedStoryPoints);
             }
         };
     }
@@ -54,7 +70,7 @@ public class ReferenceBehaviourTest {
         return new CustomTypeSafeMatcher<Long>("is significantly larger than " + finishedStoryPoints) {
             @Override
             protected boolean matchesSafely(Long arg0) {
-                return arg0 > finishedStoryPoints + 10;
+                return Math.abs(arg0 - finishedStoryPoints) >= 0.005 * 0.5 * (arg0 + finishedStoryPoints);
             }
         };
     }
@@ -63,30 +79,31 @@ public class ReferenceBehaviourTest {
         return new CustomTypeSafeMatcher<Double>("is significantly larger than " + storyCycleTimeMean) {
             @Override
             protected boolean matchesSafely(Double arg0) {
-                return arg0 > storyCycleTimeMean + 10.0;
+                return Math.abs(arg0 - storyCycleTimeMean) >= 0.005 * 0.5 * (arg0 + storyCycleTimeMean);
             }
         };
     }
 
     @Test
     public void testWhenAllRelevantEffectsAreOffThereIsNoDifference() throws Exception {
-        final ParametersFactory p = BulkParameterFactory
+        final BulkParameterFactory p = BulkParameterFactory
                         .forCommercial()
                         .copyWithChangedParam(ParameterType.IMPLEMENTATION_SKILL_MODE, 0.0)
+                        .copyWithChangedParam(ParameterType.IMPLEMENTATION_SKILL_STDDEV_FACTOR, 0.0)
                         .copyWithChangedParam(ParameterType.NUMBER_OF_DEVELOPERS, 2)
                         .copyWithChangedParam(ParameterType.GLOBAL_BUG_MODE, 0.0)
                         .copyWithChangedParam(ParameterType.CONFLICT_PROBABILITY, 0.0)
                         .copyWithChangedParam(ParameterType.TASK_SWITCH_OVERHEAD_AFTER_ONE_HOUR, 0.0)
                         .copyWithChangedParam(ParameterType.MAX_TASK_SWITCH_OVERHEAD, 0.0)
-                        .copyWithChangedParam(ParameterType.DEPENDENCY_GRAPH_CONSTELLATION, DependencyGraphConstellation.NO_DEPENDENCIES);
-        final RealProcessingModel modelPre = runExperiment(p, ReviewMode.PRE_COMMIT);
-        final RealProcessingModel modelPost = runExperiment(p, ReviewMode.POST_COMMIT);
-        assertThat(modelPre.getFinishedStoryPoints(), isSimilarTo(modelPost.getFinishedStoryPoints()));
+                        .copyWithChangedParam(ParameterType.DEPENDENCY_GRAPH_CONSTELLATION, DependencyGraphConstellation.NO_SUBDIVISION);
+        final Long modelPre = runExperimentAndGetMedianResult(p, ReviewMode.PRE_COMMIT, RealProcessingModel::getFinishedStoryPoints);
+        final Long modelPost = runExperimentAndGetMedianResult(p, ReviewMode.POST_COMMIT, RealProcessingModel::getFinishedStoryPoints);
+        assertThat(modelPre, isSimilarTo(modelPost));
     }
 
     @Test
     public void testWithLotsOfDependenciesPreCommitHasHigherCycleTime() throws Exception {
-        final ParametersFactory p = BulkParameterFactory
+        final BulkParameterFactory p = BulkParameterFactory
                         .forCommercial()
                         .copyWithChangedParam(ParameterType.IMPLEMENTATION_SKILL_MODE, 0.0)
                         .copyWithChangedParam(ParameterType.NUMBER_OF_DEVELOPERS, 2)
@@ -95,14 +112,14 @@ public class ReferenceBehaviourTest {
                         .copyWithChangedParam(ParameterType.TASK_SWITCH_OVERHEAD_AFTER_ONE_HOUR, 0.0)
                         .copyWithChangedParam(ParameterType.MAX_TASK_SWITCH_OVERHEAD, 0.0)
                         .copyWithChangedParam(ParameterType.DEPENDENCY_GRAPH_CONSTELLATION, DependencyGraphConstellation.CHAINS);
-        final RealProcessingModel modelPre = runExperiment(p, ReviewMode.PRE_COMMIT);
-        final RealProcessingModel modelPost = runExperiment(p, ReviewMode.POST_COMMIT);
-        assertThat(modelPre.getStoryCycleTimeMean(), isSignificantlyLargerThan(modelPost.getStoryCycleTimeMean()));
+        final Double modelPre = runExperimentAndGetMedianResult(p, ReviewMode.PRE_COMMIT, RealProcessingModel::getStoryCycleTimeMean);
+        final Double modelPost = runExperimentAndGetMedianResult(p, ReviewMode.POST_COMMIT, RealProcessingModel::getStoryCycleTimeMean);
+        assertThat(modelPre, isSignificantlyLargerThan(modelPost));
     }
 
     @Test
     public void testLotsOfGlobalBugsMakePreCommitBetter() throws Exception {
-        final ParametersFactory p = BulkParameterFactory
+        final BulkParameterFactory p = BulkParameterFactory
                         .forCommercial()
                         .copyWithChangedParam(ParameterType.IMPLEMENTATION_SKILL_MODE, 0.0)
                         .copyWithChangedParam(ParameterType.NUMBER_OF_DEVELOPERS, 2)
@@ -112,14 +129,14 @@ public class ReferenceBehaviourTest {
                         .copyWithChangedParam(ParameterType.TASK_SWITCH_OVERHEAD_AFTER_ONE_HOUR, 0.0)
                         .copyWithChangedParam(ParameterType.MAX_TASK_SWITCH_OVERHEAD, 0.0)
                         .copyWithChangedParam(ParameterType.DEPENDENCY_GRAPH_CONSTELLATION, DependencyGraphConstellation.NO_DEPENDENCIES);
-        final RealProcessingModel modelPre = runExperiment(p, ReviewMode.PRE_COMMIT);
-        final RealProcessingModel modelPost = runExperiment(p, ReviewMode.POST_COMMIT);
-        assertThat(modelPre.getFinishedStoryPoints(), isSignificantlyLargerThan(modelPost.getFinishedStoryPoints()));
+        final Long modelPre = runExperimentAndGetMedianResult(p, ReviewMode.PRE_COMMIT, RealProcessingModel::getFinishedStoryPoints);
+        final Long modelPost = runExperimentAndGetMedianResult(p, ReviewMode.POST_COMMIT, RealProcessingModel::getFinishedStoryPoints);
+        assertThat(modelPre, isSignificantlyLargerThan(modelPost));
     }
 
     @Test
     public void testLotsOfConflictsMakePostCommitBetter() throws Exception {
-        final ParametersFactory p = BulkParameterFactory
+        final BulkParameterFactory p = BulkParameterFactory
                         .forCommercial()
                         .copyWithChangedParam(ParameterType.IMPLEMENTATION_SKILL_MODE, 0.0)
                         .copyWithChangedParam(ParameterType.NUMBER_OF_DEVELOPERS, 10)
@@ -129,14 +146,14 @@ public class ReferenceBehaviourTest {
                         .copyWithChangedParam(ParameterType.TASK_SWITCH_OVERHEAD_AFTER_ONE_HOUR, 0.0)
                         .copyWithChangedParam(ParameterType.MAX_TASK_SWITCH_OVERHEAD, 0.0)
                         .copyWithChangedParam(ParameterType.DEPENDENCY_GRAPH_CONSTELLATION, DependencyGraphConstellation.NO_DEPENDENCIES);
-        final RealProcessingModel modelPre = runExperiment(p, ReviewMode.PRE_COMMIT);
-        final RealProcessingModel modelPost = runExperiment(p, ReviewMode.POST_COMMIT);
-        assertThat(modelPost.getFinishedStoryPoints(), isSignificantlyLargerThan(modelPre.getFinishedStoryPoints()));
+        final Long modelPre = runExperimentAndGetMedianResult(p, ReviewMode.PRE_COMMIT, RealProcessingModel::getFinishedStoryPoints);
+        final Long modelPost = runExperimentAndGetMedianResult(p, ReviewMode.POST_COMMIT, RealProcessingModel::getFinishedStoryPoints);
+        assertThat(modelPost, isSignificantlyLargerThan(modelPre));
     }
 
     @Test
     public void testHighTaskSwitchOverheadAndLotsOfDependenciesMakePostCommitBetter() throws Exception {
-        final ParametersFactory p = BulkParameterFactory
+        final BulkParameterFactory p = BulkParameterFactory
                         .forCommercial()
                         .copyWithChangedParam(ParameterType.IMPLEMENTATION_SKILL_MODE, 0.0)
                         .copyWithChangedParam(ParameterType.NUMBER_OF_DEVELOPERS, 2)
@@ -145,16 +162,16 @@ public class ReferenceBehaviourTest {
                         .copyWithChangedParam(ParameterType.TASK_SWITCH_OVERHEAD_AFTER_ONE_HOUR, 1.0)
                         .copyWithChangedParam(ParameterType.MAX_TASK_SWITCH_OVERHEAD, 2.0)
                         .copyWithChangedParam(ParameterType.DEPENDENCY_GRAPH_CONSTELLATION, DependencyGraphConstellation.SIMPLISTIC);
-        final RealProcessingModel modelPre = runExperiment(p, ReviewMode.PRE_COMMIT);
-        final RealProcessingModel modelPost = runExperiment(p, ReviewMode.POST_COMMIT);
-        assertThat(modelPost.getFinishedStoryPoints(), isSignificantlyLargerThan(modelPre.getFinishedStoryPoints()));
+        final Long modelPre = runExperimentAndGetMedianResult(p, ReviewMode.PRE_COMMIT, RealProcessingModel::getFinishedStoryPoints);
+        final Long modelPost = runExperimentAndGetMedianResult(p, ReviewMode.POST_COMMIT, RealProcessingModel::getFinishedStoryPoints);
+        assertThat(modelPost, isSignificantlyLargerThan(modelPre));
     }
 
 
     @Test
     public void testasdf() throws Exception {
         //TEST
-        final ParametersFactory p = BulkParameterFactory
+        final BulkParameterFactory p = BulkParameterFactory
                         .forCommercial()
                         .copyWithChangedParam(ParameterType.IMPLEMENTATION_SKILL_MODE, 0.16)
                         .copyWithChangedParam(ParameterType.NUMBER_OF_DEVELOPERS, 2)
@@ -163,32 +180,32 @@ public class ReferenceBehaviourTest {
                         .copyWithChangedParam(ParameterType.TASK_SWITCH_OVERHEAD_AFTER_ONE_HOUR, 0.0)
                         .copyWithChangedParam(ParameterType.MAX_TASK_SWITCH_OVERHEAD, 0.0)
                         .copyWithChangedParam(ParameterType.DEPENDENCY_GRAPH_CONSTELLATION, DependencyGraphConstellation.NO_DEPENDENCIES);
-        final RealProcessingModel modelPre = runExperiment(p, ReviewMode.PRE_COMMIT);
-        final RealProcessingModel modelPost = runExperiment(p, ReviewMode.POST_COMMIT);
-        assertThat(modelPre.getFinishedStoryPoints(), isSimilarTo(modelPost.getFinishedStoryPoints()));
+        final Long modelPre = runExperimentAndGetMedianResult(p, ReviewMode.PRE_COMMIT, RealProcessingModel::getFinishedStoryPoints);
+        final Long modelPost = runExperimentAndGetMedianResult(p, ReviewMode.POST_COMMIT, RealProcessingModel::getFinishedStoryPoints);
+        assertThat(modelPre, isSimilarTo(modelPost));
     }
 
     @Test
     public void testNoReviewIsWorseThanReview() throws Exception {
-        final ParametersFactory p = BulkParameterFactory
+        final BulkParameterFactory p = BulkParameterFactory
                         .forCommercial();
-        final RealProcessingModel modelPre = runExperiment(p, ReviewMode.PRE_COMMIT);
-        final RealProcessingModel modelPost = runExperiment(p, ReviewMode.POST_COMMIT);
-        final RealProcessingModel modelNo = runExperiment(p, ReviewMode.NO_REVIEW);
-        assertThat(modelPre.getFinishedStoryPoints(), isSignificantlyLargerThan(modelNo.getFinishedStoryPoints()));
-        assertThat(modelPost.getFinishedStoryPoints(), isSignificantlyLargerThan(modelNo.getFinishedStoryPoints()));
+        final Long modelPre = runExperimentAndGetMedianResult(p, ReviewMode.PRE_COMMIT, RealProcessingModel::getFinishedStoryPoints);
+        final Long modelPost = runExperimentAndGetMedianResult(p, ReviewMode.POST_COMMIT, RealProcessingModel::getFinishedStoryPoints);
+        final Long modelNo = runExperimentAndGetMedianResult(p, ReviewMode.NO_REVIEW, RealProcessingModel::getFinishedStoryPoints);
+        assertThat(modelPre, isSignificantlyLargerThan(modelNo));
+        assertThat(modelPost, isSignificantlyLargerThan(modelNo));
     }
 
     @Test
     public void testNoReviewIsBetterThanReviewWhenThereAreNoBugs() throws Exception {
-        final ParametersFactory p = BulkParameterFactory
+        final BulkParameterFactory p = BulkParameterFactory
                         .forCommercial()
                         .copyWithChangedParam(ParameterType.IMPLEMENTATION_SKILL_MODE, 0.0);
-        final RealProcessingModel modelPre = runExperiment(p, ReviewMode.PRE_COMMIT);
-        final RealProcessingModel modelPost = runExperiment(p, ReviewMode.POST_COMMIT);
-        final RealProcessingModel modelNo = runExperiment(p, ReviewMode.NO_REVIEW);
-        assertThat(modelNo.getFinishedStoryPoints(), isSignificantlyLargerThan(modelPre.getFinishedStoryPoints()));
-        assertThat(modelNo.getFinishedStoryPoints(), isSignificantlyLargerThan(modelPost.getFinishedStoryPoints()));
+        final Long modelPre = runExperimentAndGetMedianResult(p, ReviewMode.PRE_COMMIT, RealProcessingModel::getFinishedStoryPoints);
+        final Long modelPost = runExperimentAndGetMedianResult(p, ReviewMode.POST_COMMIT, RealProcessingModel::getFinishedStoryPoints);
+        final Long modelNo = runExperimentAndGetMedianResult(p, ReviewMode.NO_REVIEW, RealProcessingModel::getFinishedStoryPoints);
+        assertThat(modelNo, isSignificantlyLargerThan(modelPre));
+        assertThat(modelNo, isSignificantlyLargerThan(modelPost));
     }
 
 }

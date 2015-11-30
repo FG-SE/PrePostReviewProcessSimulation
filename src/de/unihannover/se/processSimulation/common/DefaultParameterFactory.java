@@ -35,12 +35,14 @@ public class DefaultParameterFactory extends ParametersFactory {
                         new ContDistConstant(owner, "bugAssessmentTimeDist", 0.1, true, true),
                         new ContDistConstant(owner, "conflictResolutionTimeDist", 0.25, true, true),
                         new BoolDistConstant(owner, "internalBugDist", false, true, true),
-                        new ContDistConstant(owner, "bugActivationTimeDist", 160, true, true),
+                        new ContDistConstant(owner, "bugActivationTimeDeveloperDist", 160, true, true),
+                        new ContDistConstant(owner, "bugActivationTimeCustomerDist", 160, true, true),
                         new ContDistConstant(owner, "planningTimeDist", 8.0, true, true),
                         new ContDistConstant(owner, "reviewTimeDist", 1.0, true, true),
                         this.getNumberOfDevelopers(),
                         new TimeSpan(5, TimeUnit.MINUTES),
                         new TimeSpan(1, TimeUnit.HOURS),
+                        100,
                         this.getSeed(),
                         DependencyGraphConstellation.DIAMONDS);
     }

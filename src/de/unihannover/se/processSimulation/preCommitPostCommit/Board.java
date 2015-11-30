@@ -125,8 +125,7 @@ class Board {
                 bestTime = lastTimeForT;
                 best = t;
             }
-            //TODO parametrisierbar machen oder weghauen
-            if (iterCount > 100) {
+            if (iterCount > developer.getModel().getParameters().getBoardSearchCutoffLimit()) {
                 break;
             }
             iterCount++;
