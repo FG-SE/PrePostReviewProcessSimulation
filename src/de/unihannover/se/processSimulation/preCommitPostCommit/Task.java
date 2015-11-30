@@ -320,4 +320,6 @@ abstract class Task extends RealModelEntity implements MemoryItem {
         }
     }
 
+    public abstract Story getStory();
+
 }

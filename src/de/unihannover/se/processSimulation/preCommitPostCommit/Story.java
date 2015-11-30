@@ -1,7 +1,9 @@
 package de.unihannover.se.processSimulation.preCommitPostCommit;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import co.paralleluniverse.fibers.SuspendExecution;
@@ -11,20 +13,28 @@ import desmoj.core.simulator.TimeSpan;
 
 class Story extends RealModelEntity implements MemoryItem {
 
+    private static enum State {
+        IN_PLANNING,
+        IN_IMPLEMENTATION,
+        FINISHED
+    }
+
     private final TimeSpan planningTime;
     private TimeInstant startTime;
-    private boolean planned;
+    private State state;
     private final List<StoryTask> tasks;
     private final List<Developer> additionalPlanners = new ArrayList<>();
+    private final Set<BugfixTask> openBugsBeforeFinish = new HashSet<>();
 
     public Story(RealProcessingModel owner, int storyPoints) {
         super(owner, "story");
         this.tasks = new ArrayList<>();
         this.planningTime = owner.getParameters().getPlanningTimeDist().sampleTimeSpan(TimeUnit.HOURS);
+        this.state = State.IN_PLANNING;
     }
 
     public void plan(Developer developer) throws SuspendExecution {
-        assert !this.planned;
+        assert this.state == State.IN_PLANNING;
         if (this.startTime == null) {
             this.doMainPlanning(developer);
         } else {
@@ -35,7 +45,7 @@ class Story extends RealModelEntity implements MemoryItem {
     private void joinPlanning(Developer developer) throws SuspendExecution {
         this.additionalPlanners.add(developer);
         developer.sendTraceNote("joins planning of " + this);
-        assert !this.planned;
+        assert this.state == State.IN_PLANNING;
         developer.passivate();
     }
 
@@ -55,7 +65,7 @@ class Story extends RealModelEntity implements MemoryItem {
             }
         });
 
-        this.planned = true;
+        this.state = State.IN_IMPLEMENTATION;
         this.getBoard().addPlannedStory(this);
 
         for (final Developer helper : this.additionalPlanners) {
@@ -68,13 +78,25 @@ class Story extends RealModelEntity implements MemoryItem {
         this.tasks.add(task);
     }
 
-    public boolean allTasksFinished() {
+    void registerBug(BugfixTask task) {
+        if (this.state != State.FINISHED) {
+            this.openBugsBeforeFinish.add(task);
+        }
+    }
+
+    void unregisterBug(BugfixTask task) {
+        final boolean found = this.openBugsBeforeFinish.remove(task);
+        assert found == (this.state != State.FINISHED);
+    }
+
+    public boolean canBeFinished() {
         for (final StoryTask t : this.tasks) {
             if (!t.isFinished()) {
                 return false;
             }
         }
-        return true;
+        //when a bug occured before the story was declared finished, it blocks finishing
+        return this.openBugsBeforeFinish.isEmpty();
     }
 
     public TimeSpan getCycleTime(TimeInstant finishTime) {
@@ -100,7 +122,15 @@ class Story extends RealModelEntity implements MemoryItem {
         return this.tasks;
     }
 
+    public boolean isFinished() {
+        return this.state == State.FINISHED;
+    }
+
     public void finish() {
+        assert this.state == State.IN_IMPLEMENTATION;
+        assert this.openBugsBeforeFinish.isEmpty();
+
+        this.state = State.FINISHED;
         this.getModel().countFinishedStory(this);
         for (final StoryTask t : this.getTasks()) {
             t.startLurkingBugsForCustomer();

@@ -12,7 +12,6 @@ import desmoj.core.simulator.TimeInstant;
 
 //TODO offener Punkt: Taskwechsel führt auch zu höherer Bugrate
 //TODO offener Punkt: Beim Mergen können auch Fehler entstehen
-//TODO offener Punkt: offene Bugs halten eine Story davon ab, abgeschlossen zu werden
 class Developer extends RealModelProcess {
 
     private final BoolDistBernoulli reviewerSkill;

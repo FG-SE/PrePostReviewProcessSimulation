@@ -7,12 +7,13 @@ import java.util.concurrent.TimeUnit;
 class BugfixTask extends Task {
 
     private final NormalBug bug;
-    private final String cachedMemoryKey;
+    private final Story cachedStory;
 
     public BugfixTask(NormalBug bug) {
         super(bug.getModel(), "bug", bug.getModel().getParameters().getBugfixTaskTimeDist().sampleTimeSpan(TimeUnit.HOURS));
         this.bug = bug;
-        this.cachedMemoryKey = this.bug.getTask().getMemoryKey();
+        this.cachedStory = this.bug.getTask().getStory();
+        this.cachedStory.registerBug(this);
     }
 
     public NormalBug getBug() {
@@ -21,7 +22,12 @@ class BugfixTask extends Task {
 
     @Override
     public String getMemoryKey() {
-        return this.cachedMemoryKey;
+        return this.cachedStory.getMemoryKey();
+    }
+
+    @Override
+    public Story getStory() {
+        return this.cachedStory;
     }
 
     @Override
@@ -37,6 +43,10 @@ class BugfixTask extends Task {
     @Override
     protected void handleFinishedTask() {
         this.startLurkingBugsForCustomer();
+        this.cachedStory.unregisterBug(this);
+        if (!this.cachedStory.isFinished() && this.cachedStory.canBeFinished()) {
+            this.cachedStory.finish();
+        }
     }
 
 }
