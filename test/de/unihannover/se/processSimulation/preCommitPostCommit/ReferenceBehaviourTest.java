@@ -164,8 +164,6 @@ public class ReferenceBehaviourTest {
                         .copyWithChangedParam(ParameterType.MAX_TASK_SWITCH_OVERHEAD, 0.0)
                         .copyWithChangedParam(ParameterType.DEPENDENCY_GRAPH_CONSTELLATION, DependencyGraphConstellation.NO_DEPENDENCIES);
         final RealProcessingModel modelPre = runExperiment(p, ReviewMode.PRE_COMMIT);
-        //TEST
-        System.out.println("-------------------------");
         final RealProcessingModel modelPost = runExperiment(p, ReviewMode.POST_COMMIT);
         assertThat(modelPre.getFinishedStoryPoints(), isSimilarTo(modelPost.getFinishedStoryPoints()));
     }
@@ -191,56 +189,6 @@ public class ReferenceBehaviourTest {
         final RealProcessingModel modelNo = runExperiment(p, ReviewMode.NO_REVIEW);
         assertThat(modelNo.getFinishedStoryPoints(), isSignificantlyLargerThan(modelPre.getFinishedStoryPoints()));
         assertThat(modelNo.getFinishedStoryPoints(), isSignificantlyLargerThan(modelPost.getFinishedStoryPoints()));
-    }
-
-    //TODO weg
-    @Test
-    public void testNoReviewIsWorseThanReview2() throws Exception {
-        final ParametersFactory p = BulkParameterFactory
-                        .forCommercial();
-        final RealProcessingModel modelPre = runExperiment(p, ReviewMode.PRE_COMMIT);
-        final RealProcessingModel modelPost = runExperiment(p, ReviewMode.POST_COMMIT);
-        final RealProcessingModel modelNo = runExperiment(p, ReviewMode.NO_REVIEW);
-        assertThat(modelPre.getFinishedStoryPoints(), isSignificantlyLargerThan(modelNo.getFinishedStoryPoints()));
-        assertThat(modelPost.getFinishedStoryPoints(), isSignificantlyLargerThan(modelNo.getFinishedStoryPoints()));
-    }
-
-    //TODO weg
-    @Test
-    public void testNoReviewIsWorseThanReview3() throws Exception {
-        final ParametersFactory p = BulkParameterFactory
-                        .forCommercial();
-        final RealProcessingModel modelPre = runExperiment(p, ReviewMode.PRE_COMMIT);
-        final RealProcessingModel modelPost = runExperiment(p, ReviewMode.POST_COMMIT);
-        final RealProcessingModel modelNo = runExperiment(p, ReviewMode.NO_REVIEW);
-        assertThat(modelPre.getFinishedStoryPoints(), isSignificantlyLargerThan(modelNo.getFinishedStoryPoints()));
-        assertThat(modelPost.getFinishedStoryPoints(), isSignificantlyLargerThan(modelNo.getFinishedStoryPoints()));
-    }
-
-    //TODO weg
-    @Test
-    public void testNoReviewIsWorseThanReview4() throws Exception {
-        final ParametersFactory p = BulkParameterFactory
-                        .forCommercial();
-        final RealProcessingModel modelPre = runExperiment(p, ReviewMode.PRE_COMMIT);
-        final RealProcessingModel modelPost = runExperiment(p, ReviewMode.POST_COMMIT);
-        final RealProcessingModel modelNo = runExperiment(p, ReviewMode.NO_REVIEW);
-        assertThat(modelPre.getFinishedStoryPoints(), isSignificantlyLargerThan(modelNo.getFinishedStoryPoints()));
-        assertThat(modelPost.getFinishedStoryPoints(), isSignificantlyLargerThan(modelNo.getFinishedStoryPoints()));
-    }
-
-    //TODO weg
-    @Test
-    public void testNoReviewIsWorseThanReview5() throws Exception {
-        for (int i = 0; i < 10; i++) {
-            final ParametersFactory p = BulkParameterFactory
-                            .forCommercial();
-            final RealProcessingModel modelPre = runExperiment(p, ReviewMode.PRE_COMMIT);
-            final RealProcessingModel modelPost = runExperiment(p, ReviewMode.POST_COMMIT);
-            final RealProcessingModel modelNo = runExperiment(p, ReviewMode.NO_REVIEW);
-            assertThat(modelPre.getFinishedStoryPoints(), isSignificantlyLargerThan(modelNo.getFinishedStoryPoints()));
-            assertThat(modelPost.getFinishedStoryPoints(), isSignificantlyLargerThan(modelNo.getFinishedStoryPoints()));
-        }
     }
 
 }
