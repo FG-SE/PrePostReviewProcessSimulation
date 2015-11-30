@@ -10,14 +10,14 @@ import desmoj.core.simulator.TimeSpan;
 
 public class DefaultParameterFactory extends ParametersFactory {
 
-    private final double conflictPropability;
+    private final double conflictProbability;
 
     public DefaultParameterFactory() {
         this(0.05);
     }
 
-    public DefaultParameterFactory(double conflictPropability) {
-        this.conflictPropability = conflictPropability;
+    public DefaultParameterFactory(double conflictProbability) {
+        this.conflictProbability = conflictProbability;
     }
 
     @Override
@@ -26,7 +26,7 @@ public class DefaultParameterFactory extends ParametersFactory {
                         new ContDistConstant(owner, "implementationSkillDist", 0.2, true, true),
                         new ContDistConstant(owner, "reviewSkillDist", 0.6, true, true),
                         new ContDistConstant(owner, "globalBugDist", 0.01, true, true),
-                        new BoolDistBernoulli(owner, "conflictDist", this.conflictPropability, true, true),
+                        new BoolDistBernoulli(owner, "conflictDist", this.conflictProbability, true, true),
                         new ContDistConstant(owner, "implementationTimeDist", 8.0, true, true),
                         new ContDistConstant(owner, "bugfixTaskTimeDist", 5.0, true, true),
                         new ContDistConstant(owner, "reviewRemarkFixTimeDist", 0.15, true, true),

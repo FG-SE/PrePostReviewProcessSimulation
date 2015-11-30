@@ -75,7 +75,7 @@ public class ReferenceBehaviourTest {
                         .copyWithChangedParam(ParameterType.IMPLEMENTATION_SKILL_MODE, 0.0)
                         .copyWithChangedParam(ParameterType.NUMBER_OF_DEVELOPERS, 2)
                         .copyWithChangedParam(ParameterType.GLOBAL_BUG_MODE, 0.0)
-                        .copyWithChangedParam(ParameterType.CONFLICT_PROPABILITY, 0.0)
+                        .copyWithChangedParam(ParameterType.CONFLICT_PROBABILITY, 0.0)
                         .copyWithChangedParam(ParameterType.TASK_SWITCH_OVERHEAD_AFTER_ONE_HOUR, 0.0)
                         .copyWithChangedParam(ParameterType.MAX_TASK_SWITCH_OVERHEAD, 0.0)
                         .copyWithChangedParam(ParameterType.DEPENDENCY_GRAPH_CONSTELLATION, DependencyGraphConstellation.NO_DEPENDENCIES);
@@ -91,7 +91,7 @@ public class ReferenceBehaviourTest {
                         .copyWithChangedParam(ParameterType.IMPLEMENTATION_SKILL_MODE, 0.0)
                         .copyWithChangedParam(ParameterType.NUMBER_OF_DEVELOPERS, 2)
                         .copyWithChangedParam(ParameterType.GLOBAL_BUG_MODE, 0.0)
-                        .copyWithChangedParam(ParameterType.CONFLICT_PROPABILITY, 0.0)
+                        .copyWithChangedParam(ParameterType.CONFLICT_PROBABILITY, 0.0)
                         .copyWithChangedParam(ParameterType.TASK_SWITCH_OVERHEAD_AFTER_ONE_HOUR, 0.0)
                         .copyWithChangedParam(ParameterType.MAX_TASK_SWITCH_OVERHEAD, 0.0)
                         .copyWithChangedParam(ParameterType.DEPENDENCY_GRAPH_CONSTELLATION, DependencyGraphConstellation.CHAINS);
@@ -108,7 +108,7 @@ public class ReferenceBehaviourTest {
                         .copyWithChangedParam(ParameterType.NUMBER_OF_DEVELOPERS, 2)
                         .copyWithChangedParam(ParameterType.GLOBAL_BUG_MODE, 1.0)
                         .copyWithChangedParam(ParameterType.GLOBAL_BUG_SUSPEND_TIME_MODE, 10.0)
-                        .copyWithChangedParam(ParameterType.CONFLICT_PROPABILITY, 0.0)
+                        .copyWithChangedParam(ParameterType.CONFLICT_PROBABILITY, 0.0)
                         .copyWithChangedParam(ParameterType.TASK_SWITCH_OVERHEAD_AFTER_ONE_HOUR, 0.0)
                         .copyWithChangedParam(ParameterType.MAX_TASK_SWITCH_OVERHEAD, 0.0)
                         .copyWithChangedParam(ParameterType.DEPENDENCY_GRAPH_CONSTELLATION, DependencyGraphConstellation.NO_DEPENDENCIES);
@@ -124,7 +124,7 @@ public class ReferenceBehaviourTest {
                         .copyWithChangedParam(ParameterType.IMPLEMENTATION_SKILL_MODE, 0.0)
                         .copyWithChangedParam(ParameterType.NUMBER_OF_DEVELOPERS, 10)
                         .copyWithChangedParam(ParameterType.GLOBAL_BUG_MODE, 0.0)
-                        .copyWithChangedParam(ParameterType.CONFLICT_PROPABILITY, 1.0)
+                        .copyWithChangedParam(ParameterType.CONFLICT_PROBABILITY, 1.0)
                         .copyWithChangedParam(ParameterType.CONFLICT_RESOLUTION_TIME_MODE, 99.0)
                         .copyWithChangedParam(ParameterType.TASK_SWITCH_OVERHEAD_AFTER_ONE_HOUR, 0.0)
                         .copyWithChangedParam(ParameterType.MAX_TASK_SWITCH_OVERHEAD, 0.0)
@@ -141,7 +141,7 @@ public class ReferenceBehaviourTest {
                         .copyWithChangedParam(ParameterType.IMPLEMENTATION_SKILL_MODE, 0.0)
                         .copyWithChangedParam(ParameterType.NUMBER_OF_DEVELOPERS, 2)
                         .copyWithChangedParam(ParameterType.GLOBAL_BUG_MODE, 0.0)
-                        .copyWithChangedParam(ParameterType.CONFLICT_PROPABILITY, 1.0)
+                        .copyWithChangedParam(ParameterType.CONFLICT_PROBABILITY, 1.0)
                         .copyWithChangedParam(ParameterType.TASK_SWITCH_OVERHEAD_AFTER_ONE_HOUR, 1.0)
                         .copyWithChangedParam(ParameterType.MAX_TASK_SWITCH_OVERHEAD, 2.0)
                         .copyWithChangedParam(ParameterType.DEPENDENCY_GRAPH_CONSTELLATION, DependencyGraphConstellation.SIMPLISTIC);
@@ -159,7 +159,7 @@ public class ReferenceBehaviourTest {
                         .copyWithChangedParam(ParameterType.IMPLEMENTATION_SKILL_MODE, 0.16)
                         .copyWithChangedParam(ParameterType.NUMBER_OF_DEVELOPERS, 2)
                         .copyWithChangedParam(ParameterType.GLOBAL_BUG_MODE, 0.0)
-                        .copyWithChangedParam(ParameterType.CONFLICT_PROPABILITY, 0.0)
+                        .copyWithChangedParam(ParameterType.CONFLICT_PROBABILITY, 0.0)
                         .copyWithChangedParam(ParameterType.TASK_SWITCH_OVERHEAD_AFTER_ONE_HOUR, 0.0)
                         .copyWithChangedParam(ParameterType.MAX_TASK_SWITCH_OVERHEAD, 0.0)
                         .copyWithChangedParam(ParameterType.DEPENDENCY_GRAPH_CONSTELLATION, DependencyGraphConstellation.NO_DEPENDENCIES);

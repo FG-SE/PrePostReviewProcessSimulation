@@ -62,7 +62,7 @@ class SourceRepository<U> {
 
     /**
      * Try to commit. When another task was commited since the last update (start/restart) of the given
-     * task, there is a certain propability of conflict. When a conflict occurs, this method does not
+     * task, there is a certain probability of conflict. When a conflict occurs, this method does not
      * commit and returns false. Otherwise it commits and returns true.
      */
     public boolean tryCommit(U task) {

@@ -226,8 +226,8 @@ abstract class Task extends RealModelEntity implements MemoryItem {
             break;
         }
 
-        //TODO Abarbeitung dauert länger, wenn auf dem Buggy-Task andere Dinge aufgebaut haben (propabilistisch)
-        //TODO noch in Arbeit befindliche abhängige Tasks verzögern sich (propabilitisch)
+        //TODO Abarbeitung dauert länger, wenn auf dem Buggy-Task andere Dinge aufgebaut haben (probabilistisch)
+        //TODO noch in Arbeit befindliche abhängige Tasks verzögern sich (probabilitisch)
         //z.B.: Bug hat Auswirkungen auf Nachfolger-Task:
         //wenn der Nachfolger bereits vollständig abgeschlossen ist, verlängert sich der Bugfix-Task
         //wenn der Nachfolger gerade in der Implementierung ist, verlängert sich die Implementierung

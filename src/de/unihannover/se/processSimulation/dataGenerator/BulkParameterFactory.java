@@ -25,7 +25,7 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
         IMPLEMENTATION_SKILL_MODE(Double.class, ""),
         REVIEW_SKILL_MODE(Double.class, ""),
         GLOBAL_BUG_MODE(Double.class, ""),
-        CONFLICT_PROPABILITY(Double.class, ""),
+        CONFLICT_PROBABILITY(Double.class, ""),
         IMPLEMENTATION_TIME_MODE(Double.class, ""),
         BUGFIX_TASK_TIME_MODE(Double.class, ""),
         REVIEW_REMARK_FIX_TIME_MODE(Double.class, ""),
@@ -95,12 +95,12 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
             this.owner = owner;
         }
 
-        public ContDistBeta beta(String name, double mostPropableValue) {
-            assert mostPropableValue >= 0.0;
-            assert mostPropableValue <= 1.0;
-            if (mostPropableValue > 0.0) {
+        public ContDistBeta beta(String name, double mostProbableValue) {
+            assert mostProbableValue >= 0.0;
+            assert mostProbableValue <= 1.0;
+            if (mostProbableValue > 0.0) {
                 final double alpha = 10.0;
-                final double beta = (alpha - 1.0 - mostPropableValue*alpha + 2.0*mostPropableValue) / mostPropableValue;
+                final double beta = (alpha - 1.0 - mostProbableValue*alpha + 2.0*mostProbableValue) / mostProbableValue;
                 return this.setSeed(new ContDistBeta(this.owner, name, alpha, beta, true, true));
             } else {
                 final double alpha = 1.0;
@@ -113,8 +113,8 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
             return this.setSeed(new ContDistExponential(this.owner, name, expectedValue, true, true));
         }
 
-        public BoolDistBernoulli bernoulli(String name, double propabilityForTrue) {
-            return this.setSeed(new BoolDistBernoulli(this.owner, name, propabilityForTrue, true, true));
+        public BoolDistBernoulli bernoulli(String name, double probabilityForTrue) {
+            return this.setSeed(new BoolDistBernoulli(this.owner, name, probabilityForTrue, true, true));
         }
 
         public ContDistNormal posNormal(String name, double mode) {
@@ -145,7 +145,7 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
                     double implementationSkillMode,
                     double reviewSkillMode,
                     double globalBugMode,
-                    double conflictPropability,
+                    double conflictProbability,
                     double implementationTimeMode,
                     double bugfixTaskTimeMode,
                     double fixTimeMode,
@@ -162,7 +162,7 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
         this.parameters.put(ParameterType.IMPLEMENTATION_SKILL_MODE, implementationSkillMode);
         this.parameters.put(ParameterType.REVIEW_SKILL_MODE, reviewSkillMode);
         this.parameters.put(ParameterType.GLOBAL_BUG_MODE, globalBugMode);
-        this.parameters.put(ParameterType.CONFLICT_PROPABILITY, conflictPropability);
+        this.parameters.put(ParameterType.CONFLICT_PROBABILITY, conflictProbability);
         this.parameters.put(ParameterType.IMPLEMENTATION_TIME_MODE, implementationTimeMode);
         this.parameters.put(ParameterType.BUGFIX_TASK_TIME_MODE, bugfixTaskTimeMode);
         this.parameters.put(ParameterType.REVIEW_REMARK_FIX_TIME_MODE, fixTimeMode);
@@ -190,7 +190,7 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
                 0.16, // implementationSkillMode
                 0.56, // reviewSkillMode
                 0.001, // globalBugMode??
-                0.01, // conflictPropability??
+                0.01, // conflictProbability??
                 17.3, // implementationTimeMode
                 13.0, //bugfixTaskTimeMode
                 1.86, // reviewRemarkfixTimeMode
@@ -216,7 +216,7 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
                         b.posNormal("implementationSkillDist", this.getParamD(ParameterType.IMPLEMENTATION_SKILL_MODE)),
                         b.beta("reviewSkillDist", this.getParamD(ParameterType.REVIEW_SKILL_MODE)),
                         b.beta("globalBugDist", this.getParamD(ParameterType.GLOBAL_BUG_MODE)),
-                        b.bernoulli("conflictDist", this.getParamD(ParameterType.CONFLICT_PROPABILITY)),
+                        b.bernoulli("conflictDist", this.getParamD(ParameterType.CONFLICT_PROBABILITY)),
                         b.logNormal("implementationTimeDist", this.getParamD(ParameterType.IMPLEMENTATION_TIME_MODE), this.getParamD(ParameterType.IMPLEMENTATION_TIME_MODE) / 2.0),
                         b.exp("bugfixTaskTimeDist", this.getParamD(ParameterType.BUGFIX_TASK_TIME_MODE)),
                         b.exp("reviewRemarkFixTimeDist", this.getParamD(ParameterType.REVIEW_REMARK_FIX_TIME_MODE)),

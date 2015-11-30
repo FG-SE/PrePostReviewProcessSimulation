@@ -130,8 +130,8 @@ public class RealProcessingModel extends Model {
         return this.parameters;
     }
 
-    public boolean getRandomBool(double propabilityForTrue) {
-        return this.genericRandom.nextDouble() < propabilityForTrue;
+    public boolean getRandomBool(double probabilityForTrue) {
+        return this.genericRandom.nextDouble() < probabilityForTrue;
     }
 
     public long getFinishedStoryPoints() {

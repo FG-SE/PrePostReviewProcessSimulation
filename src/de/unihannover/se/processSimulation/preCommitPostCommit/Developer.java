@@ -20,10 +20,10 @@ class Developer extends RealModelProcess {
     private final Map<String, TimeInstant> memory;
     private final ContDist implementationSkill;
 
-    public Developer(RealProcessingModel owner, double reviewerSkill, double globalBugPropability, double implementationSkill) {
+    public Developer(RealProcessingModel owner, double reviewerSkill, double globalBugProbability, double implementationSkill) {
         super(owner, "developer");
         this.reviewerSkill = new BoolDistBernoulli(owner, "reviewerSkill-" + this, reviewerSkill, true, true);
-        this.globalBugDist = new BoolDistBernoulli(owner, "globalBugDist-" + this, globalBugPropability, true, true);
+        this.globalBugDist = new BoolDistBernoulli(owner, "globalBugDist-" + this, globalBugProbability, true, true);
         //as distribution, so that it can be seen in the DESMO report
         this.implementationSkill = new ContDistConstant(owner, "implementationSkill-" + this, implementationSkill, true, true);
         this.memory = new LinkedHashMap<>();
