@@ -32,6 +32,7 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
         GLOBAL_BUG_SUSPEND_TIME_MODE(Double.class, ""),
         BUG_ASSESSMENT_TIME_MODE(Double.class, ""),
         CONFLICT_RESOLUTION_TIME_MODE(Double.class, ""),
+        INTERNAL_BUG_SHARE(Double.class, ""),
         BUG_ACTIVATION_TIME_EXPECTED_VALUE(Double.class, ""),
         PLANNING_TIME_MODE(Double.class, ""),
         REVIEW_TIME_MODE(Double.class, ""),
@@ -152,6 +153,7 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
                     double globalBugSuspendTimeMode,
                     double bugAssessmentTimeMode,
                     double conflictResolutionTimeMode,
+                    double internalBugShare,
                     double bugActivationTimeExpectedValue,
                     double planningTimeMode,
                     double reviewTimeMode,
@@ -169,6 +171,7 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
         this.parameters.put(ParameterType.GLOBAL_BUG_SUSPEND_TIME_MODE, globalBugSuspendTimeMode);
         this.parameters.put(ParameterType.BUG_ASSESSMENT_TIME_MODE, bugAssessmentTimeMode);
         this.parameters.put(ParameterType.CONFLICT_RESOLUTION_TIME_MODE, conflictResolutionTimeMode);
+        this.parameters.put(ParameterType.INTERNAL_BUG_SHARE, internalBugShare);
         this.parameters.put(ParameterType.BUG_ACTIVATION_TIME_EXPECTED_VALUE, bugActivationTimeExpectedValue);
         this.parameters.put(ParameterType.PLANNING_TIME_MODE, planningTimeMode);
         this.parameters.put(ParameterType.REVIEW_TIME_MODE, reviewTimeMode);
@@ -197,6 +200,7 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
                 0.15, // globalBugSuspendTimeMode??
                 0.5, // bugAssessmentTimeMode??
                 0.3, // conflictResolutionTimeMode??
+                0.6, //internalBugShare?
                 1000.0, // bugActivationTimeExpectedValue??
                 4.0, // planningTimeMode??
                 3.0, // reviewTimeMode
@@ -223,6 +227,7 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
                         b.posNormal("globalBugSuspendTimeDist", this.getParamD(ParameterType.GLOBAL_BUG_SUSPEND_TIME_MODE)),
                         b.posNormal("bugAssessmentTimeDist", this.getParamD(ParameterType.BUG_ASSESSMENT_TIME_MODE)),
                         b.posNormal("conflictResolutionTimeDist", this.getParamD(ParameterType.CONFLICT_RESOLUTION_TIME_MODE)),
+                        b.bernoulli("internalBugDist", this.getParamD(ParameterType.INTERNAL_BUG_SHARE)),
                         b.exp("bugActivationTimeDist", this.getParamD(ParameterType.BUG_ACTIVATION_TIME_EXPECTED_VALUE)),
                         b.posNormal("planningTimeDist", this.getParamD(ParameterType.PLANNING_TIME_MODE)),
                         b.exp("reviewTimeDist", this.getParamD(ParameterType.REVIEW_TIME_MODE)),

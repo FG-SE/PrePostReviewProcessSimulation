@@ -2,7 +2,6 @@ package de.unihannover.se.processSimulation.common;
 
 import de.unihannover.se.processSimulation.preCommitPostCommit.DependencyGraphConstellation;
 import desmoj.core.dist.BoolDist;
-import desmoj.core.dist.BoolDistConstant;
 import desmoj.core.dist.NumericalDist;
 import desmoj.core.simulator.TimeSpan;
 
@@ -39,6 +38,7 @@ public class Parameters {
                     NumericalDist<Double> globalBugSuspendTimeDist,
                     NumericalDist<Double> bugAssessmentTimeDist,
                     NumericalDist<Double> conflictResolutionTimeDist,
+                    BoolDist internalBugDist,
                     NumericalDist<Double> bugActivationTimeDist,
                     NumericalDist<Double> planningTimeDist,
                     NumericalDist<Double> reviewTimeDist,
@@ -65,8 +65,7 @@ public class Parameters {
         this.maxTaskSwitchOverhead = maxTaskSwitchOverhead;
         this.dependencyGraphConstellation = dependencyGraphConstellation;
         this.genericRandomSeed = genericRandomSeed;
-        //TODO auslagern
-        this.internalBugDist = new BoolDistConstant(reviewTimeDist.getModel(), "internalBugDist", false, true, true);
+        this.internalBugDist = internalBugDist;
     }
 
     /**
