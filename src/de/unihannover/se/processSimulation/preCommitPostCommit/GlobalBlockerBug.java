@@ -22,7 +22,8 @@ class GlobalBlockerBug extends Bug {
     }
 
     @Override
-    protected void becomeVisible() {
+    protected void becomeVisible(boolean byCustomer) {
+        assert !byCustomer;
         for (final Task t : this.getBoard().getAllTasksInImplementation()) {
             t.suspendImplementation(this.getModel().getParameters().getGlobalBugSuspendTimeDist().sampleTimeSpan(TimeUnit.HOURS));
         }

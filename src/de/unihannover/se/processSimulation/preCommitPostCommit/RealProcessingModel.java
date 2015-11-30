@@ -37,7 +37,7 @@ public class RealProcessingModel extends Model {
     private SourceRepository<Task> sourceRepository;
 
     private Count finishedStoryPoints;
-    private Count remainingBugs;
+    private Count bugCountFoundByCustomers;
     private Tally storyCycleTime;
     private final Map<String, Aggregate> timeCounters = new HashMap<>();
 
@@ -85,7 +85,7 @@ public class RealProcessingModel extends Model {
 
         this.finishedStoryPoints = new Count(this, "finishedStoryPoints", true, true);
         this.storyCycleTime = new Tally(this, "storyCycleTime", true, true);
-        this.remainingBugs = new Count(this, "remainingBugs", true, true);
+        this.bugCountFoundByCustomers = new Count(this, "bugCountFoundByCustomers", true, true);
 
         for (int i = 0; i < this.parameters.getNumDevelopers(); i++) {
             this.developers.add(new Developer(this,
@@ -160,16 +160,12 @@ public class RealProcessingModel extends Model {
         return this.storyCycleTime.getObservations();
     }
 
-    public long getRemainingBugCount() {
-        return this.remainingBugs.getValue();
+    public long getBugCountFoundByCustomers() {
+        return this.bugCountFoundByCustomers.getValue();
     }
 
-    void countBugCreated() {
-        this.remainingBugs.update();
-    }
-
-    void countBugFixed() {
-        this.remainingBugs.update(-1);
+    void countBugFoundByCustomer() {
+        this.bugCountFoundByCustomers.update();
     }
 
     public GraphGenerator getGraphGenerator() {

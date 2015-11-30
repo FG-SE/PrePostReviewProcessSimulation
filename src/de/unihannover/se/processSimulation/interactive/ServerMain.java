@@ -21,6 +21,7 @@ import de.unihannover.se.processSimulation.dataGenerator.ExperimentRun;
 import de.unihannover.se.processSimulation.dataGenerator.ExperimentRun.SingleRunCallback;
 import de.unihannover.se.processSimulation.dataGenerator.ExperimentRunSettings;
 import de.unihannover.se.processSimulation.dataGenerator.ExperimentRunSettings.ExperimentRunParameters;
+import de.unihannover.se.processSimulation.dataGenerator.MedianWithConfidenceInterval;
 import de.unihannover.se.processSimulation.dataGenerator.StatisticsUtil;
 
 public class ServerMain extends AbstractHandler {
@@ -158,7 +159,7 @@ public class ServerMain extends AbstractHandler {
         final StringBuilder detailsTable = new StringBuilder();
         final AtomicInteger count = new AtomicInteger(1);
         detailsTable.append("<table border=\"1\">");
-        detailsTable.append("<tr><th>#</th><th colspan=\"3\">Story points</th><th colspan=\"3\">Cycle time</th><th colspan=\"3\">Remaining bugs</th></tr>\n");
+        detailsTable.append("<tr><th>#</th><th colspan=\"3\">Story points</th><th colspan=\"3\">Cycle time</th><th colspan=\"3\">Bugs found by customer</th></tr>\n");
         detailsTable.append("<tr><th></th><th>no</th><th>pre</th><th>post</th><th>no</th><th>pre</th><th>post</th><th>no</th><th>pre</th><th>post</th></tr>\n");
         final SingleRunCallback detailsCallback = new SingleRunCallback() {
             @Override
@@ -189,9 +190,9 @@ public class ServerMain extends AbstractHandler {
         w.println("Median finished stories (best alternative): " + result.getFinishedStoryMedian().toHtml() + "<br/>");
         w.println("Median share of productive work: " + result.getShareProductiveWork().toHtmlPercent() + "<br/>");
         w.println("Median share no review/review story points: " + result.getFactorNoReview().toHtmlPercent() + "<br/>");
-        w.println("Median difference pre/post story points: " + result.getFactorStoryPoints().toHtmlPercent() + "<br/>");
-        w.println("Median difference pre/post remaining bugs: " + result.getFactorBugs().toHtmlPercent() + "<br/>");
-        w.println("Median difference pre/post cycle time: " + result.getFactorCycleTime().toHtmlPercent() + "<br/>");
+        w.println("Median difference pre/post story points: " + this.formatDiff(result.getFactorStoryPoints(), "pre", "post") + "<br/>");
+        w.println("Median difference pre/post bugs found by customer: " + this.formatDiff(result.getFactorBugs(), "post", "pre") + "<br/>");
+        w.println("Median difference pre/post cycle time: " + this.formatDiff(result.getFactorCycleTime(), "post", "pre") + "<br/>");
         w.println("<br/>");
 
         detailsTable.append("<tr>");
@@ -208,6 +209,10 @@ public class ServerMain extends AbstractHandler {
         detailsTable.append("</tr>");
         detailsTable.append("</table>");
         w.println(detailsTable);
+    }
+
+    private String formatDiff(MedianWithConfidenceInterval median, String betterWhenNegative, String betterWhenPositive) {
+        return median.toHtmlPercent() + " [" + (median.getMedian() < 0 ? betterWhenNegative : betterWhenPositive) + " better]";
     }
 
     public static void main(String[] args) throws Exception {

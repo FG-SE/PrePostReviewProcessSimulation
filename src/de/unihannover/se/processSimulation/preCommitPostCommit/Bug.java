@@ -8,14 +8,17 @@ abstract class Bug extends RealModelEntity {
 
     private final class BugBecomesVisibleEvent extends ExternalEvent {
 
-        public BugBecomesVisibleEvent(Model owner, String name) {
+        private final boolean byCustomer;
+
+        public BugBecomesVisibleEvent(Model owner, String name, boolean byCustomer) {
             super(owner, name, true);
+            this.byCustomer = byCustomer;
         }
 
         @Override
         public void eventRoutine() {
             if (!Bug.this.fixed) {
-                Bug.this.becomeVisible();
+                Bug.this.becomeVisible(this.byCustomer);
             }
         }
 
@@ -27,7 +30,6 @@ abstract class Bug extends RealModelEntity {
 
     public Bug(RealProcessingModel model, String name) {
         super(model, name);
-        model.countBugCreated();
     }
 
     public final void handlePublishedForDevelopers() {
@@ -37,7 +39,7 @@ abstract class Bug extends RealModelEntity {
         this.startedForDevelopers = true;
         final TimeSpan t = this.getActivationTimeForDevelopers();
         if (t != null) {
-            new BugBecomesVisibleEvent(this.getModel(), this.getName()).schedule(t);
+            new BugBecomesVisibleEvent(this.getModel(), this.getName(), false).schedule(t);
         }
     }
 
@@ -48,19 +50,18 @@ abstract class Bug extends RealModelEntity {
         this.startedForCustomers = true;
         final TimeSpan t = this.getActivationTimeForCustomers();
         if (t != null) {
-            new BugBecomesVisibleEvent(this.getModel(), this.getName()).schedule(t);
+            new BugBecomesVisibleEvent(this.getModel(), this.getName(), true).schedule(t);
         }
     }
 
     protected abstract TimeSpan getActivationTimeForDevelopers();
     protected abstract TimeSpan getActivationTimeForCustomers();
 
-    protected abstract void becomeVisible();
+    protected abstract void becomeVisible(boolean byCustomer);
 
     public final void fix() {
         if (!this.fixed) {
             this.fixed = true;
-            this.getModel().countBugFixed();
         }
     }
 

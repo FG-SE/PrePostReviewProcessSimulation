@@ -77,7 +77,7 @@ public class DataGenerator {
                         model.getStoryCycleTimeStdDev(),
                         model.getStartedStoryCount(),
                         model.getFinishedStoryCount(),
-                        model.getRemainingBugCount(),
+                        model.getBugCountFoundByCustomers(),
                         p.getNumberOfDevelopers() * relevantRunningHours,
                         expDuration);
 

@@ -48,7 +48,7 @@ public class Plotter extends RealModelProcess {
                 data.put(TIME, this.presentTime().getTimeAsDouble(TimeUnit.HOURS));
                 data.put(STARTED_STORIES, this.getModel().getStartedStoryCount());
                 data.put(FINISHED_STORIES, this.getModel().getFinishedStoryCount());
-                data.put(REMAINING_BUGS, this.getModel().getRemainingBugCount());
+                data.put(REMAINING_BUGS, this.getModel().getBugCountFoundByCustomers());
                 data.put(OPEN_STORY_TASKS, this.getModel().getBoard().countOpenStoryTasks());
                 data.put(OPEN_BUGFIX_TASKS, this.getModel().getBoard().countOpenBugfixTasks());
                 data.put(TASKS_READY_FOR_REVIEW, this.getModel().getBoard().countTasksReadyForReview());

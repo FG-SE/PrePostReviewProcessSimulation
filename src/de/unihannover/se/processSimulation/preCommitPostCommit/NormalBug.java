@@ -35,7 +35,10 @@ class NormalBug extends Bug {
     }
 
     @Override
-    protected void becomeVisible() {
+    protected void becomeVisible(boolean byCustomer) {
+        if (byCustomer) {
+            this.getModel().countBugFoundByCustomer();
+        }
         this.getBoard().addUnassessedBug(this);
     }
 

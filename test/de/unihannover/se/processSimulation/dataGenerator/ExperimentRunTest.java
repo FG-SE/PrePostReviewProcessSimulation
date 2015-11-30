@@ -38,14 +38,14 @@ public class ExperimentRunTest {
                     int finishedStoryPoints,
                     double storyCycleTimeMean,
                     int finishedStoryCount,
-                    int remainingBugCount) {
+                    int bugCountFoundByCustomers) {
         return new ExperimentResult(
                         finishedStoryPoints,
                         storyCycleTimeMean,
                         1,
                         42,
                         finishedStoryCount,
-                        remainingBugCount,
+                        bugCountFoundByCustomers,
                         finishedStoryPoints * 2,
                         23);
     }
