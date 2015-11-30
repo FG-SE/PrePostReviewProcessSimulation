@@ -26,7 +26,7 @@ public class ExperimentRunSettings {
         final ExperimentRunSettings ret = new ExperimentRunSettings();
         ret.params.put(ExperimentRunParameters.MIN_RUNS, 15.0);
         ret.params.put(ExperimentRunParameters.MAX_RUNS, 30.0);
-        ret.params.put(ExperimentRunParameters.LIMIT_UNREALISTIC, 0.2);
+        ret.params.put(ExperimentRunParameters.LIMIT_UNREALISTIC, 0.1);
         ret.params.put(ExperimentRunParameters.LIMIT_NO_REVIEW, 1.1);
         ret.params.put(ExperimentRunParameters.LIMIT_NEGLIGIBLE_DIFFERENCE_STORY_POINTS, 0.05);
         ret.params.put(ExperimentRunParameters.LIMIT_NEGLIGIBLE_DIFFERENCE_BUGS, 0.05);

@@ -65,6 +65,9 @@ public class ExperimentRun {
             final double valueNo = this.map.get(ReviewMode.NO_REVIEW).getFinishedStoryPoints();
             final double valuePre = this.map.get(ReviewMode.PRE_COMMIT).getFinishedStoryPoints();
             final double valuePost = this.map.get(ReviewMode.POST_COMMIT).getFinishedStoryPoints();
+            if (valuePre == 0 && valuePost == 0) {
+                return 0.0;
+            }
             return valueNo / Math.max(valuePre, valuePost);
         }
 
