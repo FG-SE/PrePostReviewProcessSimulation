@@ -172,9 +172,9 @@ public class ServerMain extends AbstractHandler {
                 detailsTable.append("<td>").append(no == null ? "" : no.getStoryCycleTimeMean()).append("</td>");
                 detailsTable.append("<td>").append(pre.getStoryCycleTimeMean()).append("</td>");
                 detailsTable.append("<td>").append(post.getStoryCycleTimeMean()).append("</td>");
-                detailsTable.append("<td>").append(no == null ? "" : no.getRemainingBugCount()).append("</td>");
-                detailsTable.append("<td>").append(pre.getRemainingBugCount()).append("</td>");
-                detailsTable.append("<td>").append(post.getRemainingBugCount()).append("</td>");
+                detailsTable.append("<td>").append(no == null ? "" : no.getBugCountFoundByCustomers()).append("</td>");
+                detailsTable.append("<td>").append(pre.getBugCountFoundByCustomers()).append("</td>");
+                detailsTable.append("<td>").append(post.getBugCountFoundByCustomers()).append("</td>");
                 detailsTable.append("</tr>");
                 count.incrementAndGet();
             }
@@ -202,9 +202,9 @@ public class ServerMain extends AbstractHandler {
         detailsTable.append("<td>").append(result.getStoryCycleTimeMeanMedian(ReviewMode.NO_REVIEW).toHtml()).append("</td>");
         detailsTable.append("<td>").append(result.getStoryCycleTimeMeanMedian(ReviewMode.PRE_COMMIT).toHtml()).append("</td>");
         detailsTable.append("<td>").append(result.getStoryCycleTimeMeanMedian(ReviewMode.POST_COMMIT).toHtml()).append("</td>");
-        detailsTable.append("<td>").append(result.getRemainingBugCountMedian(ReviewMode.NO_REVIEW).toHtml()).append("</td>");
-        detailsTable.append("<td>").append(result.getRemainingBugCountMedian(ReviewMode.PRE_COMMIT).toHtml()).append("</td>");
-        detailsTable.append("<td>").append(result.getRemainingBugCountMedian(ReviewMode.POST_COMMIT).toHtml()).append("</td>");
+        detailsTable.append("<td>").append(result.getBugCountMedian(ReviewMode.NO_REVIEW).toHtml()).append("</td>");
+        detailsTable.append("<td>").append(result.getBugCountMedian(ReviewMode.PRE_COMMIT).toHtml()).append("</td>");
+        detailsTable.append("<td>").append(result.getBugCountMedian(ReviewMode.POST_COMMIT).toHtml()).append("</td>");
         detailsTable.append("</tr>");
         detailsTable.append("</table>");
         w.println(detailsTable);

@@ -1,10 +1,7 @@
 package de.unihannover.se.processSimulation.dataGenerator;
 
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import de.unihannover.se.processSimulation.common.ParametersFactory;
@@ -24,41 +21,6 @@ public class DataGenerator {
     public static final String REMAINING_BUGS = "remainingBugs";
     public static final String SIMULATION_DURATION = "simulationDuration";
 
-    private static final int MAX_PARAM_CONFIGS = 500;
-    private static final int RUNS_PER_CONFIG = 10;
-
-    public static void main(String[] args) throws IOException {
-        try (final DataWriter rawResultWriter = new ArffWriter(new FileWriter("rawResults.arff"), "rawResults")) {
-            registerResultAttributes(rawResultWriter);
-
-            final ParameterGenerator gen = new ParameterGenerator();
-            int total = 0;
-            final long startTime = System.currentTimeMillis();
-            for (int i = 0; i < MAX_PARAM_CONFIGS; i++) {
-                BulkParameterFactory fac = gen.next();
-                if (i == 0) {
-                    fac.addAttributesTo(rawResultWriter);
-                }
-                for (int j = 0; j < RUNS_PER_CONFIG; j++) {
-                    System.out.println("parameter set " + i + "/" + MAX_PARAM_CONFIGS + ", run " + j + "/" + RUNS_PER_CONFIG);
-                    System.out.println("hash=" + fac.hashCode() + ", fac=" + fac);
-//                    if (i != 53) {
-//                        //TEST
-//                        total++;
-//                        fac = fac.copyWithChangedSeed();
-//                        continue;
-//                    }
-                    runExperimentWithBothModes(rawResultWriter, fac, i + "_" + j, false);
-                    total++;
-                    fac = fac.copyWithChangedSeed();
-                }
-                final long diffTime = (System.currentTimeMillis() - startTime) / 1000L;
-                final long remaining = (MAX_PARAM_CONFIGS * RUNS_PER_CONFIG - total) * diffTime / total;
-                System.out.println("Finished " + total + " runs after " + diffTime + " seconds, approx " + remaining + " seconds remaining");
-            }
-        }
-    }
-
     static void registerResultAttributes(final DataWriter rawResultWriter) throws IOException {
         rawResultWriter.addNumericAttribute(ReviewMode.PRE_COMMIT + STORYPOINTS);
         rawResultWriter.addNumericAttribute(ReviewMode.PRE_COMMIT + CYCLETIME_MEAN);
@@ -74,15 +36,6 @@ public class DataGenerator {
         rawResultWriter.addNumericAttribute(ReviewMode.POST_COMMIT + FINISHED_STORIES);
         rawResultWriter.addNumericAttribute(ReviewMode.POST_COMMIT + REMAINING_BUGS);
         rawResultWriter.addNumericAttribute(ReviewMode.POST_COMMIT + SIMULATION_DURATION);
-    }
-
-    static void runExperimentWithBothModes(final DataWriter rawResultWriter, BulkParameterFactory fac, String runId, boolean report) throws IOException {
-        final Map<String, Object> experimentData = new HashMap<>();
-        fac.saveData(experimentData);
-        runExperiment(fac, ReviewMode.PRE_COMMIT, experimentData, report, runId);
-        runExperiment(fac, ReviewMode.POST_COMMIT, experimentData, report, runId);
-        rawResultWriter.writeTuple(experimentData);
-        rawResultWriter.flush();
     }
 
     public static ExperimentResult runExperiment(
@@ -128,19 +81,6 @@ public class DataGenerator {
                         p.getNumberOfDevelopers() * relevantRunningHours,
                         expDuration);
 
-    }
-
-    private static void runExperiment(
-                    final ParametersFactory p, ReviewMode mode, Map<String, Object> experimentDataBuffer, boolean report, String runId) {
-
-        final ExperimentResult result = runExperiment(p, mode, report, runId);
-        experimentDataBuffer.put(mode + STORYPOINTS, result.getFinishedStoryPoints());
-        experimentDataBuffer.put(mode + CYCLETIME_MEAN, result.getStoryCycleTimeMean());
-        experimentDataBuffer.put(mode + CYCLETIME_STD_DEV, result.getStoryCycleTimeStdDev());
-        experimentDataBuffer.put(mode + STARTED_STORIES, result.getStartedStoryCount());
-        experimentDataBuffer.put(mode + FINISHED_STORIES, result.getFinishedStoryCount());
-        experimentDataBuffer.put(mode + REMAINING_BUGS, result.getRemainingBugCount());
-        experimentDataBuffer.put(mode + SIMULATION_DURATION, result.getExperimentDuration());
     }
 
     private static ArrayList<String> noOutputs() {

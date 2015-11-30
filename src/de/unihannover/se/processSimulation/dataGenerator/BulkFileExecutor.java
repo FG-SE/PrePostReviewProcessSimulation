@@ -119,11 +119,11 @@ public class BulkFileExecutor {
         output.write(';');
         write(output, result.getFactorBugs());
         output.write(';');
-        write(output, result.getRemainingBugCountMedian(ReviewMode.NO_REVIEW));
+        write(output, result.getBugCountMedian(ReviewMode.NO_REVIEW));
         output.write(';');
-        write(output, result.getRemainingBugCountMedian(ReviewMode.PRE_COMMIT));
+        write(output, result.getBugCountMedian(ReviewMode.PRE_COMMIT));
         output.write(';');
-        write(output, result.getRemainingBugCountMedian(ReviewMode.POST_COMMIT));
+        write(output, result.getBugCountMedian(ReviewMode.POST_COMMIT));
         output.write(';');
         write(output, result.getFactorCycleTime());
         output.write(';');

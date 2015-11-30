@@ -208,8 +208,8 @@ public class ExperimentRun {
         return this.median(values);
     }
 
-    public MedianWithConfidenceInterval getRemainingBugCountMedian(ReviewMode mode) {
-        final double[] values = this.getResults(mode, ExperimentResult::getRemainingBugCount);
+    public MedianWithConfidenceInterval getBugCountMedian(ReviewMode mode) {
+        final double[] values = this.getResults(mode, ExperimentResult::getBugCountFoundByCustomers);
         return this.median(values);
     }
 
@@ -233,7 +233,7 @@ public class ExperimentRun {
      * I.e. if the result is > 0, post commit review resulted in more remaining bugs.
      */
     public MedianWithConfidenceInterval getFactorBugs() {
-        final double[] values = this.results.stream().mapToDouble(x -> x.factorPrePost(ExperimentResult::getRemainingBugCount)).toArray();
+        final double[] values = this.results.stream().mapToDouble(x -> x.factorPrePost(ExperimentResult::getBugCountFoundByCustomers)).toArray();
         return this.median(values);
     }
 

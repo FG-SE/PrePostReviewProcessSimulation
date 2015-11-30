@@ -7,8 +7,8 @@ public class ExperimentResult {
     private final double storyCycleTimeStdDev;
     private final int startedStoryCount;
     private final long finishedStoryCount;
-    //TEST TODO Umstellen auf "Bugs not found by developers (= remaining + found by customers)
-    private final long remainingBugCount;
+    //TODO sollte auch noch eine Kennzahl für den Technical Debt eingebaut werden?
+    private final long bugCountFoundByCustomers;
     private final long investedPersonHours;
     private final long expDuration;
 
@@ -18,7 +18,7 @@ public class ExperimentResult {
                     double storyCycleTimeStdDev,
                     int startedStoryCount,
                     long finishedStoryCount,
-                    long remainingBugCount,
+                    long bugCountFoundByCustomers,
                     long investedPersonHours,
                     long expDuration) {
         this.finishedStoryPoints = finishedStoryPoints;
@@ -26,7 +26,7 @@ public class ExperimentResult {
         this.storyCycleTimeStdDev = storyCycleTimeStdDev;
         this.startedStoryCount = startedStoryCount;
         this.finishedStoryCount = finishedStoryCount;
-        this.remainingBugCount = remainingBugCount;
+        this.bugCountFoundByCustomers = bugCountFoundByCustomers;
         this.investedPersonHours = investedPersonHours;
         this.expDuration = expDuration;
     }
@@ -51,8 +51,8 @@ public class ExperimentResult {
         return this.finishedStoryCount;
     }
 
-    public long getRemainingBugCount() {
-        return this.remainingBugCount;
+    public long getBugCountFoundByCustomers() {
+        return this.bugCountFoundByCustomers;
     }
 
     public long getInvestedPersonHours() {

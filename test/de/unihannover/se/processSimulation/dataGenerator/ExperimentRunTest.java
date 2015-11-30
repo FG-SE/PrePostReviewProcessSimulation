@@ -113,9 +113,9 @@ public class ExperimentRunTest {
         assertEquals(median(11.5, 10.5, 12.5), result.getStoryCycleTimeMeanMedian(ReviewMode.PRE_COMMIT));
         assertEquals(median(21.5, 20.5, 22.5), result.getStoryCycleTimeMeanMedian(ReviewMode.POST_COMMIT));
 
-        assertEquals(median(2, 0, 4), result.getRemainingBugCountMedian(ReviewMode.NO_REVIEW));
-        assertEquals(median(12, 10, 14), result.getRemainingBugCountMedian(ReviewMode.PRE_COMMIT));
-        assertEquals(median(22, 20, 24), result.getRemainingBugCountMedian(ReviewMode.POST_COMMIT));
+        assertEquals(median(2, 0, 4), result.getBugCountMedian(ReviewMode.NO_REVIEW));
+        assertEquals(median(12, 10, 14), result.getBugCountMedian(ReviewMode.PRE_COMMIT));
+        assertEquals(median(22, 20, 24), result.getBugCountMedian(ReviewMode.POST_COMMIT));
 
         assertEquals(median(22, 21, 23), result.getFinishedStoryMedian());
 
