@@ -29,6 +29,7 @@ public class Parameters {
     private final int boardSearchCutoffLimit;
     private final double taskSwitchTimeBugFactor;
     private final double fixingBugRateFactor;
+    private final double followUpBugSpawnProbability;
     private final long genericRandomSeed;
 
     public Parameters(
@@ -53,6 +54,7 @@ public class Parameters {
                     int boardSearchCutoffLimit,
                     double taskSwitchTimeBugFactor,
                     double fixingBugRateFactor,
+                    double followUpBugSpawnProbability,
                     long genericRandomSeed,
                     DependencyGraphConstellation dependencyGraphConstellation) {
         this.implementationSkillDist = implementationSkillDist;
@@ -76,6 +78,7 @@ public class Parameters {
         this.boardSearchCutoffLimit = boardSearchCutoffLimit;
         this.taskSwitchTimeBugFactor = taskSwitchTimeBugFactor;
         this.fixingBugRateFactor = fixingBugRateFactor;
+        this.followUpBugSpawnProbability = followUpBugSpawnProbability;
         this.genericRandomSeed = genericRandomSeed;
         this.internalBugDist = internalBugDist;
     }
@@ -240,6 +243,10 @@ public class Parameters {
 
     public double getFixingBugRateFactor() {
         return this.fixingBugRateFactor;
+    }
+
+    public double getFollowUpBugSpawnProbability() {
+        return this.followUpBugSpawnProbability;
     }
 
     public long getGenericRandomSeed() {

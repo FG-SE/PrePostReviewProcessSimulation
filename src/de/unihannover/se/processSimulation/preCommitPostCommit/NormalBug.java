@@ -11,12 +11,10 @@ class NormalBug extends Bug {
         DEVELOPER_AND_CUSTOMER
     }
 
-    private final Task task;
     private final BugType type;
 
     public NormalBug(Task task, BugType type) {
-        super(task.getModel(), "bug");
-        this.task = task;
+        super(task, "bug");
         this.type = type;
     }
 
@@ -40,10 +38,6 @@ class NormalBug extends Bug {
             this.getModel().countBugFoundByCustomer();
         }
         this.getBoard().addUnassessedBug(this);
-    }
-
-    public Task getTask() {
-        return this.task;
     }
 
 }

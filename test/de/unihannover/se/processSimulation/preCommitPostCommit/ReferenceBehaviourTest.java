@@ -92,6 +92,7 @@ public class ReferenceBehaviourTest {
                         .copyWithChangedParam(ParameterType.IMPLEMENTATION_SKILL_STDDEV_FACTOR, 0.0)
                         .copyWithChangedParam(ParameterType.NUMBER_OF_DEVELOPERS, 2)
                         .copyWithChangedParam(ParameterType.GLOBAL_BUG_MODE, 0.0)
+                        .copyWithChangedParam(ParameterType.GLOBAL_BUG_TRIANGLE_WIDTH, 0.0)
                         .copyWithChangedParam(ParameterType.CONFLICT_PROBABILITY, 0.0)
                         .copyWithChangedParam(ParameterType.TASK_SWITCH_OVERHEAD_AFTER_ONE_HOUR, 0.0)
                         .copyWithChangedParam(ParameterType.MAX_TASK_SWITCH_OVERHEAD, 0.0)

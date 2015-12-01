@@ -24,12 +24,14 @@ abstract class Bug extends RealModelEntity {
 
     }
 
+    private final Task task;
     private boolean startedForDevelopers;
     private boolean startedForCustomers;
     private boolean fixed;
 
-    public Bug(RealProcessingModel model, String name) {
-        super(model, name);
+    public Bug(Task task, String name) {
+        super(task.getModel(), name);
+        this.task = task;
     }
 
     public final void handlePublishedForDevelopers() {
@@ -62,7 +64,16 @@ abstract class Bug extends RealModelEntity {
     public final void fix() {
         if (!this.fixed) {
             this.fixed = true;
+            this.task.handleBugFixed(this);
         }
+    }
+
+    public Task getTask() {
+        return this.task;
+    }
+
+    boolean isFixed() {
+        return this.fixed;
     }
 
 }

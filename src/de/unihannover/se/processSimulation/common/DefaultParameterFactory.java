@@ -45,6 +45,7 @@ public class DefaultParameterFactory extends ParametersFactory {
                         100,
                         0.0,
                         1.0,
+                        0.0,
                         this.getSeed(),
                         DependencyGraphConstellation.DIAMONDS);
     }

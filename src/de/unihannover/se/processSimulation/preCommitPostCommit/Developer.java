@@ -10,7 +10,6 @@ import desmoj.core.dist.ContDistConstant;
 import desmoj.core.simulator.TimeInstant;
 
 
-//TODO offener Punkt: Beim Mergen können auch Fehler entstehen
 class Developer extends RealModelProcess {
 
     private final BoolDistBernoulli reviewerSkill;
@@ -44,7 +43,7 @@ class Developer extends RealModelProcess {
 
             final Task taskWithReviewRemarks = board.getTaskWithReviewRemarksFor(this);
             if (taskWithReviewRemarks != null) {
-                taskWithReviewRemarks.performFixing(this);
+                taskWithReviewRemarks.performFixingOfReviewRemarks(this);
                 this.saveLastTimeIHadToDoWith(taskWithReviewRemarks);
                 this.getModel().countTime("fixingReviewRemarks", startTime);
                 continue;

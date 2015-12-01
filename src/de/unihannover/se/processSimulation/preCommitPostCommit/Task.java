@@ -26,7 +26,11 @@ abstract class Task extends RealModelEntity implements MemoryItem {
     private State state;
     private Developer implementor;
 
+    /**
+     * Bugs that can still be found in review, i.e. that were neither found in a previous review or fixed for another reason.
+     */
     private final List<Bug> lurkingBugs;
+
     private final List<Bug> bugsFixedInCommit;
     private final List<TimeSpan> implementationInterruptions;
     private Review currentReview;
@@ -82,11 +86,23 @@ abstract class Task extends RealModelEntity implements MemoryItem {
     }
 
     private void createBugs(TimeSpan relevantTime, boolean fixing) {
-        //TODO hier fehlt mir noch ein bisschen Zufall
+        //Anzahl zu erzeugender Bugs ermitteln
         double bugsToCreate = this.implementor.getImplementationSkill() * relevantTime.getTimeAsDouble(TimeUnit.HOURS);
         if (fixing) {
             bugsToCreate *= this.getModel().getParameters().getFixingBugRateFactor();
         }
+        for (final Task t : this.getPrerequisites()) {
+            for (final Bug b : t.lurkingBugs) {
+                assert !b.isFixed();
+                final boolean bugSpawnsFollowUpBug = this.getModel().getRandomBool(
+                                this.getModel().getParameters().getFollowUpBugSpawnProbability());
+                if (bugSpawnsFollowUpBug) {
+                    bugsToCreate *= 1;
+                }
+            }
+        }
+
+        //Bugs erzeugen
         while (bugsToCreate > 1) {
             this.createNormalBug();
             bugsToCreate -= 1.0;
@@ -97,7 +113,7 @@ abstract class Task extends RealModelEntity implements MemoryItem {
         }
 
         if (this.implementor.makesBlockerBug()) {
-            this.lurkingBugs.add(new GlobalBlockerBug(this.getModel()));
+            this.lurkingBugs.add(new GlobalBlockerBug(this));
         }
     }
 
@@ -171,7 +187,7 @@ abstract class Task extends RealModelEntity implements MemoryItem {
 
     protected abstract void handleFinishedTask();
 
-    public void performFixing(Developer dev) throws SuspendExecution {
+    public void performFixingOfReviewRemarks(Developer dev) throws SuspendExecution {
         assert this.state == State.REJECTED;
         assert this.getModel().getReviewMode() != ReviewMode.NO_REVIEW;
         assert this.implementor == dev;
@@ -234,15 +250,6 @@ abstract class Task extends RealModelEntity implements MemoryItem {
             this.getBoard().addBugToBeFixed(new BugfixTask(bug));
             break;
         }
-
-        //TODO Abarbeitung dauert länger, wenn auf dem Buggy-Task andere Dinge aufgebaut haben (probabilistisch)
-        //TODO noch in Arbeit befindliche abhängige Tasks verzögern sich (probabilitisch)
-        //z.B.: Bug hat Auswirkungen auf Nachfolger-Task:
-        //wenn der Nachfolger bereits vollständig abgeschlossen ist, verlängert sich der Bugfix-Task
-        //wenn der Nachfolger gerade in der Implementierung ist, verlängert sich die Implementierung
-        //wenn der Nachfolger gerade vor der Implementierung ist, passiert nichts
-        //wenn der Nachfolger schon
-
     }
 
     private TimeSpan sampleRemarkFixTime() {
@@ -304,6 +311,7 @@ abstract class Task extends RealModelEntity implements MemoryItem {
         }
         this.bugsFixedInCommit.clear();
         for (final Bug b : this.lurkingBugs) {
+            assert !b.isFixed();
             b.handlePublishedForDevelopers();
         }
     }
@@ -326,8 +334,14 @@ abstract class Task extends RealModelEntity implements MemoryItem {
 
     public void startLurkingBugsForCustomer() {
         for (final Bug b : this.lurkingBugs) {
+            assert !b.isFixed();
             b.handlePublishedForCustomers();
         }
+    }
+
+    void handleBugFixed(Bug bug) {
+        assert bug.isFixed();
+        this.lurkingBugs.remove(bug);
     }
 
     public abstract Story getStory();

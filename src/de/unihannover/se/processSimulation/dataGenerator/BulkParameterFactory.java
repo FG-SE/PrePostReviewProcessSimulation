@@ -11,9 +11,12 @@ import de.unihannover.se.processSimulation.common.Parameters;
 import de.unihannover.se.processSimulation.common.ParametersFactory;
 import de.unihannover.se.processSimulation.preCommitPostCommit.DependencyGraphConstellation;
 import desmoj.core.dist.BoolDistBernoulli;
+import desmoj.core.dist.ContDist;
 import desmoj.core.dist.ContDistBeta;
+import desmoj.core.dist.ContDistConstant;
 import desmoj.core.dist.ContDistExponential;
 import desmoj.core.dist.ContDistNormal;
+import desmoj.core.dist.ContDistTriangular;
 import desmoj.core.dist.Distribution;
 import desmoj.core.dist.MersenneTwisterRandomGenerator;
 import desmoj.core.simulator.Model;
@@ -25,7 +28,9 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
         IMPLEMENTATION_SKILL_MODE(Double.class, ""),
         IMPLEMENTATION_SKILL_STDDEV_FACTOR(Double.class, ""),
         REVIEW_SKILL_MODE(Double.class, ""),
+        REVIEW_SKILL_TRIANGLE_WIDTH(Double.class, ""),
         GLOBAL_BUG_MODE(Double.class, ""),
+        GLOBAL_BUG_TRIANGLE_WIDTH(Double.class, ""),
         CONFLICT_PROBABILITY(Double.class, ""),
         IMPLEMENTATION_TIME_MODE(Double.class, ""),
         BUGFIX_TASK_TIME_MODE(Double.class, ""),
@@ -44,6 +49,7 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
         BOARD_SEARCH_CUTOFF_LIMIT(Integer.class, ""),
         TASK_SWITCH_TIME_BUG_FACTOR(Double.class, ""),
         FIXING_BUG_RATE_FACTOR(Double.class, ""),
+        FOLLOW_UP_BUG_SPAWN_PROBABILITY(Double.class, ""),
         DEPENDENCY_GRAPH_CONSTELLATION(DependencyGraphConstellation.class, "");
 
 
@@ -115,6 +121,24 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
             }
         }
 
+        public ContDist triangularProbability(String name, double mostProbableValue, double width) {
+            assert width <= 1.0;
+            if (width == 0.0) {
+                return new ContDistConstant(this.owner, name, mostProbableValue, true, true);
+            }
+            double lower = mostProbableValue - width / 2.0;
+            double upper = mostProbableValue + width / 2.0;
+            if (upper > 1.0) {
+                lower -= upper - 1.0;
+                upper = 1.0;
+            }
+            if (lower < 0.0) {
+                upper -= lower;
+                lower = 0.0;
+            }
+            return this.setSeed(new ContDistTriangular(this.owner, name, lower, upper, mostProbableValue, true, true));
+        }
+
         public ContDistExponential exp(String name, double expectedValue) {
             return this.setSeed(new ContDistExponential(this.owner, name, expectedValue, true, true));
         }
@@ -166,7 +190,9 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
         ret.parameters.put(ParameterType.IMPLEMENTATION_SKILL_MODE, 0.16);
         ret.parameters.put(ParameterType.IMPLEMENTATION_SKILL_STDDEV_FACTOR, 0.1);
         ret.parameters.put(ParameterType.REVIEW_SKILL_MODE, 0.56);
+        ret.parameters.put(ParameterType.REVIEW_SKILL_TRIANGLE_WIDTH, 0.05);
         ret.parameters.put(ParameterType.GLOBAL_BUG_MODE, 0.001);
+        ret.parameters.put(ParameterType.GLOBAL_BUG_TRIANGLE_WIDTH, 0.001);
         ret.parameters.put(ParameterType.CONFLICT_PROBABILITY, 0.01);
         ret.parameters.put(ParameterType.IMPLEMENTATION_TIME_MODE, 17.3);
         ret.parameters.put(ParameterType.BUGFIX_TASK_TIME_MODE, 13.0);
@@ -185,6 +211,7 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
         ret.parameters.put(ParameterType.BOARD_SEARCH_CUTOFF_LIMIT, 100);
         ret.parameters.put(ParameterType.TASK_SWITCH_TIME_BUG_FACTOR, 0.0);
         ret.parameters.put(ParameterType.FIXING_BUG_RATE_FACTOR, 0.5);
+        ret.parameters.put(ParameterType.FOLLOW_UP_BUG_SPAWN_PROBABILITY, 0.05);
         ret.parameters.put(ParameterType.DEPENDENCY_GRAPH_CONSTELLATION, DependencyGraphConstellation.REALISTIC);
         return ret;
     }
@@ -196,8 +223,8 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
         final DistributionBuilder b = new DistributionBuilder(r, owner);
         return new Parameters(
                         b.posNormal("implementationSkillDist", this.getParamD(ParameterType.IMPLEMENTATION_SKILL_MODE), this.getParamD(ParameterType.IMPLEMENTATION_SKILL_STDDEV_FACTOR)),
-                        b.beta("reviewSkillDist", this.getParamD(ParameterType.REVIEW_SKILL_MODE)),
-                        b.beta("globalBugDist", this.getParamD(ParameterType.GLOBAL_BUG_MODE)),
+                        b.triangularProbability("reviewSkillDist", this.getParamD(ParameterType.REVIEW_SKILL_MODE), this.getParamD(ParameterType.REVIEW_SKILL_TRIANGLE_WIDTH)),
+                        b.triangularProbability("globalBugDist", this.getParamD(ParameterType.GLOBAL_BUG_MODE), this.getParamD(ParameterType.GLOBAL_BUG_TRIANGLE_WIDTH)),
                         b.bernoulli("conflictDist", this.getParamD(ParameterType.CONFLICT_PROBABILITY)),
                         b.logNormal("implementationTimeDist", this.getParamD(ParameterType.IMPLEMENTATION_TIME_MODE), this.getParamD(ParameterType.IMPLEMENTATION_TIME_MODE) / 2.0),
                         b.exp("bugfixTaskTimeDist", this.getParamD(ParameterType.BUGFIX_TASK_TIME_MODE)),
@@ -216,6 +243,7 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
                         this.getParamI(ParameterType.BOARD_SEARCH_CUTOFF_LIMIT),
                         this.getParamD(ParameterType.TASK_SWITCH_TIME_BUG_FACTOR),
                         this.getParamD(ParameterType.FIXING_BUG_RATE_FACTOR),
+                        this.getParamD(ParameterType.FOLLOW_UP_BUG_SPAWN_PROBABILITY),
                         nextLong(r),
                         (DependencyGraphConstellation) this.getParam(ParameterType.DEPENDENCY_GRAPH_CONSTELLATION));
     }
