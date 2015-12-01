@@ -53,11 +53,14 @@ abstract class Task extends RealModelEntity implements MemoryItem {
 
         //mit Jens abgestimmt: erst update, dann Task-Switch-Overhead
         this.getSourceRepository().startWork(this);
-        this.handleTaskSwitchOverhead(dev);
+        final TimeSpan taskSwitchTime = this.handleTaskSwitchOverhead(dev);
         final TimeSpan implementationTime = this.getImplementationTime();
         this.implementor.hold(implementationTime);
 
-        this.createBugs(implementationTime);
+        final TimeSpan bugTime = TimeOperations.add(
+                        implementationTime,
+                        TimeOperations.multiply(taskSwitchTime, this.getModel().getParameters().getTaskSwitchTimeBugFactor()));
+        this.createBugs(bugTime, this instanceof BugfixTask);
         this.endImplementation();
     }
 
@@ -78,9 +81,12 @@ abstract class Task extends RealModelEntity implements MemoryItem {
         }
     }
 
-    private void createBugs(TimeSpan relevantTime) {
+    private void createBugs(TimeSpan relevantTime, boolean fixing) {
         //TODO hier fehlt mir noch ein bisschen Zufall
         double bugsToCreate = this.implementor.getImplementationSkill() * relevantTime.getTimeAsDouble(TimeUnit.HOURS);
+        if (fixing) {
+            bugsToCreate *= this.getModel().getParameters().getFixingBugRateFactor();
+        }
         while (bugsToCreate > 1) {
             this.createNormalBug();
             bugsToCreate -= 1.0;
@@ -178,7 +184,7 @@ abstract class Task extends RealModelEntity implements MemoryItem {
             this.getSourceRepository().startWork(this);
         }
 
-        this.handleTaskSwitchOverhead(dev);
+        final TimeSpan taskSwitchTime = this.handleTaskSwitchOverhead(dev);
 
         //An sich kann es neben dem Einbauen neuer Bugs auch vorkommen, dass bestehende und bereits angemerkte
         //  Bugs nicht wirklich gefixt werden. Das wird hier vernachlässigt.
@@ -191,7 +197,10 @@ abstract class Task extends RealModelEntity implements MemoryItem {
         this.lurkingBugs.removeAll(this.currentReview.getRemarks());
         this.bugsFixedInCommit.addAll(this.currentReview.getRemarks());
 
-        this.createBugs(timeForFixing);
+        final TimeSpan bugTime = TimeOperations.add(
+                        timeForFixing,
+                        TimeOperations.multiply(taskSwitchTime, this.getModel().getParameters().getTaskSwitchTimeBugFactor()));
+        this.createBugs(bugTime, true);
         this.endImplementation();
     }
 
@@ -240,7 +249,7 @@ abstract class Task extends RealModelEntity implements MemoryItem {
         return this.getModel().getParameters().getReviewRemarkFixDist().sampleTimeSpan(TimeUnit.HOURS);
     }
 
-    private void handleTaskSwitchOverhead(Developer dev) throws SuspendExecution {
+    private TimeSpan handleTaskSwitchOverhead(Developer dev) throws SuspendExecution {
         final TimeSpan taskSwitchOverhead = this.determineTaskSwitchOverhead(dev);
         assert taskSwitchOverhead.getTimeAsDouble(TimeUnit.HOURS) < 8.0 :
             "more than a day? something must be wrong " + taskSwitchOverhead;
@@ -249,6 +258,7 @@ abstract class Task extends RealModelEntity implements MemoryItem {
             this.sendTraceNote("has task switch overhead switching to " + this);
             dev.hold(taskSwitchOverhead);
         }
+        return taskSwitchOverhead;
     }
 
     private TimeSpan determineTaskSwitchOverhead(Developer dev) {

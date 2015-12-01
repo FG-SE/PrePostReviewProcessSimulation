@@ -43,6 +43,8 @@ public class DefaultParameterFactory extends ParametersFactory {
                         new TimeSpan(5, TimeUnit.MINUTES),
                         new TimeSpan(1, TimeUnit.HOURS),
                         100,
+                        0.0,
+                        1.0,
                         this.getSeed(),
                         DependencyGraphConstellation.DIAMONDS);
     }

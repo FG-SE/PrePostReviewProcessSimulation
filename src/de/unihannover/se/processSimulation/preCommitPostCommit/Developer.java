@@ -10,7 +10,6 @@ import desmoj.core.dist.ContDistConstant;
 import desmoj.core.simulator.TimeInstant;
 
 
-//TODO offener Punkt: Taskwechsel führt auch zu höherer Bugrate
 //TODO offener Punkt: Beim Mergen können auch Fehler entstehen
 class Developer extends RealModelProcess {
 

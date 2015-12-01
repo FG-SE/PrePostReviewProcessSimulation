@@ -1,8 +1,12 @@
 apply plugin:'java'
 apply plugin:'eclipse'
+apply plugin:'application'
 
 sourceCompatibility = 1.8
 version = '1.0'
+
+mainClassName = "de.unihannover.se.processSimulation.dataGenerator.BulkFileExecutor"
+applicationDefaultJvmArgs = ["-Djava.library.path=./lib/"]
 
 tasks.compileJava.options.encoding = 'UTF-8'
 

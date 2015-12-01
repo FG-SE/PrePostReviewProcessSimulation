@@ -6,6 +6,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import co.paralleluniverse.common.util.Pair;
@@ -99,7 +100,7 @@ public class BulkFileExecutor {
             int runCount = 1;
             @Override
             public void handleResult(ExperimentResult no, ExperimentResult pre, ExperimentResult post) {
-                System.out.println("Executing run " + this.runCount + " for input line " + lineNumber + " ...");
+                System.out.println("Executing run " + this.runCount + " for input line " + lineNumber + " ... " + new Date());
                 System.out.println("story points " + (no == null ? "X" : no.getFinishedStoryPoints())
                                 + ", " + pre.getFinishedStoryPoints()
                                 + ", " + post.getFinishedStoryPoints());

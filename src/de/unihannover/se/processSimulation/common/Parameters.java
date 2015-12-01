@@ -27,6 +27,8 @@ public class Parameters {
     private final BoolDist internalBugDist;
     private final DependencyGraphConstellation dependencyGraphConstellation;
     private final int boardSearchCutoffLimit;
+    private final double taskSwitchTimeBugFactor;
+    private final double fixingBugRateFactor;
     private final long genericRandomSeed;
 
     public Parameters(
@@ -49,6 +51,8 @@ public class Parameters {
                     TimeSpan taskSwitchOverheadAfterOneHour,
                     TimeSpan maxTaskSwitchOverhead,
                     int boardSearchCutoffLimit,
+                    double taskSwitchTimeBugFactor,
+                    double fixingBugRateFactor,
                     long genericRandomSeed,
                     DependencyGraphConstellation dependencyGraphConstellation) {
         this.implementationSkillDist = implementationSkillDist;
@@ -70,6 +74,8 @@ public class Parameters {
         this.maxTaskSwitchOverhead = maxTaskSwitchOverhead;
         this.dependencyGraphConstellation = dependencyGraphConstellation;
         this.boardSearchCutoffLimit = boardSearchCutoffLimit;
+        this.taskSwitchTimeBugFactor = taskSwitchTimeBugFactor;
+        this.fixingBugRateFactor = fixingBugRateFactor;
         this.genericRandomSeed = genericRandomSeed;
         this.internalBugDist = internalBugDist;
     }
@@ -226,6 +232,14 @@ public class Parameters {
 
     public int getBoardSearchCutoffLimit() {
         return this.boardSearchCutoffLimit;
+    }
+
+    public double getTaskSwitchTimeBugFactor() {
+        return this.taskSwitchTimeBugFactor;
+    }
+
+    public double getFixingBugRateFactor() {
+        return this.fixingBugRateFactor;
     }
 
     public long getGenericRandomSeed() {

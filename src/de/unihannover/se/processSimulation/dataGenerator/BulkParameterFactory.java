@@ -42,6 +42,8 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
         TASK_SWITCH_OVERHEAD_AFTER_ONE_HOUR(Double.class, ""),
         MAX_TASK_SWITCH_OVERHEAD(Double.class, ""),
         BOARD_SEARCH_CUTOFF_LIMIT(Integer.class, ""),
+        TASK_SWITCH_TIME_BUG_FACTOR(Double.class, ""),
+        FIXING_BUG_RATE_FACTOR(Double.class, ""),
         DEPENDENCY_GRAPH_CONSTELLATION(DependencyGraphConstellation.class, "");
 
 
@@ -181,6 +183,8 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
         ret.parameters.put(ParameterType.TASK_SWITCH_OVERHEAD_AFTER_ONE_HOUR, new TimeSpan(5, TimeUnit.MINUTES).getTimeAsDouble(TimeUnit.HOURS));
         ret.parameters.put(ParameterType.MAX_TASK_SWITCH_OVERHEAD, new TimeSpan(30, TimeUnit.MINUTES).getTimeAsDouble(TimeUnit.HOURS));
         ret.parameters.put(ParameterType.BOARD_SEARCH_CUTOFF_LIMIT, 100);
+        ret.parameters.put(ParameterType.TASK_SWITCH_TIME_BUG_FACTOR, 0.0);
+        ret.parameters.put(ParameterType.FIXING_BUG_RATE_FACTOR, 0.5);
         ret.parameters.put(ParameterType.DEPENDENCY_GRAPH_CONSTELLATION, DependencyGraphConstellation.REALISTIC);
         return ret;
     }
@@ -210,6 +214,8 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
                         new TimeSpan(this.getParamD(ParameterType.TASK_SWITCH_OVERHEAD_AFTER_ONE_HOUR), TimeUnit.HOURS),
                         new TimeSpan(this.getParamD(ParameterType.MAX_TASK_SWITCH_OVERHEAD), TimeUnit.HOURS),
                         this.getParamI(ParameterType.BOARD_SEARCH_CUTOFF_LIMIT),
+                        this.getParamD(ParameterType.TASK_SWITCH_TIME_BUG_FACTOR),
+                        this.getParamD(ParameterType.FIXING_BUG_RATE_FACTOR),
                         nextLong(r),
                         (DependencyGraphConstellation) this.getParam(ParameterType.DEPENDENCY_GRAPH_CONSTELLATION));
     }
