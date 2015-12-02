@@ -21,14 +21,9 @@ import de.unihannover.se.processSimulation.preCommitPostCommit.DependencyGraphCo
 public class BulkFileExecutor {
 
     public static void main(String[] args) throws Exception {
-        StatisticsUtil.checkInit();
-        try {
-            final List<ParameterType> paramNames = readParamNames(new File("sobolStuff/params.txt"));
-            System.out.println("Read param names: " + paramNames);
-            executeBulk(paramNames, new File("sobolStuff/sobolParameterSets.txt"), new File("sobolStuff/results.txt"));
-        } finally {
-            StatisticsUtil.close();
-        }
+        final List<ParameterType> paramNames = readParamNames(new File("sobolStuff/params.txt"));
+        System.out.println("Read param names: " + paramNames);
+        executeBulk(paramNames, new File("sobolStuff/sobolParameterSets.txt"), new File("sobolStuff/results.txt"));
     }
 
     public static List<ParameterType> readParamNames(File filename) throws IOException {

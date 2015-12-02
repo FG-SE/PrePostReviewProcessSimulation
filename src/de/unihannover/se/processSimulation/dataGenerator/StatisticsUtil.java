@@ -1,49 +1,37 @@
 package de.unihannover.se.processSimulation.dataGenerator;
 
-import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 
-import org.rosuda.REngine.REXP;
-import org.rosuda.REngine.REXPMismatchException;
-import org.rosuda.REngine.REngine;
-import org.rosuda.REngine.REngineException;
+import org.apache.commons.math.MathException;
+import org.apache.commons.math.distribution.BinomialDistribution;
+import org.apache.commons.math.distribution.BinomialDistributionImpl;
 
 public class StatisticsUtil {
 
-    private static REngine rengine;
-
-    static {
-        try {
-            rengine = REngine.engineForClass("org.rosuda.REngine.JRI.JRIEngine");
-        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException
-                        | InvocationTargetException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     public static MedianWithConfidenceInterval median(double[] data, double p) {
+        Arrays.sort(data);
+        //When the array is really short, the intended p value can possibly not be reached. This is not checked here
+        //  and has to be taken care of by the researcher.
+        return new MedianWithConfidenceInterval(
+                data.length % 2 == 0 ? ((data[data.length / 2 - 1] + data[data.length / 2]) / 2.0) : data[data.length / 2],
+                data[qBinom(p / 2.0, data.length, 0.5) - 1],
+                data[Math.min(qBinom(1.0 - p / 2.0, data.length, 0.5), data.length - 1)]);
+    }
+
+    static int qBinom(double q, int trials, double p) {
         try {
-            rengine.assign("x", data);
-            final double median = rengine.parseAndEval("median(x)").asDouble();
-            final double lower = p / 2.0;
-            final double upper = 1.0 - lower;
-            final REXP confIntv = rengine.parseAndEval("sort(x)[c(max(1,qbinom(" + lower + ", length(x), 0.5)),qbinom(" + upper + ", length(x), 0.5))]");
-            //When the array is really short, the intended p value can possibly not be reached. This is not checked here
-            //  and has to be taken care of by the researcher.
-            return new MedianWithConfidenceInterval(median, confIntv.asDoubles());
-        } catch (final REngineException | REXPMismatchException e) {
+            final BinomialDistribution d = new BinomialDistributionImpl(trials, p);
+            final int result = d.inverseCumulativeProbability(q);
+            if (result == -1) {
+                return 0;
+            } else if (result == Integer.MAX_VALUE) {
+                return trials;
+            } else {
+                return result + 1;
+            }
+        } catch (final MathException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public static void checkInit() {
-        final double median = median(new double[] {1.0, 2.0, 3.0, 4.0, 5.0}, 0.05).getMedian();
-        if (median != 3.0) {
-            throw new RuntimeException("something is wrong: " + median);
-        }
-    }
-
-    public static void close() {
-        rengine.close();
     }
 
 }

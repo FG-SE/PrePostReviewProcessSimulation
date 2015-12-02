@@ -1,7 +1,5 @@
 package de.unihannover.se.processSimulation.dataGenerator;
 
-import java.util.Arrays;
-
 public class MedianWithConfidenceInterval {
 
     private static final double EPSILON = 0.00000001;
@@ -11,12 +9,15 @@ public class MedianWithConfidenceInterval {
     private final double upperConfidence;
 
     MedianWithConfidenceInterval(double median, double[] confidence) {
-        assert confidence.length == 2;
+        this(median, confidence[0], confidence[1]);
+    }
+
+    MedianWithConfidenceInterval(double median, double lower, double upper) {
         this.median = median;
-        this.lowerConfidence = confidence[0];
-        this.upperConfidence = confidence[1];
-        assert this.lowerConfidence <= this.median : "Invalid lower confidence " + median + " " + Arrays.toString(confidence);
-        assert this.median <= this.upperConfidence : "Invalid upper confidence " + median + " " + Arrays.toString(confidence);
+        this.lowerConfidence = lower;
+        this.upperConfidence = upper;
+        assert this.lowerConfidence <= this.median : "Invalid lower confidence " + median + " " + lower + " " + upper;
+        assert this.median <= this.upperConfidence : "Invalid upper confidence " + median + " " + lower + " " + upper;
     }
 
     @Override

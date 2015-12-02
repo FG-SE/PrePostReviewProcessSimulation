@@ -22,7 +22,6 @@ import de.unihannover.se.processSimulation.dataGenerator.ExperimentRun.SingleRun
 import de.unihannover.se.processSimulation.dataGenerator.ExperimentRunSettings;
 import de.unihannover.se.processSimulation.dataGenerator.ExperimentRunSettings.ExperimentRunParameters;
 import de.unihannover.se.processSimulation.dataGenerator.MedianWithConfidenceInterval;
-import de.unihannover.se.processSimulation.dataGenerator.StatisticsUtil;
 
 public class ServerMain extends AbstractHandler {
 
@@ -216,15 +215,11 @@ public class ServerMain extends AbstractHandler {
     }
 
     public static void main(String[] args) throws Exception {
-        StatisticsUtil.checkInit();
-
         final Server server = new Server(8080);
         server.setHandler(new ServerMain());
 
         server.start();
         server.join();
-
-        StatisticsUtil.close();
     }
 }
 

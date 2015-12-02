@@ -105,9 +105,9 @@ public class ExperimentRunTest {
                         .copyWithChangedParam(ExperimentRunParameters.CONFIDENCE_P, 0.05);
         final ExperimentRun result = ExperimentRun.perform(settings, stub, f, dummyCallback());
 
-        assertEquals(median(6, 2, 9), result.getFinishedStoryPointsMedian(ReviewMode.NO_REVIEW));
-        assertEquals(median(16, 12, 19), result.getFinishedStoryPointsMedian(ReviewMode.PRE_COMMIT));
-        assertEquals(median(26, 22, 29), result.getFinishedStoryPointsMedian(ReviewMode.POST_COMMIT));
+        assertEquals(median(6, 2, 10), result.getFinishedStoryPointsMedian(ReviewMode.NO_REVIEW));
+        assertEquals(median(16, 12, 20), result.getFinishedStoryPointsMedian(ReviewMode.PRE_COMMIT));
+        assertEquals(median(26, 22, 30), result.getFinishedStoryPointsMedian(ReviewMode.POST_COMMIT));
 
         assertEquals(median(1.5, 0.5, 2.5), result.getStoryCycleTimeMeanMedian(ReviewMode.NO_REVIEW));
         assertEquals(median(11.5, 10.5, 12.5), result.getStoryCycleTimeMeanMedian(ReviewMode.PRE_COMMIT));
@@ -117,11 +117,11 @@ public class ExperimentRunTest {
         assertEquals(median(12, 10, 14), result.getBugCountMedian(ReviewMode.PRE_COMMIT));
         assertEquals(median(22, 20, 24), result.getBugCountMedian(ReviewMode.POST_COMMIT));
 
-        assertEquals(median(22, 21, 23), result.getFinishedStoryMedian());
+        assertEquals(median(22, 21, 24), result.getFinishedStoryMedian());
 
-        assertEquals(median(10/21.0, 10/25.0, 10/18.0), result.getFactorStoryPoints());
+        assertEquals(median(10/21.0, 10/25.0, 10/17.0), result.getFactorStoryPoints());
         assertEquals(median(10/16.5, 10/17.5, 10/15.5), result.getFactorCycleTime());
-        assertEquals(median(10/17.0, 10/19.0, 10/16.0), result.getFactorBugs());
+        assertEquals(median(10/17.0, 10/19.0, 10/15.0), result.getFactorBugs());
 
         assertEquals(ExperimentRunSummary.POST_BETTER_STORY_POINTS, result.getSummary());
         assertTrue(result.isSummaryStatisticallySignificant());

@@ -17,7 +17,6 @@ import org.apache.activemq.ActiveMQConnectionFactory;
 
 import de.unihannover.se.processSimulation.dataGenerator.BulkFileExecutor;
 import de.unihannover.se.processSimulation.dataGenerator.BulkParameterFactory.ParameterType;
-import de.unihannover.se.processSimulation.dataGenerator.StatisticsUtil;
 
 public class ClusterWorker {
 
@@ -26,8 +25,6 @@ public class ClusterWorker {
     public static void main(String[] args) throws Exception {
         final String url = args[0]; //"tcp://TOBI:61616"
         final String ownId = args[1];
-
-        StatisticsUtil.checkInit();
 
         String fullOwnId = InetAddress.getLocalHost().getHostName()
                         + "_" + System.getProperty("user.name")
@@ -43,7 +40,6 @@ public class ClusterWorker {
             connection.start();
             performWork(connection, workDir);
         } finally {
-            StatisticsUtil.close();
             connection.close();
         }
     }
