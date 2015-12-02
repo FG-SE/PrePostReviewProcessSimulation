@@ -14,6 +14,7 @@ import javax.jms.Session;
 import javax.jms.TextMessage;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
+import org.apache.activemq.ActiveMQPrefetchPolicy;
 
 import de.unihannover.se.processSimulation.dataGenerator.BulkFileExecutor;
 import de.unihannover.se.processSimulation.dataGenerator.BulkParameterFactory.ParameterType;
@@ -35,6 +36,9 @@ public class ClusterWorker {
         workDir.mkdir();
 
         final ActiveMQConnectionFactory connFactory = new ActiveMQConnectionFactory(url);
+        final ActiveMQPrefetchPolicy prefetchPolicy = new ActiveMQPrefetchPolicy();
+        prefetchPolicy.setQueuePrefetch(0);
+        connFactory.setPrefetchPolicy(prefetchPolicy);
         final Connection connection = connFactory.createConnection();
         try {
             connection.start();
