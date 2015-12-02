@@ -1,6 +1,7 @@
 package de.unihannover.se.processSimulation.dataGenerator;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -20,16 +21,17 @@ import de.unihannover.se.processSimulation.preCommitPostCommit.DependencyGraphCo
 public class BulkFileExecutor {
 
     public static void main(String[] args) throws Exception {
+        StatisticsUtil.checkInit();
         try {
-            final List<ParameterType> paramNames = readParamNames("sobolStuff/params.txt");
+            final List<ParameterType> paramNames = readParamNames(new File("sobolStuff/params.txt"));
             System.out.println("Read param names: " + paramNames);
-            executeBulk(paramNames, "sobolStuff/sobolParameterSets.txt", "sobolStuff/results.txt");
+            executeBulk(paramNames, new File("sobolStuff/sobolParameterSets.txt"), new File("sobolStuff/results.txt"));
         } finally {
             StatisticsUtil.close();
         }
     }
 
-    public static List<ParameterType> readParamNames(String filename) throws IOException {
+    public static List<ParameterType> readParamNames(File filename) throws IOException {
         final List<ParameterType> ret = new ArrayList<>();
         try (BufferedReader r = new BufferedReader(new FileReader(filename))) {
             String line;
@@ -40,7 +42,7 @@ public class BulkFileExecutor {
         return ret;
     }
 
-    private static void executeBulk(List<ParameterType> paramNames, String inputFile, String outputFile) throws Exception {
+    public static void executeBulk(List<ParameterType> paramNames, File inputFile, File outputFile) throws Exception {
         try (BufferedReader r = new BufferedReader(new FileReader(inputFile))) {
             try (Writer output = new FileWriter(outputFile)) {
                 String line;

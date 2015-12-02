@@ -1,6 +1,7 @@
 package de.unihannover.se.processSimulation.dataGenerator;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -14,17 +15,17 @@ import de.unihannover.se.processSimulation.dataGenerator.BulkParameterFactory.Pa
 public class ParameterAndResultToArffMerger {
 
     public static void main(String[] args) throws Exception {
-        mergeToArff("sobolStuff/params.txt",
-                    "sobolStuff/sobolParameterSets.txt",
-                    "sobolStuff/results.txt",
-                    "sobolStuff/combined.arff");
+        mergeToArff(new File("sobolStuff/params.txt"),
+                    new File("sobolStuff/sobolParameterSets.txt"),
+                    new File("sobolStuff/results.txt"),
+                    new File("sobolStuff/combined.arff"));
     }
 
     private static void mergeToArff(
-                    String paramsFile,
-                    String parameterSetsFile,
-                    String resultsFile,
-                    String outputFile) throws Exception {
+                    File paramsFile,
+                    File parameterSetsFile,
+                    File resultsFile,
+                    File outputFile) throws Exception {
         final List<ParameterType> paramNames = BulkFileExecutor.readParamNames(paramsFile);
         try (BufferedReader inputs = new BufferedReader(new FileReader(parameterSetsFile))) {
             try (BufferedReader results = new BufferedReader(new FileReader(resultsFile))) {

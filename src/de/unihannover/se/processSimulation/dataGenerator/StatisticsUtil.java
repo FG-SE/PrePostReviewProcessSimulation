@@ -35,6 +35,13 @@ public class StatisticsUtil {
         }
     }
 
+    public static void checkInit() {
+        final double median = median(new double[] {1.0, 2.0, 3.0, 4.0, 5.0}, 0.05).getMedian();
+        if (median != 3.0) {
+            throw new RuntimeException("something is wrong: " + median);
+        }
+    }
+
     public static void close() {
         rengine.close();
     }

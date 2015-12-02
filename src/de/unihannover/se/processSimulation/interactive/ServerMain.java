@@ -216,6 +216,8 @@ public class ServerMain extends AbstractHandler {
     }
 
     public static void main(String[] args) throws Exception {
+        StatisticsUtil.checkInit();
+
         final Server server = new Server(8080);
         server.setHandler(new ServerMain());
 
