@@ -1,3 +1,20 @@
+/**
+    This file is part of LUH PrePostReview Process Simulation.
+
+    LUH PrePostReview Process Simulation is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LUH PrePostReview Process Simulation is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with LUH PrePostReview Process Simulation. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package de.unihannover.se.processSimulation.dataGenerator;
 
 import java.io.BufferedReader;
@@ -17,6 +34,8 @@ import de.unihannover.se.processSimulation.dataGenerator.ExperimentRun.Experimen
 import de.unihannover.se.processSimulation.dataGenerator.ExperimentRun.SingleRunCallback;
 import de.unihannover.se.processSimulation.dataGenerator.ExperimentRunSettings.ExperimentRunParameters;
 import de.unihannover.se.processSimulation.preCommitPostCommit.DependencyGraphConstellation;
+import desmoj.core.simulator.CoroutineModel;
+import desmoj.core.simulator.Experiment;
 
 public class BulkFileExecutor {
 
@@ -38,6 +57,8 @@ public class BulkFileExecutor {
     }
 
     public static void executeBulk(List<ParameterType> paramNames, File inputFile, File outputFile) throws Exception {
+        Experiment.setCoroutineModel(CoroutineModel.FIBERS);
+
         try (BufferedReader r = new BufferedReader(new FileReader(inputFile))) {
             try (Writer output = new FileWriter(outputFile)) {
                 String line;
@@ -92,7 +113,7 @@ public class BulkFileExecutor {
     private static ExperimentRun executeSingle(BulkParameterFactory parameters, int lineNumber) {
         final ExperimentRunSettings runSettings = ExperimentRunSettings.defaultSettings()
                         .copyWithChangedParam(ExperimentRunParameters.MIN_RUNS, 20.0)
-                        .copyWithChangedParam(ExperimentRunParameters.MAX_RUNS, 1000.0);
+                        .copyWithChangedParam(ExperimentRunParameters.MAX_RUNS, 1500.0);
         return ExperimentRun.perform(runSettings, DataGenerator::runExperiment, parameters, new SingleRunCallback() {
             int runCount = 1;
             @Override

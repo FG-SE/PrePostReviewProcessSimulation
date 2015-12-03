@@ -1,3 +1,20 @@
+/**
+    This file is part of LUH PrePostReview Process Simulation.
+
+    LUH PrePostReview Process Simulation is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LUH PrePostReview Process Simulation is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with LUH PrePostReview Process Simulation. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package de.unihannover.se.processSimulation.preCommitPostCommit;
 
 import java.util.ArrayList;
@@ -16,6 +33,7 @@ import desmoj.core.simulator.Experiment;
 import desmoj.core.simulator.ExternalEventReset;
 import desmoj.core.simulator.Model;
 import desmoj.core.simulator.TimeInstant;
+import desmoj.core.simulator.TimeOperations;
 import desmoj.core.simulator.TimeSpan;
 import desmoj.core.statistic.Aggregate;
 import desmoj.core.statistic.Count;
@@ -115,7 +133,7 @@ public class RealProcessingModel extends Model {
         return this.sourceRepository;
     }
 
-    public void countFinishedStory(Story story) {
+    void countFinishedStory(Story story) {
         final TimeSpan cycleTime = story.getCycleTime(this.presentTime());
         this.sendTraceNote("Story " + story + " finished after " + cycleTime);
         this.storyCycleTime.update(cycleTime);
@@ -130,7 +148,7 @@ public class RealProcessingModel extends Model {
         return this.parameters;
     }
 
-    public boolean getRandomBool(double probabilityForTrue) {
+    boolean getRandomBool(double probabilityForTrue) {
         return this.genericRandom.nextDouble() < probabilityForTrue;
     }
 
@@ -172,14 +190,14 @@ public class RealProcessingModel extends Model {
         return this.dependencyGraphGenerator;
     }
 
-    public void countTime(String typeOfWork, TimeInstant startTime) {
+    void countTime(String typeOfWork, TimeInstant startTime) {
         Aggregate agg = this.timeCounters.get(typeOfWork);
         if (agg == null) {
             agg = new Aggregate(this, "timeFor_" + typeOfWork, true, true);
             agg.setShowTimeSpansInReport(true);
             this.timeCounters.put(typeOfWork, agg);
         }
-        agg.update(Util.timeBetween(startTime, this.presentTime()));
+        agg.update(TimeOperations.diff(this.presentTime(), startTime));
     }
 
 }

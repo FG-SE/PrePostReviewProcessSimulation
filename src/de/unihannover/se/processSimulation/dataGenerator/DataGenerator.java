@@ -1,6 +1,22 @@
+/**
+    This file is part of LUH PrePostReview Process Simulation.
+
+    LUH PrePostReview Process Simulation is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LUH PrePostReview Process Simulation is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with LUH PrePostReview Process Simulation. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package de.unihannover.se.processSimulation.dataGenerator;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
@@ -12,31 +28,6 @@ import desmoj.core.simulator.Experiment;
 import desmoj.core.simulator.TimeInstant;
 
 public class DataGenerator {
-
-    public static final String STORYPOINTS = "storypoints";
-    public static final String CYCLETIME_MEAN = "cycletimeMean";
-    public static final String CYCLETIME_STD_DEV = "cycletimeStdDev";
-    public static final String STARTED_STORIES = "startedStories";
-    public static final String FINISHED_STORIES = "finishedStories";
-    public static final String REMAINING_BUGS = "remainingBugs";
-    public static final String SIMULATION_DURATION = "simulationDuration";
-
-    static void registerResultAttributes(final DataWriter rawResultWriter) throws IOException {
-        rawResultWriter.addNumericAttribute(ReviewMode.PRE_COMMIT + STORYPOINTS);
-        rawResultWriter.addNumericAttribute(ReviewMode.PRE_COMMIT + CYCLETIME_MEAN);
-        rawResultWriter.addNumericAttribute(ReviewMode.PRE_COMMIT + CYCLETIME_STD_DEV);
-        rawResultWriter.addNumericAttribute(ReviewMode.PRE_COMMIT + STARTED_STORIES);
-        rawResultWriter.addNumericAttribute(ReviewMode.PRE_COMMIT + FINISHED_STORIES);
-        rawResultWriter.addNumericAttribute(ReviewMode.PRE_COMMIT + REMAINING_BUGS);
-        rawResultWriter.addNumericAttribute(ReviewMode.PRE_COMMIT + SIMULATION_DURATION);
-        rawResultWriter.addNumericAttribute(ReviewMode.POST_COMMIT + STORYPOINTS);
-        rawResultWriter.addNumericAttribute(ReviewMode.POST_COMMIT + CYCLETIME_MEAN);
-        rawResultWriter.addNumericAttribute(ReviewMode.POST_COMMIT + CYCLETIME_STD_DEV);
-        rawResultWriter.addNumericAttribute(ReviewMode.POST_COMMIT + STARTED_STORIES);
-        rawResultWriter.addNumericAttribute(ReviewMode.POST_COMMIT + FINISHED_STORIES);
-        rawResultWriter.addNumericAttribute(ReviewMode.POST_COMMIT + REMAINING_BUGS);
-        rawResultWriter.addNumericAttribute(ReviewMode.POST_COMMIT + SIMULATION_DURATION);
-    }
 
     public static ExperimentResult runExperiment(
                     final ParametersFactory p, ReviewMode mode, boolean report, String runId) {

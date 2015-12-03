@@ -1,10 +1,23 @@
+/**
+    This file is part of LUH PrePostReview Process Simulation.
+
+    LUH PrePostReview Process Simulation is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LUH PrePostReview Process Simulation is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with LUH PrePostReview Process Simulation. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package de.unihannover.se.processSimulation.dataGenerator;
 
-import java.io.IOException;
 import java.util.EnumMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
 import de.unihannover.se.processSimulation.common.Parameters;
@@ -258,25 +271,6 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
         return copy;
     }
 
-    public BulkParameterFactory copyWithChangedParamMult(ParameterType paramId, double factor) {
-        final BulkParameterFactory copy = this.copy();
-        final Object oldValue = copy.getParam(paramId);
-        if (paramId.getType().equals(Double.class)) {
-            copy.setParam(paramId, ((Double) oldValue) * factor);
-        } else if (paramId.getType().equals(Integer.class)) {
-            final double dv = ((Integer) oldValue) * factor;
-            final long rounded = Math.round(dv);
-            if (rounded != ((Integer) oldValue).intValue()) {
-                copy.setParam(paramId, (int) rounded);
-            } else {
-                copy.setParam(paramId, (int) (factor > 1 ? rounded + 1 : rounded - 1));
-            }
-        } else {
-            throw new RuntimeException("Parameter " + paramId + " has unsupported type " + oldValue.getClass());
-        }
-        return copy;
-    }
-
     public BulkParameterFactory copyWithChangedParam(ParameterType paramId, Object newValue) {
         final BulkParameterFactory copy = this.copy();
         copy.setParam(paramId, newValue);
@@ -289,13 +283,6 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
         } catch (final CloneNotSupportedException e) {
             throw new RuntimeException("should not happen", e);
         }
-    }
-
-    public void saveData(Map<String, Object> experimentData) {
-        for (final ParameterType param : ParameterType.values()) {
-            experimentData.put(param.toString(), this.getParam(param));
-        }
-        experimentData.put("seed", this.seed);
     }
 
     public Object getParam(ParameterType param) {
@@ -314,19 +301,6 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
     private void setParam(ParameterType param, Object newValue) {
         param.checkType(newValue);
         this.parameters.put(param, newValue);
-    }
-
-    public void addAttributesTo(DataWriter rawResultWriter) throws IOException {
-        final LinkedHashMap<String, Object> hs = new LinkedHashMap<>();
-        this.saveData(hs);
-        for (final Entry<String, Object> e : hs.entrySet()) {
-            final String name = e.getKey();
-            if (e.getValue() instanceof Enum) {
-                rawResultWriter.addNominalAttribute(name, e.getValue().getClass().getSuperclass().getEnumConstants());
-            } else {
-                rawResultWriter.addNumericAttribute(name);
-            }
-        }
     }
 
     @Override
