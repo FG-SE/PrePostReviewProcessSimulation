@@ -1,1 +1,1 @@
-java -cp MOEAFramework-2.6\lib\* org.moeaframework.analysis.sensitivity.SampleGenerator -m saltelli -n 25 -p params.txt > sobolParameterSets.txt
+java -cp MOEAFramework-2.6\lib\* org.moeaframework.analysis.sensitivity.SampleGenerator -m saltelli -n 500 -p params.txt > sobolParameterSets.txt
