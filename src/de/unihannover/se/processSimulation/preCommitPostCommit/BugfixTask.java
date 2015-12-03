@@ -21,11 +21,17 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * A {@link Task} in which a certain {@link NormalBug} shall be fixed.
+ */
 class BugfixTask extends Task {
 
     private final NormalBug bug;
     private final Story cachedStory;
 
+    /**
+     * Creates a new bugfix task for the given bug.
+     */
     public BugfixTask(NormalBug bug) {
         super(bug.getModel(), "bug", bug.getModel().getParameters().getBugfixTaskTimeDist().sampleTimeSpan(TimeUnit.HOURS));
         this.bug = bug;
@@ -33,36 +39,61 @@ class BugfixTask extends Task {
         this.cachedStory.registerBug(this);
     }
 
+    /**
+     * Returns the bug that shall be fixed.
+     */
     public NormalBug getBug() {
         return this.bug;
     }
 
+    /**
+     * Belongs to the same topic as the task during which the bug was injected.
+     */
     @Override
     public String getMemoryKey() {
         return this.cachedStory.getMemoryKey();
     }
 
+    /**
+     * Returns the story that belongs to the task during which the bug was injected.
+     */
     @Override
     public Story getStory() {
         return this.cachedStory;
     }
 
+    /**
+     * Bugfixes don't have prerequisites.
+     */
     @Override
     public List<? extends Task> getPrerequisites() {
         return Collections.emptyList();
     }
 
+    /**
+     * When the bugfix task is commited, the bug is fixed.
+     */
     @Override
     protected void handleCommited() {
         this.bug.fix();
     }
 
+    /**
+     * When this task is finished, there are two possibilites:
+     * 1. The story is not finished yet (possibly because this bugfix kept it from finishing). The story will be finished if this
+     *      is now possible. Bugs injected during this bugfix's implementation can only become visible to the customer as soon
+     *      as the story is finished.
+     * 2. The story is finished (i.e. the bug occured after it had beed finished). Bugs injected during this bugfix's implementation
+     *      can immediately become visible to the customer.
+     */
     @Override
     protected void handleFinishedTask() {
-        this.startLurkingBugsForCustomer();
-        this.cachedStory.unregisterBug(this);
-        if (!this.cachedStory.isFinished() && this.cachedStory.canBeFinished()) {
-            this.cachedStory.finish();
+        if (this.cachedStory.isFinished()) {
+            this.startLurkingBugsForCustomer();
+        } else {
+            if (this.cachedStory.canBeFinished()) {
+                this.cachedStory.finish();
+            }
         }
     }
 

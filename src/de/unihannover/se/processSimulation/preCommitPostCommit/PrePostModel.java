@@ -39,7 +39,11 @@ import desmoj.core.statistic.Aggregate;
 import desmoj.core.statistic.Count;
 import desmoj.core.statistic.Tally;
 
-public class RealProcessingModel extends Model {
+/**
+ * The model implementation for comparison of pre commit and post commit reviews.
+ * Initializes and manages the model's processes and entities and keeps some statistics.
+ */
+public class PrePostModel extends Model {
 
     static {
         Experiment.setEpsilon(TimeUnit.MINUTES);
@@ -66,7 +70,10 @@ public class RealProcessingModel extends Model {
     private UniformRandomGenerator genericRandom;
     private GraphGenerator dependencyGraphGenerator;
 
-    public RealProcessingModel(String name, ReviewMode reviewMode, ParametersFactory parameterFactory, boolean plot) {
+    /**
+     * Creates a model with the given parameters and the given {@link ReviewMode}.
+     */
+    public PrePostModel(String name, ReviewMode reviewMode, ParametersFactory parameterFactory, boolean plot) {
         super(null, name, true, true);
         this.reviewMode = reviewMode;
         this.parameterFactory = parameterFactory;
@@ -78,6 +85,9 @@ public class RealProcessingModel extends Model {
         return "Modell zum Vergleich von Pre-commit und Post-commit-Reviews anhand der Simulation eines Entwicklungsprozesses.";
     }
 
+    /**
+     * Initializes all objects needed for execution.
+     */
     @Override
     public void init() {
         this.parameters = this.parameterFactory.create(this);
@@ -89,15 +99,15 @@ public class RealProcessingModel extends Model {
         this.sourceRepository = new SourceRepository<Task>(new SourceRepositoryDependencies() {
             @Override
             public TimeInstant presentTime() {
-                return RealProcessingModel.this.presentTime();
+                return PrePostModel.this.presentTime();
             }
             @Override
             public boolean sampleConflictDist() {
-                return RealProcessingModel.this.getParameters().getConflictDist().sample();
+                return PrePostModel.this.getParameters().getConflictDist().sample();
             }
             @Override
             public void sendTraceNote(String description) {
-                RealProcessingModel.this.sendTraceNote(description);
+                PrePostModel.this.sendTraceNote(description);
             }
         });
 
@@ -113,6 +123,9 @@ public class RealProcessingModel extends Model {
         }
     }
 
+    /**
+     * Starts all the model's processes.
+     */
     @Override
     public void doInitialSchedules() {
         if (this.plot) {
@@ -125,14 +138,30 @@ public class RealProcessingModel extends Model {
         new ExternalEventReset(this, true).schedule(new TimeInstant(HOURS_TO_RESET, TimeUnit.HOURS));
     }
 
-    public Board getBoard() {
+    /**
+     * Returns the {@link Board}.
+     */
+    Board getBoard() {
         return this.board;
     }
 
-    public SourceRepository<Task> getSourceRepository() {
+    /**
+     * Returns the {@link SourceRepository}.
+     */
+    SourceRepository<Task> getSourceRepository() {
         return this.sourceRepository;
     }
 
+    /**
+     * Returns the {@link GraphGenerator} for the chosen task dependency structure.
+     */
+    GraphGenerator getGraphGenerator() {
+        return this.dependencyGraphGenerator;
+    }
+
+    /**
+     * Adjusts the statistics when a story has been finished.
+     */
     void countFinishedStory(Story story) {
         final TimeSpan cycleTime = story.getCycleTime(this.presentTime());
         this.sendTraceNote("Story " + story + " finished after " + cycleTime);
@@ -140,22 +169,38 @@ public class RealProcessingModel extends Model {
         this.finishedStoryPoints.update(story.getStoryPoints());
     }
 
+    /**
+     * Returns the review mode chosen for this model.
+     */
     public ReviewMode getReviewMode() {
         return this.reviewMode;
     }
 
+    /**
+     * Returns the parameters chosen for this model.
+     */
     public Parameters getParameters() {
         return this.parameters;
     }
 
+    /**
+     * Returns a boolean value that is true with the given probability.
+     */
     boolean getRandomBool(double probabilityForTrue) {
         return this.genericRandom.nextDouble() < probabilityForTrue;
     }
 
+    /**
+     * Returns the sum of story points that have been finished since the last reset.
+     */
     public long getFinishedStoryPoints() {
         return this.finishedStoryPoints.getValue();
     }
 
+    /**
+     * Returns the mean story cycle time that has been observed since the last reset.
+     * Returns -1 iff there has not been a finished story.
+     */
     public double getStoryCycleTimeMean() {
         if (this.storyCycleTime.getObservations() <= 0) {
             return -1.0;
@@ -163,6 +208,10 @@ public class RealProcessingModel extends Model {
         return this.storyCycleTime.getMean();
     }
 
+    /**
+     * Returns the story cycle time's standard deviation that has been observed since the last reset.
+     * Returns -1 iff there has been at most one finished story.
+     */
     public double getStoryCycleTimeStdDev() {
         if (this.storyCycleTime.getObservations() <= 1) {
             return -1.0;
@@ -170,26 +219,37 @@ public class RealProcessingModel extends Model {
         return this.storyCycleTime.getStdDev();
     }
 
-    public int getStartedStoryCount() {
+    /**
+     * Returns the number of stories that has been started since the last reset.
+     */
+    public long getStartedStoryCount() {
         return this.board.getStartedStoryCount();
     }
 
+    /**
+     * Returns the number of stories that has been finished since the last reset.
+     */
     public long getFinishedStoryCount() {
         return this.storyCycleTime.getObservations();
     }
 
+    /**
+     * Returns the number of bugs found by customers since the last reset.
+     */
     public long getBugCountFoundByCustomers() {
         return this.bugCountFoundByCustomers.getValue();
     }
 
+    /**
+     * Adjusts the statistics for a bug found by a customer.
+     */
     void countBugFoundByCustomer() {
         this.bugCountFoundByCustomers.update();
     }
 
-    public GraphGenerator getGraphGenerator() {
-        return this.dependencyGraphGenerator;
-    }
-
+    /**
+     * Adjusts the statistics for a certain kind of work that was done since a given time instant until now.
+     */
     void countTime(String typeOfWork, TimeInstant startTime) {
         Aggregate agg = this.timeCounters.get(typeOfWork);
         if (agg == null) {

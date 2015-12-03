@@ -26,15 +26,25 @@ import desmoj.core.dist.ContDist;
 import desmoj.core.dist.ContDistConstant;
 import desmoj.core.simulator.TimeInstant;
 
-
-class Developer extends RealModelProcess {
+/**
+ * Representation of a software developer. Software developers are the main active processes of the model.
+ * They interact with the {@link Board} to know what to do and act accordingly.
+ *
+ * Every developer has certain skills: For implementation (bugs injected/hour and chance to insert a global bug
+ * during implementation) and for reviewing (chance to detect a bug in review).
+ * A developer also has a "memory" where he knows when he last had contact with a certain topic.
+ */
+class Developer extends PrePostProcess {
 
     private final BoolDistBernoulli reviewerSkill;
     private final BoolDistBernoulli globalBugDist;
     private final Map<String, TimeInstant> memory;
     private final ContDist implementationSkill;
 
-    public Developer(RealProcessingModel owner, double reviewerSkill, double globalBugProbability, double implementationSkill) {
+    /**
+     * Creates a developer with the given skills.
+     */
+    public Developer(PrePostModel owner, double reviewerSkill, double globalBugProbability, double implementationSkill) {
         super(owner, "developer");
         this.reviewerSkill = new BoolDistBernoulli(owner, "reviewerSkill-" + this, reviewerSkill, true, true);
         this.globalBugDist = new BoolDistBernoulli(owner, "globalBugDist-" + this, globalBugProbability, true, true);
@@ -43,6 +53,11 @@ class Developer extends RealModelProcess {
         this.memory = new LinkedHashMap<>();
     }
 
+    /**
+     * Perform the developers work: Look at the board what to do next, do it, and repeat until infinity (which is actually quite finite).
+     * The possible things to do have a strict priority order, with "bug assessment" being the most important and "help another developer
+     * in story planning" the least important.
+     */
     @Override
     public void lifeCycle() throws SuspendExecution {
         while (true) {
@@ -97,24 +112,40 @@ class Developer extends RealModelProcess {
         }
     }
 
-    public boolean findsBug(Bug b) {
-        return this.reviewerSkill.sample();
-    }
-
-    public TimeInstant getLastTimeYouHadToDoWith(MemoryItem item) {
-        return this.memory.get(item.getMemoryKey());
-    }
-
     private void saveLastTimeIHadToDoWith(MemoryItem task) {
         this.memory.put(task.getMemoryKey(), this.presentTime());
     }
 
+    /**
+     * Returns the last time the developer had to do with the given item's topic.
+     * Returns null iff he never had contact with that topic before.
+     */
+    public TimeInstant getLastTimeYouHadToDoWith(MemoryItem item) {
+        return this.memory.get(item.getMemoryKey());
+    }
+
+    /**
+     * Samples a value from the underlying random distribution to determine if
+     * the developer will inject a global blocker into his current task.
+     * Returns true iff this is the case.
+     */
     public boolean makesBlockerBug() {
         return this.globalBugDist.sample();
     }
 
+    /**
+     * Returns this developer's implementation skill.
+     */
     public double getImplementationSkill() {
         return this.implementationSkill.sample();
+    }
+
+    /**
+     * Samples a value from the underlying random distribution to determine if
+     * the developer will find a bug in review. Returns true iff this is the case.
+     */
+    public boolean findsBug() {
+        return this.reviewerSkill.sample();
     }
 
 }

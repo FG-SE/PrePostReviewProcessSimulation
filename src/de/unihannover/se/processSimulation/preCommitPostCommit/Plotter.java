@@ -29,10 +29,10 @@ import de.unihannover.se.processSimulation.dataGenerator.CsvWriter;
 import desmoj.core.simulator.TimeSpan;
 
 /**
- * Hilfsklasse, die regelmäßig die aktuellen Queue-Längen in eine Datei ausgibt.
- * Auf Basis dieser Datei kann dann später z.B. eine grafische Darstellung erstellt werden.
+ * A helper process that regularly prints some counter's values into a csv file so that this
+ * file can be used to do plots over time.
  */
-public class Plotter extends RealModelProcess {
+public class Plotter extends PrePostProcess {
 
     private static final String TASKS_WITH_REVIEW_REMARKS = "tasksWithReviewRemarks";
     private static final String TASKS_READY_FOR_REVIEW = "tasksReadyForReview";
@@ -43,7 +43,7 @@ public class Plotter extends RealModelProcess {
     private static final String STARTED_STORIES = "startedStories";
     private static final String TIME = "time";
 
-    public Plotter(RealProcessingModel owner) {
+    public Plotter(PrePostModel owner) {
         super(owner, "plotter");
     }
 
@@ -66,10 +66,10 @@ public class Plotter extends RealModelProcess {
                 data.put(STARTED_STORIES, this.getModel().getStartedStoryCount());
                 data.put(FINISHED_STORIES, this.getModel().getFinishedStoryCount());
                 data.put(REMAINING_BUGS, this.getModel().getBugCountFoundByCustomers());
-                data.put(OPEN_STORY_TASKS, this.getModel().getBoard().countOpenStoryTasks());
-                data.put(OPEN_BUGFIX_TASKS, this.getModel().getBoard().countOpenBugfixTasks());
-                data.put(TASKS_READY_FOR_REVIEW, this.getModel().getBoard().countTasksReadyForReview());
-                data.put(TASKS_WITH_REVIEW_REMARKS, this.getModel().getBoard().countTasksWithReviewRemarks());
+                data.put(OPEN_STORY_TASKS, this.getBoard().countOpenStoryTasks());
+                data.put(OPEN_BUGFIX_TASKS, this.getBoard().countOpenBugfixTasks());
+                data.put(TASKS_READY_FOR_REVIEW, this.getBoard().countTasksReadyForReview());
+                data.put(TASKS_WITH_REVIEW_REMARKS, this.getBoard().countTasksWithReviewRemarks());
                 w.writeTuple(data);
                 this.hold(new TimeSpan(16, TimeUnit.HOURS));
             }

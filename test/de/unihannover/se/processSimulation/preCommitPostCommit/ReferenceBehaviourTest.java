@@ -43,8 +43,8 @@ public class ReferenceBehaviourTest {
         Experiment.setCoroutineModel(CoroutineModel.FIBERS);
     }
 
-    private static RealProcessingModel runExperiment(ParametersFactory p, ReviewMode mode) throws Exception {
-        final RealProcessingModel model = new RealProcessingModel("RealProcessingModel", mode, p, false);
+    private static PrePostModel runExperiment(ParametersFactory p, ReviewMode mode) throws Exception {
+        final PrePostModel model = new PrePostModel("RealProcessingModel", mode, p, false);
         final ArrayList<String> noOutputs = new ArrayList<>();
         final Experiment exp = new Experiment("UnitTest" + mode + "_" + p.hashCode(),
                         ".", null, noOutputs, noOutputs, noOutputs, noOutputs);
@@ -54,7 +54,7 @@ public class ReferenceBehaviourTest {
         exp.setSilent(true);
         exp.getOutputPath();
         exp.setShowProgressBar(false);
-        exp.stop(new TimeInstant(RealProcessingModel.HOURS_TO_RESET + 8 * 600, TimeUnit.HOURS));
+        exp.stop(new TimeInstant(PrePostModel.HOURS_TO_RESET + 8 * 600, TimeUnit.HOURS));
         exp.start();
         exp.finish();
 
@@ -62,11 +62,11 @@ public class ReferenceBehaviourTest {
     }
 
     private static<T extends Comparable<T>> T runExperimentAndGetMedianResult(
-                    BulkParameterFactory p, ReviewMode mode, Function<RealProcessingModel, T> getter) throws Exception {
+                    BulkParameterFactory p, ReviewMode mode, Function<PrePostModel, T> getter) throws Exception {
 
         final List<T> results = new ArrayList<>();
         for (int i = 0; i < 7; i++) {
-            final RealProcessingModel model = runExperiment(p, mode);
+            final PrePostModel model = runExperiment(p, mode);
             p = p.copyWithChangedSeed();
             results.add(getter.apply(model));
         }
@@ -114,8 +114,8 @@ public class ReferenceBehaviourTest {
                         .copyWithChangedParam(ParameterType.TASK_SWITCH_OVERHEAD_AFTER_ONE_HOUR, 0.0)
                         .copyWithChangedParam(ParameterType.MAX_TASK_SWITCH_OVERHEAD, 0.0)
                         .copyWithChangedParam(ParameterType.DEPENDENCY_GRAPH_CONSTELLATION, DependencyGraphConstellation.NO_SUBDIVISION);
-        final Long modelPre = runExperimentAndGetMedianResult(p, ReviewMode.PRE_COMMIT, RealProcessingModel::getFinishedStoryPoints);
-        final Long modelPost = runExperimentAndGetMedianResult(p, ReviewMode.POST_COMMIT, RealProcessingModel::getFinishedStoryPoints);
+        final Long modelPre = runExperimentAndGetMedianResult(p, ReviewMode.PRE_COMMIT, PrePostModel::getFinishedStoryPoints);
+        final Long modelPost = runExperimentAndGetMedianResult(p, ReviewMode.POST_COMMIT, PrePostModel::getFinishedStoryPoints);
         assertThat(modelPre, isSimilarTo(modelPost));
     }
 
@@ -130,8 +130,8 @@ public class ReferenceBehaviourTest {
                         .copyWithChangedParam(ParameterType.TASK_SWITCH_OVERHEAD_AFTER_ONE_HOUR, 0.0)
                         .copyWithChangedParam(ParameterType.MAX_TASK_SWITCH_OVERHEAD, 0.0)
                         .copyWithChangedParam(ParameterType.DEPENDENCY_GRAPH_CONSTELLATION, DependencyGraphConstellation.CHAINS);
-        final Double modelPre = runExperimentAndGetMedianResult(p, ReviewMode.PRE_COMMIT, RealProcessingModel::getStoryCycleTimeMean);
-        final Double modelPost = runExperimentAndGetMedianResult(p, ReviewMode.POST_COMMIT, RealProcessingModel::getStoryCycleTimeMean);
+        final Double modelPre = runExperimentAndGetMedianResult(p, ReviewMode.PRE_COMMIT, PrePostModel::getStoryCycleTimeMean);
+        final Double modelPost = runExperimentAndGetMedianResult(p, ReviewMode.POST_COMMIT, PrePostModel::getStoryCycleTimeMean);
         assertThat(modelPre, isSignificantlyLargerThan(modelPost));
     }
 
@@ -147,8 +147,8 @@ public class ReferenceBehaviourTest {
                         .copyWithChangedParam(ParameterType.TASK_SWITCH_OVERHEAD_AFTER_ONE_HOUR, 0.0)
                         .copyWithChangedParam(ParameterType.MAX_TASK_SWITCH_OVERHEAD, 0.0)
                         .copyWithChangedParam(ParameterType.DEPENDENCY_GRAPH_CONSTELLATION, DependencyGraphConstellation.NO_DEPENDENCIES);
-        final Long modelPre = runExperimentAndGetMedianResult(p, ReviewMode.PRE_COMMIT, RealProcessingModel::getFinishedStoryPoints);
-        final Long modelPost = runExperimentAndGetMedianResult(p, ReviewMode.POST_COMMIT, RealProcessingModel::getFinishedStoryPoints);
+        final Long modelPre = runExperimentAndGetMedianResult(p, ReviewMode.PRE_COMMIT, PrePostModel::getFinishedStoryPoints);
+        final Long modelPost = runExperimentAndGetMedianResult(p, ReviewMode.POST_COMMIT, PrePostModel::getFinishedStoryPoints);
         assertThat(modelPre, isSignificantlyLargerThan(modelPost));
     }
 
@@ -164,8 +164,8 @@ public class ReferenceBehaviourTest {
                         .copyWithChangedParam(ParameterType.TASK_SWITCH_OVERHEAD_AFTER_ONE_HOUR, 0.0)
                         .copyWithChangedParam(ParameterType.MAX_TASK_SWITCH_OVERHEAD, 0.0)
                         .copyWithChangedParam(ParameterType.DEPENDENCY_GRAPH_CONSTELLATION, DependencyGraphConstellation.NO_DEPENDENCIES);
-        final Long modelPre = runExperimentAndGetMedianResult(p, ReviewMode.PRE_COMMIT, RealProcessingModel::getFinishedStoryPoints);
-        final Long modelPost = runExperimentAndGetMedianResult(p, ReviewMode.POST_COMMIT, RealProcessingModel::getFinishedStoryPoints);
+        final Long modelPre = runExperimentAndGetMedianResult(p, ReviewMode.PRE_COMMIT, PrePostModel::getFinishedStoryPoints);
+        final Long modelPost = runExperimentAndGetMedianResult(p, ReviewMode.POST_COMMIT, PrePostModel::getFinishedStoryPoints);
         assertThat(modelPost, isSignificantlyLargerThan(modelPre));
     }
 
@@ -180,8 +180,8 @@ public class ReferenceBehaviourTest {
                         .copyWithChangedParam(ParameterType.TASK_SWITCH_OVERHEAD_AFTER_ONE_HOUR, 1.0)
                         .copyWithChangedParam(ParameterType.MAX_TASK_SWITCH_OVERHEAD, 2.0)
                         .copyWithChangedParam(ParameterType.DEPENDENCY_GRAPH_CONSTELLATION, DependencyGraphConstellation.SIMPLISTIC);
-        final Long modelPre = runExperimentAndGetMedianResult(p, ReviewMode.PRE_COMMIT, RealProcessingModel::getFinishedStoryPoints);
-        final Long modelPost = runExperimentAndGetMedianResult(p, ReviewMode.POST_COMMIT, RealProcessingModel::getFinishedStoryPoints);
+        final Long modelPre = runExperimentAndGetMedianResult(p, ReviewMode.PRE_COMMIT, PrePostModel::getFinishedStoryPoints);
+        final Long modelPost = runExperimentAndGetMedianResult(p, ReviewMode.POST_COMMIT, PrePostModel::getFinishedStoryPoints);
         assertThat(modelPost, isSignificantlyLargerThan(modelPre));
     }
 
@@ -198,8 +198,8 @@ public class ReferenceBehaviourTest {
                         .copyWithChangedParam(ParameterType.TASK_SWITCH_OVERHEAD_AFTER_ONE_HOUR, 0.0)
                         .copyWithChangedParam(ParameterType.MAX_TASK_SWITCH_OVERHEAD, 0.0)
                         .copyWithChangedParam(ParameterType.DEPENDENCY_GRAPH_CONSTELLATION, DependencyGraphConstellation.NO_DEPENDENCIES);
-        final Long modelPre = runExperimentAndGetMedianResult(p, ReviewMode.PRE_COMMIT, RealProcessingModel::getFinishedStoryPoints);
-        final Long modelPost = runExperimentAndGetMedianResult(p, ReviewMode.POST_COMMIT, RealProcessingModel::getFinishedStoryPoints);
+        final Long modelPre = runExperimentAndGetMedianResult(p, ReviewMode.PRE_COMMIT, PrePostModel::getFinishedStoryPoints);
+        final Long modelPost = runExperimentAndGetMedianResult(p, ReviewMode.POST_COMMIT, PrePostModel::getFinishedStoryPoints);
         assertThat(modelPre, isSimilarTo(modelPost));
     }
 
@@ -207,9 +207,9 @@ public class ReferenceBehaviourTest {
     public void testNoReviewIsWorseThanReview() throws Exception {
         final BulkParameterFactory p = BulkParameterFactory
                         .forCommercial();
-        final Long modelPre = runExperimentAndGetMedianResult(p, ReviewMode.PRE_COMMIT, RealProcessingModel::getFinishedStoryPoints);
-        final Long modelPost = runExperimentAndGetMedianResult(p, ReviewMode.POST_COMMIT, RealProcessingModel::getFinishedStoryPoints);
-        final Long modelNo = runExperimentAndGetMedianResult(p, ReviewMode.NO_REVIEW, RealProcessingModel::getFinishedStoryPoints);
+        final Long modelPre = runExperimentAndGetMedianResult(p, ReviewMode.PRE_COMMIT, PrePostModel::getFinishedStoryPoints);
+        final Long modelPost = runExperimentAndGetMedianResult(p, ReviewMode.POST_COMMIT, PrePostModel::getFinishedStoryPoints);
+        final Long modelNo = runExperimentAndGetMedianResult(p, ReviewMode.NO_REVIEW, PrePostModel::getFinishedStoryPoints);
         assertThat(modelPre, isSignificantlyLargerThan(modelNo));
         assertThat(modelPost, isSignificantlyLargerThan(modelNo));
     }
@@ -219,9 +219,9 @@ public class ReferenceBehaviourTest {
         final BulkParameterFactory p = BulkParameterFactory
                         .forCommercial()
                         .copyWithChangedParam(ParameterType.IMPLEMENTATION_SKILL_MODE, 0.0);
-        final Long modelPre = runExperimentAndGetMedianResult(p, ReviewMode.PRE_COMMIT, RealProcessingModel::getFinishedStoryPoints);
-        final Long modelPost = runExperimentAndGetMedianResult(p, ReviewMode.POST_COMMIT, RealProcessingModel::getFinishedStoryPoints);
-        final Long modelNo = runExperimentAndGetMedianResult(p, ReviewMode.NO_REVIEW, RealProcessingModel::getFinishedStoryPoints);
+        final Long modelPre = runExperimentAndGetMedianResult(p, ReviewMode.PRE_COMMIT, PrePostModel::getFinishedStoryPoints);
+        final Long modelPost = runExperimentAndGetMedianResult(p, ReviewMode.POST_COMMIT, PrePostModel::getFinishedStoryPoints);
+        final Long modelNo = runExperimentAndGetMedianResult(p, ReviewMode.NO_REVIEW, PrePostModel::getFinishedStoryPoints);
         assertThat(modelNo, isSignificantlyLargerThan(modelPre));
         assertThat(modelNo, isSignificantlyLargerThan(modelPost));
     }

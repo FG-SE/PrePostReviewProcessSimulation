@@ -29,18 +29,45 @@ import desmoj.core.simulator.TimeInstant;
 import desmoj.core.simulator.TimeOperations;
 import desmoj.core.simulator.TimeSpan;
 
-abstract class Task extends RealModelEntity implements MemoryItem {
+/**
+ * Abstract represenation of a task, i.e. something that has to be implemented by a {@link Developer}.
+ */
+abstract class Task extends PrePostEntity implements MemoryItem {
 
     private enum State {
+        /**
+         * The task was newly created and nothing has been done yet.
+         */
         OPEN,
+        /**
+         * Someone is currently implementation this task (initially, or fixing remarks).
+         */
         IN_IMPLEMENTATION,
+        /**
+         * An implementation round has been finished and the task should now be reviewed.
+         */
         READY_FOR_REVIEW,
+        /**
+         * Someone is currently reviewing this task.
+         */
         IN_REVIEW,
+        /**
+         * There were review remarks found. Another implementation round is needed.
+         */
         REJECTED,
+        /**
+         * The task is finished.
+         */
         DONE
     }
 
+    private final TimeSpan implementationTime;
+    private boolean commited;
     private State state;
+
+    /**
+     * The developer that performed the initial implementation (aka author).
+     */
     private Developer implementor;
 
     /**
@@ -48,14 +75,32 @@ abstract class Task extends RealModelEntity implements MemoryItem {
      */
     private final List<Bug> lurkingBugs;
 
+    /**
+     * Bugs that will be fixed with the next commit. In the case of post commit reviews, this are bugs found in the current review, while for
+     * pre commit reviews, this are all bugs found in any review.
+     */
     private final List<Bug> bugsFixedInCommit;
-    private final List<TimeSpan> implementationInterruptions;
-    private Review currentReview;
-    private List<NormalBug> bugsFoundByOthersDuringReview;
-    private boolean commited;
-    private final TimeSpan implementationTime;
 
-    public Task(RealProcessingModel model, String name, TimeSpan implementationTime) {
+    /**
+     * Interruptions that occurred during the current implementation session and that will delay it.
+     */
+    private final List<TimeSpan> implementationInterruptions;
+
+    /**
+     * The review that is currently or was last performed.
+     */
+    private Review currentReview;
+
+    /**
+     * Bugs that have been noticed to belong to this task by other developers while it was in review.
+     */
+    private List<NormalBug> bugsFoundByOthersDuringReview;
+
+
+    /**
+     * Creates a new task which needs the given time for initial implementation.
+     */
+    public Task(PrePostModel model, String name, TimeSpan implementationTime) {
         super(model, name);
         this.state = State.OPEN;
         this.lurkingBugs = new ArrayList<>();
@@ -64,6 +109,10 @@ abstract class Task extends RealModelEntity implements MemoryItem {
         this.implementationTime = implementationTime;
     }
 
+    /**
+     * Let the given developer perform the implementation of this task.
+     * Returns when implementation is done.
+     */
     public void performImplementation(Developer dev) throws SuspendExecution {
         assert this.state == State.OPEN;
         assert this.implementor == null;
@@ -85,6 +134,12 @@ abstract class Task extends RealModelEntity implements MemoryItem {
         this.endImplementation();
     }
 
+    /**
+     * Perform the work that has to be done at the end of implementation:
+     * Further waiting (if interruptions occured)
+     * Commiting (if the review mode demands it)
+     * Changing the state and the board according to the review mode
+     */
     private void endImplementation() throws SuspendExecution {
         this.handleAdditionalWaitsForInterruptions();
 
@@ -102,8 +157,12 @@ abstract class Task extends RealModelEntity implements MemoryItem {
         }
     }
 
+    /**
+     * Inject bugs into this task. The number of bugs depends on the given time/effort that went into
+     * implementation, if it was bug fixing or new implementation and the developer.
+     */
     private void createBugs(TimeSpan relevantTime, boolean fixing) {
-        //Anzahl zu erzeugender Bugs ermitteln
+        //determine number of bugs to create
         double bugsToCreate = this.implementor.getImplementationSkill() * relevantTime.getTimeAsDouble(TimeUnit.HOURS);
         if (fixing) {
             bugsToCreate *= this.getModel().getParameters().getFixingBugRateFactor();
@@ -119,7 +178,7 @@ abstract class Task extends RealModelEntity implements MemoryItem {
             }
         }
 
-        //Bugs erzeugen
+        //create bugs
         while (bugsToCreate > 1) {
             this.createNormalBug();
             bugsToCreate -= 1.0;
@@ -147,12 +206,22 @@ abstract class Task extends RealModelEntity implements MemoryItem {
         }
     }
 
+    /**
+     * Suspends the current implementation for the given amount.
+     * Technically, the time to wait is saved and the wait is performed when implementation would normally end
+     * (see {@link #handleAdditionalWaitsForInterruptions()}.
+     * @pre this.state == State.IN_IMPLEMENTATION
+     */
     public void suspendImplementation(TimeSpan timeSpan) {
         assert this.state == State.IN_IMPLEMENTATION;
         this.getModel().sendTraceNote("suspends implementation of " + this + " for " + timeSpan);
         this.implementationInterruptions.add(timeSpan);
     }
 
+    /**
+     * Let the given developer perform a review of this task.
+     * Returns when the review is done.
+     */
     public void performReview(Developer reviewer) throws SuspendExecution {
         assert this.state == State.READY_FOR_REVIEW;
         assert this.implementor != null;
@@ -168,7 +237,7 @@ abstract class Task extends RealModelEntity implements MemoryItem {
 
         final List<Bug> foundBugs = new ArrayList<>();
         for (final Bug b : this.lurkingBugs) {
-            if (reviewer.findsBug(b)) {
+            if (reviewer.findsBug()) {
                 foundBugs.add(b);
             }
         }
@@ -202,8 +271,15 @@ abstract class Task extends RealModelEntity implements MemoryItem {
         this.handleFinishedTask();
     }
 
+    /**
+     * Is called when this task is finished (moved to state DONE) and allows the subclasses to perform additional work in this case.
+     */
     protected abstract void handleFinishedTask();
 
+    /**
+     * Let the given developer (must be the tasks author) fix the remarks found in the last review.
+     * Returns when fixing is done.
+     */
     public void performFixingOfReviewRemarks(Developer dev) throws SuspendExecution {
         assert this.state == State.REJECTED;
         assert this.getModel().getReviewMode() != ReviewMode.NO_REVIEW;
@@ -213,14 +289,14 @@ abstract class Task extends RealModelEntity implements MemoryItem {
         this.setState(State.IN_IMPLEMENTATION);
 
         if (this.getModel().getReviewMode() == ReviewMode.POST_COMMIT) {
-            //im Post-Commit-Fall wurde schon commitet und es muss nochmal "ausgecheckt" werden
+            //in post commit mode, the code was already commited and has to be "checked out" again
             this.getSourceRepository().startWork(this);
         }
 
         final TimeSpan taskSwitchTime = this.handleTaskSwitchOverhead(dev);
 
-        //An sich kann es neben dem Einbauen neuer Bugs auch vorkommen, dass bestehende und bereits angemerkte
-        //  Bugs nicht wirklich gefixt werden. Das wird hier vernachlässigt.
+        //In reality, it could happen that remarks are not fixed correctly or at all. This is not modeled here,
+        //  as these wrong fixes could be regarded as new bugs (which are modeled).
 
         TimeSpan timeForFixing = new TimeSpan(0);
         for (final Bug b : this.currentReview.getRemarks()) {
@@ -237,6 +313,10 @@ abstract class Task extends RealModelEntity implements MemoryItem {
         this.endImplementation();
     }
 
+    /**
+     * Let the given developer have a look at the given bug and decide what to do with it.
+     * Returns when bug assessment is finished.
+     */
     public void performBugAssessment(Developer dev, NormalBug bug) throws SuspendExecution {
         this.handleTaskSwitchOverhead(dev);
         dev.hold(this.getModel().getParameters().getBugAssessmentTimeDist().sampleTimeSpan(TimeUnit.HOURS));
@@ -245,25 +325,25 @@ abstract class Task extends RealModelEntity implements MemoryItem {
         case OPEN:
             throw new RuntimeException("Should not happen: Bug in open task " + this);
         case IN_IMPLEMENTATION:
-            //Task ist gerade in Arbeit: Problem wird gleich miterledigt und verlängert die Implementierung
+            //task is currently in work: fixing is done while the author is at it and delays the implementation
             this.suspendImplementation(this.sampleRemarkFixTime());
             break;
         case READY_FOR_REVIEW:
-            //Task ist bereit für Review: Bug-Assessment zählt als ein Review-Durchlauf
+            //tasks is ready for review: bug assessment is seen as a review round
             this.getBoard().removeTaskFromReviewQueue(this);
             this.currentReview = new Review(Collections.singletonList(bug));
             this.endReviewWithRemarks();
             break;
         case IN_REVIEW:
-            //Task wird gerade gereviewt: Bug als zusätzliche Anmerkung aufnehmen
+            //task is in review: add bug to the review remarks
             this.bugsFoundByOthersDuringReview.add(bug);
             break;
         case REJECTED:
-            //Task wurde bereits /wird gerade gereviewt: Bug als zusätzliche Anmerkung aufnehmen
+            //task has been reviewed with remarks: add bug to the review remarks
             this.currentReview.addRemark(bug);
             break;
         case DONE:
-            //Task ist bereits abgeschlossen: Fixing geschieht im Rahmen eines separaten Bugfix-Tickets
+            //task is already finished: create a separate bugfix task
             this.getBoard().addBugToBeFixed(new BugfixTask(bug));
             break;
         }
@@ -273,6 +353,10 @@ abstract class Task extends RealModelEntity implements MemoryItem {
         return this.getModel().getParameters().getReviewRemarkFixDist().sampleTimeSpan(TimeUnit.HOURS);
     }
 
+    /**
+     * Determine the time it takes the developer to switch to this task's topic and hold for
+     * this time span.
+     */
     private TimeSpan handleTaskSwitchOverhead(Developer dev) throws SuspendExecution {
         final TimeSpan taskSwitchOverhead = this.determineTaskSwitchOverhead(dev);
         assert taskSwitchOverhead.getTimeAsDouble(TimeUnit.HOURS) < 8.0 :
@@ -304,18 +388,28 @@ abstract class Task extends RealModelEntity implements MemoryItem {
         return new TimeSpan(overhead);
     }
 
+    /**
+     * Returns true iff the given developer is this task's author.
+     */
     public boolean wasImplementedBy(Developer developer) {
         return developer.equals(this.implementor);
     }
 
+    /**
+     * Returns true iff this task is finished/done.
+     */
     public boolean isFinished() {
         return this.state == State.DONE;
     }
 
+    /**
+     * Perform a commit. In case of conflict, retry until success.
+     * After commit, other developers can find bugs injected with this task.
+     */
     private void commit(Developer commiter) throws SuspendExecution {
 
         while (!this.getSourceRepository().tryCommit(this)) {
-            //Konflikt vorhanden => Update ziehen, anpassen, und nochmal probieren
+            //conflict found => update, resolve conflict, retry
             this.getSourceRepository().restartWork(this);
             commiter.hold(this.getModel().getParameters().getConflictResolutionTimeDist().sampleTimeSpan(TimeUnit.HOURS));
             this.handleAdditionalWaitsForInterruptions();
@@ -333,18 +427,35 @@ abstract class Task extends RealModelEntity implements MemoryItem {
         }
     }
 
+    /**
+     * Is called when this task is committed to allow subclass specific behavior.
+     */
     protected abstract void handleCommited();
 
+    /**
+     * Returns true iff this tasks main implementation is committed (so that dependent tasks can start).
+     */
     public boolean isCommited() {
         return this.commited;
     }
 
+    /**
+     * Returns all tasks this task depends on.
+     */
     public abstract List<? extends Task> getPrerequisites();
 
+    /**
+     * Returns the time needed for the initial implementation of this task (without waste such as
+     * task switch, conflicts, ...).
+     */
     public final TimeSpan getImplementationTime() {
         return this.implementationTime;
     }
 
+    /**
+     * Tell all the bugs that are still lurking (not found by reviews or fixed) that they can now be found
+     * by customers.
+     */
     public void startLurkingBugsForCustomer() {
         for (final Bug b : this.lurkingBugs) {
             assert !b.isFixed();
@@ -352,11 +463,17 @@ abstract class Task extends RealModelEntity implements MemoryItem {
         }
     }
 
+    /**
+     * Remove the given fixed bug from the set of lurking bugs.
+     */
     void handleBugFixed(Bug bug) {
         assert bug.isFixed();
         this.lurkingBugs.remove(bug);
     }
 
+    /**
+     * Returns the story this task belongs to.
+     */
     public abstract Story getStory();
 
 }

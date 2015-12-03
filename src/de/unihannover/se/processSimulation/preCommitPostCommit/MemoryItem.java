@@ -17,8 +17,15 @@
 
 package de.unihannover.se.processSimulation.preCommitPostCommit;
 
+/**
+ * This interface stands for the abstract concept of "a thing that belongs to a topic that can be remembered in a developers memory".
+ * It is to determine the task switch overhead, which depends on the time a developer last had to do with a certain topic.
+ */
 interface MemoryItem {
 
+    /**
+     * Returns a unique key for the "topic" of this item.
+     */
     public abstract String getMemoryKey();
 
 }

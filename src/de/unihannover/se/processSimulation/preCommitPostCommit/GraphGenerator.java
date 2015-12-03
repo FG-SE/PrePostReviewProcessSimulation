@@ -24,27 +24,53 @@ import java.util.Map;
 
 import desmoj.core.dist.MersenneTwisterRandomGenerator;
 
-public class GraphGenerator {
+/**
+ * A helper class to create dependency graphs.
+ * The graphs' structures are specified using a simple textual notation.
+ */
+class GraphGenerator {
 
+    /**
+     * Factory to create nodes and edges.
+     * Breaks the depency to DESMO-J for testing.
+     * @param <N> The node's type.
+     */
     public static interface GraphItemFactory<N> {
+        /**
+         * Create and return a new node.
+         */
         public abstract N createNode();
+        /**
+         * Connect the given nodes with an edge.
+         */
         public abstract void connect(N from, N to);
     }
 
     private final MersenneTwisterRandomGenerator random;
     private final List<String> descriptions;
 
+    /**
+     * Constructs a graph generator using the given random number source.
+     */
     public GraphGenerator(MersenneTwisterRandomGenerator random) {
         this.descriptions = new ArrayList<>();
         this.random = random;
     }
 
+    /**
+     * Registers a graph template. The higher count, the higher its probability for occurrence.
+     * In the description syntax "->" stands for edges and ";" can be used to separate these paths, i.e.
+     * "A->B;C" creates a graph with three nodes, of which two are connected by an edge.
+     */
     public void addTemplate(String description, int count) {
         for (int i = 0; i < count; i++) {
             this.descriptions.add(description);
         }
     }
 
+    /**
+     * Generate a graph using the given {@link GraphItemFactory}.
+     */
     public<NODE> void generateGraph(GraphItemFactory<NODE> factory) {
         this.parseDescription(this.descriptions.get(this.random.nextInt(16) % this.descriptions.size()), factory);
     }

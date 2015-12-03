@@ -21,8 +21,20 @@ import desmoj.core.simulator.ExternalEvent;
 import desmoj.core.simulator.Model;
 import desmoj.core.simulator.TimeSpan;
 
-abstract class Bug extends RealModelEntity {
+/**
+ * Abstract class for all kinds of "bugs" that can be injected during development. The term "bug" is used in a very broad sense in
+ * this model.
+ *
+ * A is injected into the source code during implementation. After some event (commit/deploy to customer), it can become visible to a developer
+ * or customer. When it becomes visible, it has to be handled in the development process. A bug can also be "fixed", which prevents it from
+ * becoming visible in the future.
+ */
+abstract class Bug extends PrePostEntity {
 
+    /**
+     * Event that makes a bug visible when it occurs.
+     * This is modeled as event and not as process for performance reasons.
+     */
     private final class BugBecomesVisibleEvent extends ExternalEvent {
 
         private final boolean byCustomer;
@@ -46,11 +58,18 @@ abstract class Bug extends RealModelEntity {
     private boolean startedForCustomers;
     private boolean fixed;
 
+    /**
+     * Creates a new bug that was injected during implementation of the given task.
+     */
     public Bug(Task task, String name) {
         super(task.getModel(), name);
         this.task = task;
     }
 
+    /**
+     * Has to be called as soon as the bug can become visible to developers.
+     * Schedules the corresponding event (if the bug has not been already fixed).
+     */
     public final void handlePublishedForDevelopers() {
         if (this.startedForDevelopers || this.fixed) {
             return;
@@ -62,6 +81,10 @@ abstract class Bug extends RealModelEntity {
         }
     }
 
+    /**
+     * Has to be called as soon as the bug can become visible to customers.
+     * Schedules the corresponding event (if the bug has not been already fixed).
+     */
     public final void handlePublishedForCustomers() {
         if (this.startedForCustomers || this.fixed) {
             return;
@@ -73,11 +96,27 @@ abstract class Bug extends RealModelEntity {
         }
     }
 
+    /**
+     * Needs to be implemented in subclasses to return the time until this bug becomes visible
+     * to a developer.
+     */
     protected abstract TimeSpan getActivationTimeForDevelopers();
+
+    /**
+     * Needs to be implemented in subclasses to return the time until this bug becomes visible
+     * to a customer.
+     */
     protected abstract TimeSpan getActivationTimeForCustomers();
 
+    /**
+     * Is called when the bug became visible.
+     */
     protected abstract void becomeVisible(boolean byCustomer);
 
+    /**
+     * Marks this bug as fixed. A fixed bug can not become visible any more and can not be observed
+     * in a review, too.
+     */
     public final void fix() {
         if (!this.fixed) {
             this.fixed = true;
@@ -85,11 +124,17 @@ abstract class Bug extends RealModelEntity {
         }
     }
 
-    public Task getTask() {
+    /**
+     * Returns the task which injected this bug.
+     */
+    public final Task getTask() {
         return this.task;
     }
 
-    boolean isFixed() {
+    /**
+     * Return true iff this bug is fixed.
+     */
+    final boolean isFixed() {
         return this.fixed;
     }
 

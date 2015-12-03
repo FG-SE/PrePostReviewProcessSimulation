@@ -21,25 +21,40 @@ import java.util.concurrent.TimeUnit;
 
 import desmoj.core.simulator.TimeSpan;
 
+/**
+ * A "global blocker bug" is a certain kind of bug that occurs almost immediately after commit and that impedes
+ * all currently implementing developers (think: someone broke the build badly).
+ */
 class GlobalBlockerBug extends Bug {
 
     public GlobalBlockerBug(Task task) {
         super(task, "global-bug");
     }
 
+    /**
+     * Occurs almost immediately after commit.
+     */
     @Override
     protected TimeSpan getActivationTimeForDevelopers() {
         return new TimeSpan(1, TimeUnit.MINUTES);
     }
 
+    /**
+     * Cannot be observed by customers.
+     */
     @Override
     protected TimeSpan getActivationTimeForCustomers() {
         return null;
     }
 
+    /**
+     * When it becomes visible, all currently active implementation tasks are delayed for a certain time span.
+     * It is then fixed automatically (i.e. some waiting developer fixes it).
+     */
     @Override
     protected void becomeVisible(boolean byCustomer) {
         assert !byCustomer;
+        //TODO: wenn gerade nichts im Implementierung ist wird das Problem gelöst, ohne dass es Zeit gekostet hat. Das ist unrealistisch. Ist das schlimm?
         for (final Task t : this.getBoard().getAllTasksInImplementation()) {
             t.suspendImplementation(this.getModel().getParameters().getGlobalBugSuspendTimeDist().sampleTimeSpan(TimeUnit.HOURS));
         }

@@ -22,7 +22,7 @@ public class ExperimentResult {
     private final long finishedStoryPoints;
     private final double storyCycleTimeMean;
     private final double storyCycleTimeStdDev;
-    private final int startedStoryCount;
+    private final long startedStoryCount;
     private final long finishedStoryCount;
     //TODO sollte auch noch eine Kennzahl für den Technical Debt eingebaut werden?
     private final long bugCountFoundByCustomers;
@@ -33,7 +33,7 @@ public class ExperimentResult {
                     long finishedStoryPoints,
                     double storyCycleTimeMean,
                     double storyCycleTimeStdDev,
-                    int startedStoryCount,
+                    long startedStoryCount,
                     long finishedStoryCount,
                     long bugCountFoundByCustomers,
                     long investedPersonHours,
@@ -60,7 +60,7 @@ public class ExperimentResult {
         return this.storyCycleTimeStdDev;
     }
 
-    public int getStartedStoryCount() {
+    public long getStartedStoryCount() {
         return this.startedStoryCount;
     }
 

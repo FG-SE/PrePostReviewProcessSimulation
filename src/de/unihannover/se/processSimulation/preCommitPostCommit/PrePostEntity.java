@@ -19,9 +19,13 @@ package de.unihannover.se.processSimulation.preCommitPostCommit;
 
 import desmoj.core.simulator.Entity;
 
-class RealModelEntity extends Entity {
+/**
+ * Common helper superclass for all entities in the model.
+ * Contains some getters for commonly needed objects.
+ */
+class PrePostEntity extends Entity {
 
-    public RealModelEntity(RealProcessingModel owner, String name) {
+    public PrePostEntity(PrePostModel owner, String name) {
         super(owner, name, true);
     }
 
@@ -34,8 +38,8 @@ class RealModelEntity extends Entity {
     }
 
     @Override
-    public RealProcessingModel getModel() {
-        return (RealProcessingModel) super.getModel();
+    public PrePostModel getModel() {
+        return (PrePostModel) super.getModel();
     }
 
 }

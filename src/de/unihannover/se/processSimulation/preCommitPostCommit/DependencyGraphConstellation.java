@@ -19,8 +19,15 @@ package de.unihannover.se.processSimulation.preCommitPostCommit;
 
 import desmoj.core.dist.MersenneTwisterRandomGenerator;
 
+/**
+ * The tasks of a story can have dependencies, i.e. they form a dependy graph. This enum
+ * provides several generators for different types of these dependency graphs.
+ */
 public enum DependencyGraphConstellation {
 
+    /**
+     * A simple graph where one task is common prequisite of two others.
+     */
     SIMPLISTIC {
         @Override
         public GraphGenerator createGenerator(MersenneTwisterRandomGenerator random) {
@@ -30,6 +37,9 @@ public enum DependencyGraphConstellation {
         }
     },
 
+    /**
+     * The graph with only one node.
+     */
     NO_SUBDIVISION {
         @Override
         public GraphGenerator createGenerator(MersenneTwisterRandomGenerator random) {
@@ -39,6 +49,9 @@ public enum DependencyGraphConstellation {
         }
     },
 
+    /**
+     * A sample of real dependency graphs and task counts from the ticket system of a commercial software producer.
+     */
     REALISTIC {
         @Override
         public GraphGenerator createGenerator(MersenneTwisterRandomGenerator random) {
@@ -72,6 +85,10 @@ public enum DependencyGraphConstellation {
         }
     },
 
+    /**
+     * A sample of different graphs without any dependencies. The number of tasks per graph
+     * is roughly based on the empirical sample from {@link #REALISTIC}.
+     */
     NO_DEPENDENCIES {
         @Override
         public GraphGenerator createGenerator(MersenneTwisterRandomGenerator random) {
@@ -96,6 +113,10 @@ public enum DependencyGraphConstellation {
         }
     },
 
+    /**
+     * A sample of different graphs with the maximum of dependencies: Every graph forms a chain of tasks.
+     * The number of tasks per graph is roughly based on the empirical sample from {@link #REALISTIC}.
+     */
     CHAINS {
         @Override
         public GraphGenerator createGenerator(MersenneTwisterRandomGenerator random) {
@@ -119,6 +140,11 @@ public enum DependencyGraphConstellation {
         }
     },
 
+    /**
+     * A sample of different graphs where each graph contains a "diamond" structure of a single start and end task
+     * and several tasks that can be done in parallel in between.
+     * The number of tasks per graph is roughly based on the empirical sample from {@link #REALISTIC}.
+     */
     DIAMONDS {
         @Override
         public GraphGenerator createGenerator(MersenneTwisterRandomGenerator random) {
@@ -141,6 +167,9 @@ public enum DependencyGraphConstellation {
         }
     };
 
-    public abstract GraphGenerator createGenerator(MersenneTwisterRandomGenerator random);
+    /**
+     * Returns a {@link GraphGenerator} for the enum value'S type of structure, using the given random number generator.
+     */
+    abstract GraphGenerator createGenerator(MersenneTwisterRandomGenerator random);
 
 }

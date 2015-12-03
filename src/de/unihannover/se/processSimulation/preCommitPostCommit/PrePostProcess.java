@@ -19,10 +19,13 @@ package de.unihannover.se.processSimulation.preCommitPostCommit;
 
 import desmoj.core.simulator.SimProcess;
 
-abstract class RealModelProcess extends SimProcess {
-//abstract class RealModelProcess extends QuasarContinuationProcess {
+/**
+ * Common helper superclass for all processes in the model.
+ * Contains some getters for commonly needed objects.
+ */
+abstract class PrePostProcess extends SimProcess {
 
-    public RealModelProcess(RealProcessingModel owner, String name) {
+    public PrePostProcess(PrePostModel owner, String name) {
         super(owner, name, true);
     }
 
@@ -31,8 +34,8 @@ abstract class RealModelProcess extends SimProcess {
     }
 
     @Override
-    public RealProcessingModel getModel() {
-        return (RealProcessingModel) super.getModel();
+    public PrePostModel getModel() {
+        return (PrePostModel) super.getModel();
     }
 
 }

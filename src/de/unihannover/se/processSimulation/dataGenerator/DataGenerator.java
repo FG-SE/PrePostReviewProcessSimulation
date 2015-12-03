@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 
 import de.unihannover.se.processSimulation.common.ParametersFactory;
 import de.unihannover.se.processSimulation.common.ReviewMode;
-import de.unihannover.se.processSimulation.preCommitPostCommit.RealProcessingModel;
+import de.unihannover.se.processSimulation.preCommitPostCommit.PrePostModel;
 import desmoj.core.dist.MersenneTwisterRandomGenerator;
 import desmoj.core.simulator.Experiment;
 import desmoj.core.simulator.TimeInstant;
@@ -31,7 +31,7 @@ public class DataGenerator {
 
     public static ExperimentResult runExperiment(
                     final ParametersFactory p, ReviewMode mode, boolean report, String runId) {
-        final RealProcessingModel model = new RealProcessingModel("RealProcessingModel", mode, p, report);
+        final PrePostModel model = new PrePostModel("RealProcessingModel", mode, p, report);
         final Experiment exp;
         if (report) {
             exp = new Experiment("Experiment" + mode + "_" + runId,
@@ -54,7 +54,7 @@ public class DataGenerator {
             exp.tracePeriod(new TimeInstant(0), new TimeInstant(160, TimeUnit.HOURS));
         }
         final int relevantRunningHours = 8 * 600;
-        exp.stop(new TimeInstant(RealProcessingModel.HOURS_TO_RESET + relevantRunningHours, TimeUnit.HOURS));
+        exp.stop(new TimeInstant(PrePostModel.HOURS_TO_RESET + relevantRunningHours, TimeUnit.HOURS));
         exp.start();
         if (report) {
             exp.report();

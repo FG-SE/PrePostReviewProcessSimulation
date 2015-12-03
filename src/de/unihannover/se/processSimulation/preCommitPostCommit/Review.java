@@ -20,18 +20,30 @@ package de.unihannover.se.processSimulation.preCommitPostCommit;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Representation of a (finished or ongoing) review and the remarks found during this review.
+ */
 class Review {
 
     private final List<Bug> remarks;
 
+    /**
+     * Creates a review with the given remarks.
+     */
     public Review(List<? extends Bug> foundBugs) {
         this.remarks = new ArrayList<>(foundBugs);
     }
 
+    /**
+     * Returns the bugs that have been found during this review.
+     */
     public List<Bug> getRemarks() {
         return this.remarks;
     }
 
+    /**
+     * Adds a bug to the set of review remarks/found bugs.
+     */
     public void addRemark(Bug bug) {
         if (!this.remarks.contains(bug)) {
             this.remarks.add(bug);

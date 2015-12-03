@@ -21,13 +21,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Represenation of a task that belongs to the implementation of a {@link Story}.
+ * It can depend on other tasks from that story.
+ */
 class StoryTask extends Task {
 
     private final Story story;
 
     private final List<StoryTask> prerequisites;
 
-    public StoryTask(RealProcessingModel model, Story story) {
+    /**
+     * Creates a task and connects it to the given story.
+     */
+    public StoryTask(PrePostModel model, Story story) {
         super(model, "story-task", model.getParameters().getImplementationTimeDist().sampleTimeSpan(TimeUnit.HOURS));
         this.story = story;
         this.prerequisites = new ArrayList<>();
@@ -44,6 +51,10 @@ class StoryTask extends Task {
         return this.story.getMemoryKey();
     }
 
+    /**
+     * Returns true iff all tasks that this task depends on are commited (so that this
+     * tasks implementation could sensibly start).
+     */
     public boolean arePrerequisitesGiven() {
         for (final Task t : this.prerequisites) {
             if (!t.isCommited()) {
@@ -58,10 +69,17 @@ class StoryTask extends Task {
         return super.toString() + " (" + this.story.toString() + ")";
     }
 
+    /**
+     * Adds another prequisite to this task. Should only be called during construction of the stories
+     * dependency graph.
+     */
     void addPrerequisite(StoryTask t) {
         this.prerequisites.add(t);
     }
 
+    /**
+     * Returns all tasks that have to be commited before this task's implementation can be started.
+     */
     @Override
     public List<? extends Task> getPrerequisites() {
         return this.prerequisites;
@@ -71,6 +89,10 @@ class StoryTask extends Task {
     protected void handleCommited() {
     }
 
+    /**
+     * When this task is finished, it could have been the last unfinished task in the story.
+     * If the story can now be finished, this is done.
+     */
     @Override
     protected void handleFinishedTask() {
         if (this.story.canBeFinished()) {
