@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 import desmoj.core.simulator.TimeSpan;
 
 /**
- * Represenation of "normal" bugs, i.e. bugs that are not {@link GlobalBlockerBug}s. The used concept of "bug" is still quite
+ * Representation of "normal" bugs, i.e. bugs that are not {@link GlobalBlockerBug}s. The used concept of "bug" is still quite
  * broad: A bug can be everything that is remarked in a review, from "real" correctness defects to performance or maintainability
  * problems. The only distinction that is made is between bugs that only a developer can find (e.g. a maintainability issue) and
  * bugs that customers as well as developers can find.
@@ -43,7 +43,7 @@ class NormalBug extends Bug {
     private final BugType type;
 
     /**
-     * Creates a bug that was injected during implemenation of the given task and has the given type.
+     * Creates a bug that was injected during implementation of the given task and has the given type.
      */
     public NormalBug(Task task, BugType type) {
         super(task, "bug");

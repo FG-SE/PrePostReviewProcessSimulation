@@ -323,7 +323,7 @@ abstract class Task extends PrePostEntity implements MemoryItem {
 
         switch (this.state) {
         case OPEN:
-            throw new RuntimeException("Should not happen: Bug in open task " + this);
+            throw new AssertionError("Should not happen: Bug in open task " + this);
         case IN_IMPLEMENTATION:
             //task is currently in work: fixing is done while the author is at it and delays the implementation
             this.suspendImplementation(this.sampleRemarkFixTime());

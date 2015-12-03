@@ -40,13 +40,6 @@ class BugfixTask extends Task {
     }
 
     /**
-     * Returns the bug that shall be fixed.
-     */
-    public NormalBug getBug() {
-        return this.bug;
-    }
-
-    /**
      * Belongs to the same topic as the task during which the bug was injected.
      */
     @Override
