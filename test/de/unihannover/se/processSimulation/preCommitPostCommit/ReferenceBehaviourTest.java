@@ -187,23 +187,6 @@ public class ReferenceBehaviourTest {
 
 
     @Test
-    public void testasdf() throws Exception {
-        //TEST
-        final BulkParameterFactory p = BulkParameterFactory
-                        .forCommercial()
-                        .copyWithChangedParam(ParameterType.IMPLEMENTATION_SKILL_MODE, 0.16)
-                        .copyWithChangedParam(ParameterType.NUMBER_OF_DEVELOPERS, 2)
-                        .copyWithChangedParam(ParameterType.GLOBAL_BUG_MODE, 0.0)
-                        .copyWithChangedParam(ParameterType.CONFLICT_PROBABILITY, 0.0)
-                        .copyWithChangedParam(ParameterType.TASK_SWITCH_OVERHEAD_AFTER_ONE_HOUR, 0.0)
-                        .copyWithChangedParam(ParameterType.MAX_TASK_SWITCH_OVERHEAD, 0.0)
-                        .copyWithChangedParam(ParameterType.DEPENDENCY_GRAPH_CONSTELLATION, DependencyGraphConstellation.NO_DEPENDENCIES);
-        final Long modelPre = runExperimentAndGetMedianResult(p, ReviewMode.PRE_COMMIT, PrePostModel::getFinishedStoryPoints);
-        final Long modelPost = runExperimentAndGetMedianResult(p, ReviewMode.POST_COMMIT, PrePostModel::getFinishedStoryPoints);
-        assertThat(modelPre, isSimilarTo(modelPost));
-    }
-
-    @Test
     public void testNoReviewIsWorseThanReview() throws Exception {
         final BulkParameterFactory p = BulkParameterFactory
                         .forCommercial();
