@@ -43,7 +43,8 @@ import de.unihannover.se.processSimulation.dataGenerator.BulkParameterFactory.Pa
 public class ClusterWorker {
 
     private static final String SHUTDOWN_FILENAME = "shutdown.txt";
-    private static final long TIMEOUT = 1000L * 60;
+    private static final long MIN_TIMEOUT = 1000L * 60;
+    private static final long MAX_TIMEOUT = 1000L * 60 * 30;
 
     public static void main(String[] args) throws Exception {
         final String url = args[0]; //"tcp://TOBI:61616"
@@ -77,13 +78,19 @@ public class ClusterWorker {
         final MessageProducer resultProducer = session.createProducer(session.createQueue(Common.RESULT_QUEUE));
 
         final File shutdownFile = new File(workDir, SHUTDOWN_FILENAME);
+        long curTimeout = MIN_TIMEOUT;
         while (!shutdownFile.exists()) {
-            final TextMessage message = (TextMessage) workConsumer.receive(TIMEOUT);
+            final TextMessage message = (TextMessage) workConsumer.receive(curTimeout);
             if (message == null) {
-                System.out.println("received no work for " + TIMEOUT + " ms ...");
+                System.out.println("received no work for " + curTimeout + " ms ...");
                 log(session, logProducer, workDir, "has nothing to do");
+                curTimeout *= 2;
+                if (curTimeout > MAX_TIMEOUT) {
+                    curTimeout = MAX_TIMEOUT;
+                }
                 continue;
             }
+            curTimeout = MIN_TIMEOUT;
             final String msgId = message.getStringProperty(Common.MSG_ID);
             log(session, logProducer, workDir, "starts working on message " + msgId);
             final File msgDir = new File(workDir, msgId);
