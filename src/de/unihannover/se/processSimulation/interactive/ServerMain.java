@@ -17,9 +17,15 @@
 
 package de.unihannover.se.processSimulation.interactive;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -29,12 +35,15 @@ import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
+import com.google.common.io.Files;
+
 import de.unihannover.se.processSimulation.common.ReviewMode;
 import de.unihannover.se.processSimulation.dataGenerator.BulkParameterFactory;
 import de.unihannover.se.processSimulation.dataGenerator.BulkParameterFactory.ParameterType;
 import de.unihannover.se.processSimulation.dataGenerator.DataGenerator;
 import de.unihannover.se.processSimulation.dataGenerator.ExperimentResult;
 import de.unihannover.se.processSimulation.dataGenerator.ExperimentRun;
+import de.unihannover.se.processSimulation.dataGenerator.ExperimentRun.ExperimentRunSummary;
 import de.unihannover.se.processSimulation.dataGenerator.ExperimentRun.SingleRunCallback;
 import de.unihannover.se.processSimulation.dataGenerator.ExperimentRunSettings;
 import de.unihannover.se.processSimulation.dataGenerator.ExperimentRunSettings.ExperimentRunParameters;
@@ -45,25 +54,157 @@ import de.unihannover.se.processSimulation.dataGenerator.MedianWithConfidenceInt
  */
 public class ServerMain extends AbstractHandler {
 
+    private static final String PARAMS_PROPERTIES = "params.properties";
+    private final AtomicInteger requestIdCounter = new AtomicInteger();
+
     @Override
     public void handle(String target,
                        Request baseRequest,
                        HttpServletRequest request,
                        HttpServletResponse response)
         throws IOException, ServletException {
+
+        baseRequest.setHandled(true);
+
+        final Matcher detailsMainMatcher = Pattern.compile("/details/([0-9]+)/([0-9]+)/overview").matcher(target);
+        final Matcher detailsFileMatcher = Pattern.compile("/details/([0-9]+)/([0-9]+)/(.+)").matcher(target);
+
+        if (target.equals("/")) {
+            final int currentRequestId = this.requestIdCounter.getAndIncrement();
+            this.handleMainPage(request, response, currentRequestId);
+        } else if (detailsMainMatcher.matches()) {
+            this.handleDetailsPage(request, response,
+                            Integer.parseInt(detailsMainMatcher.group(1)), Integer.parseInt(detailsMainMatcher.group(2)));
+        } else if (detailsFileMatcher.matches()) {
+            this.handleDetailFileRequest(request, response,
+                            Integer.parseInt(detailsFileMatcher.group(1)), Integer.parseInt(detailsFileMatcher.group(2)), detailsFileMatcher.group(3));
+        }
+    }
+
+    private void handleMainPage(HttpServletRequest request, HttpServletResponse response, int requestId) throws IOException {
         response.setContentType("text/html;charset=utf-8");
         response.setStatus(HttpServletResponse.SC_OK);
-        baseRequest.setHandled(true);
 
         final PrintWriter w = response.getWriter();
         this.printHeader(w);
+        w.println("<h1>Pre/Post commit review comparison - Process simulation</h1>");
         final BulkParameterFactory f = this.getParameters(w, request);
+        this.saveParameters(requestId, f);
         final ExperimentRunSettings s = this.getExperimentSettings(w, request);
         this.printInputParameters(w, f, s);
         if (this.shallSimulate(request)) {
-            this.simulateAndPrintOutput(w, f, s);
+            this.simulateAndPrintOutput(w, f, s, requestId);
         }
         this.printFooter(w);
+    }
+
+    private void saveParameters(int requestId, BulkParameterFactory f) throws IOException {
+        final File requestDir = this.getRequestDir(requestId);
+        requestDir.mkdirs();
+
+        final Properties p = this.parametersToProperties(f);
+        try (FileOutputStream out = new FileOutputStream(new File(requestDir, PARAMS_PROPERTIES))) {
+            p.store(out, "Params for request id " + requestId);
+        }
+    }
+
+    private File getRequestDir(int requestId) {
+        return new File("webguiWorkdir", Integer.toString(requestId));
+    }
+
+    private Properties parametersToProperties(BulkParameterFactory f) {
+        final Properties ret = new Properties();
+        for (final ParameterType type : ParameterType.values()) {
+            ret.setProperty(type.name(), f.getParam(type).toString());
+        }
+        return ret;
+    }
+
+    private void handleDetailsPage(HttpServletRequest request, HttpServletResponse response,
+                    int requestId, int runNbr) throws IOException {
+
+        final BulkParameterFactory f = this.createRunDirectoryIfMissing(requestId, runNbr);
+
+        response.setContentType("text/html;charset=utf-8");
+        response.setStatus(HttpServletResponse.SC_OK);
+
+        final PrintWriter w = response.getWriter();
+        w.println("<h2>Details for run " + runNbr + "</h2>");
+        w.println("<h3>Parameters</h3>");
+        for (final ParameterType type : ParameterType.values()) {
+            w.println(type + ": " + f.getParam(type) +  "<br/>");
+        }
+        w.println("Seed: " + f.getSeed());
+
+        w.println("<h3>No review</h3>");
+        w.println("<a href=\"ExperimentNO_REVIEW_run_report.html\">Report</a><br/>");
+        w.println("<a href=\"ExperimentNO_REVIEW_run_trace.html\">Trace</a><br/>");
+        w.println("<a href=\"ExperimentNO_REVIEW_run_error.html\">Error log</a><br/>");
+        w.println("<a href=\"ExperimentNO_REVIEW_run_debug.html\">Debug</a><br/>");
+
+        w.println("<h3>Pre commit review</h3>");
+        w.println("<a href=\"ExperimentPRE_COMMIT_run_report.html\">Report</a><br/>");
+        w.println("<a href=\"ExperimentPRE_COMMIT_run_trace.html\">Trace</a><br/>");
+        w.println("<a href=\"ExperimentPRE_COMMIT_run_error.html\">Error log</a><br/>");
+        w.println("<a href=\"ExperimentPRE_COMMIT_run_debug.html\">Debug</a><br/>");
+
+        w.println("<h3>Post commit review</h3>");
+        w.println("<a href=\"ExperimentPOST_COMMIT_run_report.html\">Report</a><br/>");
+        w.println("<a href=\"ExperimentPOST_COMMIT_run_trace.html\">Trace</a><br/>");
+        w.println("<a href=\"ExperimentPOST_COMMIT_run_error.html\">Error log</a><br/>");
+        w.println("<a href=\"ExperimentPOST_COMMIT_run_debug.html\">Debug</a><br/>");
+    }
+
+    private BulkParameterFactory createRunDirectoryIfMissing(int requestId, int runNbr) throws IOException {
+        BulkParameterFactory f = this.loadParameters(requestId);
+        for (int i = 0; i < runNbr; i++) {
+            f = f.copyWithChangedSeed();
+        }
+
+        final File runDirectory = this.getRunDir(requestId, runNbr);
+        if (!runDirectory.exists()) {
+            runDirectory.mkdir();
+
+            DataGenerator.runExperiment(f, ReviewMode.NO_REVIEW, runDirectory, "run");
+            DataGenerator.runExperiment(f, ReviewMode.PRE_COMMIT, runDirectory, "run");
+            DataGenerator.runExperiment(f, ReviewMode.POST_COMMIT, runDirectory, "run");
+        }
+
+        return f;
+    }
+
+    private File getRunDir(int requestId, int runNbr) {
+        return new File(this.getRequestDir(requestId), Integer.toString(runNbr));
+    }
+
+    private BulkParameterFactory loadParameters(int requestId) throws IOException {
+        final File requestDir = this.getRequestDir(requestId);
+        final File paramsFile = new File(requestDir, PARAMS_PROPERTIES);
+        try (FileInputStream in = new FileInputStream(paramsFile)) {
+            final Properties properties = new Properties();
+            properties.load(in);
+
+            BulkParameterFactory ret = BulkParameterFactory.forCommercial();
+            for (final String name : properties.stringPropertyNames()) {
+                final ParameterType type = ParameterType.valueOf(name);
+                ret = ret.copyWithChangedParam(type, type.parse(properties.getProperty(name)));
+            }
+            return ret;
+        }
+    }
+
+    private void handleDetailFileRequest(HttpServletRequest request, HttpServletResponse response,
+                    int requestId, int runNbr, String filename) throws IOException {
+        final File file = new File(this.getRunDir(requestId, runNbr), filename);
+
+        response.setContentType("text/html;charset=utf-8");
+        if (!file.exists()) {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            response.getWriter().println("File not found: " + filename);
+        } else {
+            response.setStatus(HttpServletResponse.SC_OK);
+            Files.copy(file, response.getOutputStream());
+        }
     }
 
     private boolean shallSimulate(HttpServletRequest request) {
@@ -108,7 +249,6 @@ public class ServerMain extends AbstractHandler {
 
     private void printHeader(final PrintWriter w) {
         w.println("<html><head><title>Pre/Post commit review comparison - Process simulation</title></head><body>");
-        w.println("<h1>Pre/Post commit review comparison - Process simulation</h1>");
     }
 
     private void printFooter(final PrintWriter w) {
@@ -172,7 +312,7 @@ public class ServerMain extends AbstractHandler {
         return "<input name=\"" + t.name() + "\" value=\"" + s.get(t) + "\" type=\"number\" step=\"any\" />";
     }
 
-    private void simulateAndPrintOutput(PrintWriter w, BulkParameterFactory f, ExperimentRunSettings s) {
+    private void simulateAndPrintOutput(PrintWriter w, BulkParameterFactory f, ExperimentRunSettings s, int requestId) {
         w.println("<h2>Simulation output</h2>");
 
         final StringBuilder detailsTable = new StringBuilder();
@@ -185,7 +325,7 @@ public class ServerMain extends AbstractHandler {
             public void handleResult(ExperimentResult no, ExperimentResult pre, ExperimentResult post) {
                 System.err.println("run " + count + " finished");
                 detailsTable.append("<tr>");
-                detailsTable.append("<td>").append(count).append("</td>");
+                detailsTable.append("<td><a href=\"details/").append(requestId).append("/overview").append(count).append("\">").append(count).append("</a></td>");
                 detailsTable.append("<td>").append(no == null ? "" : no.getFinishedStoryPoints()).append("</td>");
                 detailsTable.append("<td>").append(pre.getFinishedStoryPoints()).append("</td>");
                 detailsTable.append("<td>").append(post.getFinishedStoryPoints()).append("</td>");
@@ -200,9 +340,18 @@ public class ServerMain extends AbstractHandler {
             }
         };
 
-        final ExperimentRun result = ExperimentRun.perform(s, DataGenerator::runExperiment, f, detailsCallback);
+        final ExperimentRun result;
+        try {
+            result = ExperimentRun.perform(s, DataGenerator::runExperiment, f, detailsCallback);
+        } catch (final RuntimeException e) {
+            w.println("An exception occured during simulation: " + e.getMessage());
+            return;
+        }
 
-        w.println("Summary result: " + result.getSummary() + "<br/>");
+        final ExperimentRunSummary summary = result.getSummary();
+        w.println("Summary result - Story points: " + summary.getStoryPointsResult() + "<br/>");
+        w.println("Summary result - Bugs found by customer: " + summary.getBugsResult() + "<br/>");
+        w.println("Summary result - Cycle time: " + summary.getCycleTimeResult() + "<br/>");
         if (!result.isSummaryStatisticallySignificant()) {
             w.println("Summary result not statistically significant<br/>");
         }

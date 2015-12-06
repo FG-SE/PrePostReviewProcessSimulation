@@ -28,6 +28,7 @@ public class ExperimentResult {
     private final long bugCountFoundByCustomers;
     private final long investedPersonHours;
     private final long expDuration;
+    private final boolean hadError;
 
     public ExperimentResult(
                     long finishedStoryPoints,
@@ -37,7 +38,8 @@ public class ExperimentResult {
                     long finishedStoryCount,
                     long bugCountFoundByCustomers,
                     long investedPersonHours,
-                    long expDuration) {
+                    long expDuration,
+                    boolean hadError) {
         this.finishedStoryPoints = finishedStoryPoints;
         this.storyCycleTimeMean = storyCycleTimeMean;
         this.storyCycleTimeStdDev = storyCycleTimeStdDev;
@@ -46,6 +48,7 @@ public class ExperimentResult {
         this.bugCountFoundByCustomers = bugCountFoundByCustomers;
         this.investedPersonHours = investedPersonHours;
         this.expDuration = expDuration;
+        this.hadError = hadError;
     }
 
     public long getFinishedStoryPoints() {
@@ -78,6 +81,10 @@ public class ExperimentResult {
 
     public long getExperimentDuration() {
         return this.expDuration;
+    }
+
+    public boolean hadError() {
+        return this.hadError;
     }
 
 }

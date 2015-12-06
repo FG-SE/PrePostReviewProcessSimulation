@@ -21,6 +21,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,8 +30,8 @@ import org.junit.Test;
 import co.paralleluniverse.common.util.Pair;
 import de.unihannover.se.processSimulation.common.ParametersFactory;
 import de.unihannover.se.processSimulation.common.ReviewMode;
-import de.unihannover.se.processSimulation.dataGenerator.ExperimentRun.ExperimentRunSummary;
 import de.unihannover.se.processSimulation.dataGenerator.ExperimentRun.ExperimentRunner;
+import de.unihannover.se.processSimulation.dataGenerator.ExperimentRun.PrePostComparison;
 import de.unihannover.se.processSimulation.dataGenerator.ExperimentRun.SingleRunCallback;
 import de.unihannover.se.processSimulation.dataGenerator.ExperimentRunSettings.ExperimentRunParameters;
 
@@ -45,7 +46,7 @@ public class ExperimentRunTest {
         }
 
         @Override
-        public ExperimentResult runExperiment(ParametersFactory p, ReviewMode mode, boolean report, String runId) {
+        public ExperimentResult runExperiment(ParametersFactory p, ReviewMode mode, File resultDir, String runId) {
             return this.data.get(new Pair<String, ReviewMode>(runId, mode));
         }
 
@@ -64,7 +65,8 @@ public class ExperimentRunTest {
                         finishedStoryCount,
                         bugCountFoundByCustomers,
                         finishedStoryPoints * 2,
-                        23);
+                        23,
+                        false);
     }
 
     private static MedianWithConfidenceInterval median(double median, double lower, double upper) {
@@ -140,7 +142,7 @@ public class ExperimentRunTest {
         assertEquals(median(10/16.5, 10/17.5, 10/15.5), result.getFactorCycleTime());
         assertEquals(median(10/17.0, 10/19.0, 10/15.0), result.getFactorBugs());
 
-        assertEquals(ExperimentRunSummary.POST_BETTER_STORY_POINTS, result.getSummary());
+        assertEquals(PrePostComparison.POST_BETTER, result.getSummary().getStoryPointsResult());
         assertTrue(result.isSummaryStatisticallySignificant());
     }
 
@@ -202,19 +204,19 @@ public class ExperimentRunTest {
 
         assertEquals(median(10/206.0, 10/306.0, 10/106.0), result4.getFactorStoryPoints());
 
-        assertEquals(ExperimentRunSummary.POST_BETTER_STORY_POINTS, result4.getSummary());
+        assertEquals(PrePostComparison.POST_BETTER, result4.getSummary().getStoryPointsResult());
         assertFalse(result4.isSummaryStatisticallySignificant());
 
         //with smaller limit, result becomes significant
         final ExperimentRun result2 = ExperimentRun.perform(settings2, stub, f, dummyCallback());
         assertEquals(result4.getFactorStoryPoints(), result2.getFactorStoryPoints());
-        assertEquals(ExperimentRunSummary.POST_BETTER_STORY_POINTS, result2.getSummary());
+        assertEquals(PrePostComparison.POST_BETTER, result2.getSummary().getStoryPointsResult());
         assertTrue(result2.isSummaryStatisticallySignificant());
 
         //with larger limit, result becomes significant too (but with different outcome)
         final ExperimentRun result10 = ExperimentRun.perform(settings10, stub, f, dummyCallback());
         assertEquals(result4.getFactorStoryPoints(), result10.getFactorStoryPoints());
-        assertEquals(ExperimentRunSummary.NEGLIGIBLE_DIFFERENCE, result10.getSummary());
+        assertEquals(PrePostComparison.NEGLIGIBLE_DIFFERENCE, result10.getSummary().getStoryPointsResult());
         assertTrue(result10.isSummaryStatisticallySignificant());
     }
 
@@ -261,7 +263,7 @@ public class ExperimentRunTest {
 
         assertEquals(median(0.0, -1.0, 1.0), result.getFactorStoryPoints());
 
-        assertEquals(ExperimentRunSummary.POST_BETTER_CYCLE_TIME, result.getSummary());
+        assertEquals(PrePostComparison.NEGLIGIBLE_DIFFERENCE, result.getSummary().getStoryPointsResult());
         assertFalse(result.isSummaryStatisticallySignificant());
     }
 }

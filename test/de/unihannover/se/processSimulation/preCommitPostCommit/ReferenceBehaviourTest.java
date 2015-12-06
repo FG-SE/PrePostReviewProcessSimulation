@@ -106,7 +106,7 @@ public class ReferenceBehaviourTest {
         final BulkParameterFactory p = BulkParameterFactory
                         .forCommercial()
                         .copyWithChangedParam(ParameterType.IMPLEMENTATION_SKILL_MODE, 0.0)
-                        .copyWithChangedParam(ParameterType.IMPLEMENTATION_SKILL_STDDEV_FACTOR, 0.0)
+                        .copyWithChangedParam(ParameterType.IMPLEMENTATION_SKILL_TRIANGLE_WIDTH, 0.0)
                         .copyWithChangedParam(ParameterType.NUMBER_OF_DEVELOPERS, 2)
                         .copyWithChangedParam(ParameterType.GLOBAL_BUG_MODE, 0.0)
                         .copyWithChangedParam(ParameterType.GLOBAL_BUG_TRIANGLE_WIDTH, 0.0)

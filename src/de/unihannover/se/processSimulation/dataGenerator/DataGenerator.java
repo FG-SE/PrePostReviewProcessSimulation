@@ -17,6 +17,7 @@
 
 package de.unihannover.se.processSimulation.dataGenerator;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
@@ -30,17 +31,18 @@ import desmoj.core.simulator.TimeInstant;
 public class DataGenerator {
 
     public static ExperimentResult runExperiment(
-                    final ParametersFactory p, ReviewMode mode, boolean report, String runId) {
+                    final ParametersFactory p, ReviewMode mode, File resultDir, String runId) {
+        final boolean report = resultDir != null;
         final PrePostModel model = new PrePostModel("RealProcessingModel", mode, p, report);
         final Experiment exp;
         if (report) {
             exp = new Experiment("Experiment" + mode + "_" + runId,
-                        ".\\experimentResults", null, Experiment.DEFAULT_REPORT_OUTPUT_TYPE,
+                        resultDir.getPath(), null, Experiment.DEFAULT_REPORT_OUTPUT_TYPE,
                         Experiment.DEFAULT_TRACE_OUTPUT_TYPE, Experiment.DEFAULT_ERROR_OUTPUT_TYPE,
                         Experiment.DEFAULT_DEBUG_OUTPUT_TYPE);
         } else {
             exp = new Experiment("Experiment" + mode + "_" + runId,
-                        ".\\experimentResults", null, noOutputs(), noOutputs(), noOutputs(), noOutputs());
+                        ".\\dummy", null, noOutputs(), noOutputs(), noOutputs(), noOutputs());
         }
         exp.setRandomNumberGenerator(MersenneTwisterRandomGenerator.class);
         exp.setSeedGenerator(p.getSeed());
@@ -70,7 +72,8 @@ public class DataGenerator {
                         model.getFinishedStoryCount(),
                         model.getBugCountFoundByCustomers(),
                         p.getNumberOfDevelopers() * relevantRunningHours,
-                        expDuration);
+                        expDuration,
+                        exp.hasError());
 
     }
 

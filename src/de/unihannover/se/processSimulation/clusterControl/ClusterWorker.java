@@ -99,7 +99,7 @@ public class ClusterWorker {
             final File parameterSetsFile = new File(msgDir, "parameterSets.txt");
             final File resultsFile = new File(msgDir, "results.txt");
             writeInputToMsgDir(message, paramFile, parameterSetsFile);
-            executeRuns(paramFile, parameterSetsFile, resultsFile);
+            executeRuns(session, logProducer, paramFile, parameterSetsFile, resultsFile);
             sendResultMessage(session, resultsFile, resultProducer);
             log(session, logProducer, workDir, "finished working on message " + msgId);
         }
@@ -117,9 +117,10 @@ public class ClusterWorker {
         Common.writeToFile(parameterSetsFile, parts[1]);
     }
 
-    private static void executeRuns(File paramFile, File parameterSetsFile, File resultsFile) throws Exception {
+    private static void executeRuns(Session session, MessageProducer logProducer, File paramFile, File parameterSetsFile, File resultsFile) throws Exception {
         final List<ParameterType> paramNames = BulkFileExecutor.readParamNames(paramFile);
-        BulkFileExecutor.executeBulk(paramNames, parameterSetsFile, resultsFile);
+        BulkFileExecutor.executeBulk(paramNames, parameterSetsFile, resultsFile,
+                        e-> log(session, logProducer, paramFile.getParentFile().getParentFile(), "Exception aufgetreten: " + e));
     }
 
     private static void sendResultMessage(Session session, File resultsFile, MessageProducer resultProducer) throws JMSException, IOException {
@@ -129,11 +130,15 @@ public class ClusterWorker {
         resultProducer.send(msg);
     }
 
-    private static void log(Session session, MessageProducer logProducer, File workDir, String string) throws JMSException {
-        final String fullMessage = workDir.getName() + " " + new Date() + ": " + string;
-        System.out.println(fullMessage);
-        final TextMessage msg = session.createTextMessage(fullMessage);
-        msg.setStringProperty(Common.MSG_PROCESSOR, workDir.getName());
-        logProducer.send(msg);
+    private static void log(Session session, MessageProducer logProducer, File workDir, String string) {
+        try {
+            final String fullMessage = workDir.getName() + " " + new Date() + ": " + string;
+            System.out.println(fullMessage);
+            final TextMessage msg = session.createTextMessage(fullMessage);
+            msg.setStringProperty(Common.MSG_PROCESSOR, workDir.getName());
+            logProducer.send(msg);
+        } catch (final JMSException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

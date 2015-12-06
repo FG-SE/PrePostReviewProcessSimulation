@@ -25,10 +25,13 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.function.Consumer;
 
 import co.paralleluniverse.common.util.Pair;
 import de.unihannover.se.processSimulation.common.ReviewMode;
+import de.unihannover.se.processSimulation.dataGenerator.BulkParameterFactory.DistributionFactory;
 import de.unihannover.se.processSimulation.dataGenerator.BulkParameterFactory.ParameterType;
 import de.unihannover.se.processSimulation.dataGenerator.ExperimentRun.ExperimentRunSummary;
 import de.unihannover.se.processSimulation.dataGenerator.ExperimentRun.SingleRunCallback;
@@ -42,7 +45,7 @@ public class BulkFileExecutor {
     public static void main(String[] args) throws Exception {
         final List<ParameterType> paramNames = readParamNames(new File("sobolStuff/params.txt"));
         System.out.println("Read param names: " + paramNames);
-        executeBulk(paramNames, new File("sobolStuff/sobolParameterSets.txt"), new File("sobolStuff/results.txt"));
+        executeBulk(paramNames, new File("sobolStuff/sobolParameterSets.txt"), new File("sobolStuff/results.txt"), e -> {});
     }
 
     public static List<ParameterType> readParamNames(File filename) throws IOException {
@@ -53,10 +56,13 @@ public class BulkFileExecutor {
                 ret.add(ParameterType.valueOf(line.split(" ")[0]));
             }
         }
+        if (new HashSet<>(ret).size() != ret.size()) {
+            throw new AssertionError("There are duplicate parameters!!");
+        }
         return ret;
     }
 
-    public static void executeBulk(List<ParameterType> paramNames, File inputFile, File outputFile) throws Exception {
+    public static void executeBulk(List<ParameterType> paramNames, File inputFile, File outputFile, Consumer<Exception> exceptionCallback) throws Exception {
         Experiment.setCoroutineModel(CoroutineModel.FIBERS);
 
         try (BufferedReader r = new BufferedReader(new FileReader(inputFile))) {
@@ -70,6 +76,7 @@ public class BulkFileExecutor {
                         writeResult(result, output);
                     } catch (final Exception e) {
                         e.printStackTrace();
+                        exceptionCallback.accept(e);
                     }
                     inputLineNbr++;
                 }
@@ -97,7 +104,20 @@ public class BulkFileExecutor {
             } else if (idx == 1) {
                 return DependencyGraphConstellation.REALISTIC;
             } else if (idx == 2) {
+                return DependencyGraphConstellation.DIAMONDS;
+            } else if (idx == 3) {
                 return DependencyGraphConstellation.CHAINS;
+            } else {
+                throw new RuntimeException("Invalid value " + idx);
+            }
+        }if (param.getType().equals(DistributionFactory.class)) {
+            final int idx = (int) Double.parseDouble(value);
+            if (idx == 0) {
+                return DistributionFactory.POSNORMAL;
+            } else if (idx == 1) {
+                return DistributionFactory.LOGNORMAL;
+            } else if (idx == 2) {
+                return DistributionFactory.EXPSHIFT;
             } else {
                 throw new RuntimeException("Invalid value " + idx);
             }
@@ -128,6 +148,8 @@ public class BulkFileExecutor {
     }
 
     private static void writeResult(ExperimentRun result, Writer output) throws IOException {
+        final ExperimentRunSummary summary = result.getSignificantSummary();
+
         write(output, result.getFactorStoryPoints());
         output.write(';');
         write(output, result.getFinishedStoryPointsMedian(ReviewMode.NO_REVIEW));
@@ -135,6 +157,8 @@ public class BulkFileExecutor {
         write(output, result.getFinishedStoryPointsMedian(ReviewMode.PRE_COMMIT));
         output.write(';');
         write(output, result.getFinishedStoryPointsMedian(ReviewMode.POST_COMMIT));
+        output.write(';');
+        output.write(summary.getStoryPointsResult().toString());
         output.write(';');
         write(output, result.getFactorBugs());
         output.write(';');
@@ -144,6 +168,8 @@ public class BulkFileExecutor {
         output.write(';');
         write(output, result.getBugCountMedian(ReviewMode.POST_COMMIT));
         output.write(';');
+        output.write(summary.getBugsResult().toString());
+        output.write(';');
         write(output, result.getFactorCycleTime());
         output.write(';');
         write(output, result.getStoryCycleTimeMeanMedian(ReviewMode.NO_REVIEW));
@@ -152,13 +178,17 @@ public class BulkFileExecutor {
         output.write(';');
         write(output, result.getStoryCycleTimeMeanMedian(ReviewMode.POST_COMMIT));
         output.write(';');
+        output.write(summary.getCycleTimeResult().toString());
+        output.write(';');
         write(output, result.getShareProductiveWork());
+        output.write(';');
+        output.write(summary.getRealismCheckResult().toString());
         output.write(';');
         write(output, result.getFactorNoReview());
         output.write(';');
-        output.write(result.getSummary().toString());
+        output.write(summary.getNoReviewResult().toString());
         output.write(';');
-        output.write(Boolean.toString(result.isSummaryStatisticallySignificant()));
+        output.write(Integer.toString(result.getNumberOfTrials()));
         output.write('\n');
         output.flush();
     }
@@ -189,6 +219,7 @@ public class BulkFileExecutor {
         addMedianAttributes(ret, "FactorNoReview");
         ret.add(new Pair<>("summary", ExperimentRunSummary.class));
         ret.add(new Pair<>("isSummaryStatisticallySignificant", Boolean.class));
+        ret.add(new Pair<>("numberOfTrials", Integer.class));
         return ret;
     }
 

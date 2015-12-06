@@ -17,6 +17,7 @@
 
 package de.unihannover.se.processSimulation.dataGenerator;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
@@ -28,15 +29,110 @@ import de.unihannover.se.processSimulation.dataGenerator.ExperimentRunSettings.E
 
 public class ExperimentRun {
 
-    public enum ExperimentRunSummary {
+    public static class ExperimentRunSummary {
+        private final RealismCheckResult realismCheckResult;
+        private final ReviewNoReviewComparison noReviewResult;
+        private final PrePostComparison storyPointsResult;
+        private final PrePostComparison cycleTimeResult;
+        private final PrePostComparison bugsResult;
+
+        public ExperimentRunSummary(
+                        RealismCheckResult realismCheckResult,
+                        ReviewNoReviewComparison noReviewResult,
+                        PrePostComparison storyPointsResult,
+                        PrePostComparison cycleTimeResult,
+                        PrePostComparison bugsResult) {
+            this.realismCheckResult = realismCheckResult;
+            this.noReviewResult = noReviewResult;
+            this.storyPointsResult = storyPointsResult;
+            this.cycleTimeResult = cycleTimeResult;
+            this.bugsResult = bugsResult;
+        }
+
+        public RealismCheckResult getRealismCheckResult() {
+            return this.realismCheckResult;
+        }
+
+        public ReviewNoReviewComparison getNoReviewResult() {
+            return this.noReviewResult;
+        }
+
+        public PrePostComparison getStoryPointsResult() {
+            return this.storyPointsResult;
+        }
+
+        public PrePostComparison getCycleTimeResult() {
+            return this.cycleTimeResult;
+        }
+
+        public PrePostComparison getBugsResult() {
+            return this.bugsResult;
+        }
+
+        @Override
+        public int hashCode() {
+            return this.storyPointsResult.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof ExperimentRunSummary)) {
+                return false;
+            }
+            final ExperimentRunSummary e = (ExperimentRunSummary) o;
+            return this.bugsResult == e.bugsResult
+                && this.cycleTimeResult == e.cycleTimeResult
+                && this.storyPointsResult == e.storyPointsResult
+                && this.noReviewResult == e.noReviewResult
+                && this.realismCheckResult == e.realismCheckResult;
+        }
+
+        public static ExperimentRunSummary unrealistic() {
+            return new ExperimentRunSummary(
+                            RealismCheckResult.UNREALISTIC,
+                            ReviewNoReviewComparison.UNREALISTIC,
+                            PrePostComparison.UNREALISTIC,
+                            PrePostComparison.UNREALISTIC,
+                            PrePostComparison.UNREALISTIC);
+        }
+
+        public static ExperimentRunSummary noReview() {
+            return new ExperimentRunSummary(
+                            RealismCheckResult.REALISTIC,
+                            ReviewNoReviewComparison.NO_REVIEW,
+                            PrePostComparison.NO_REVIEW,
+                            PrePostComparison.NO_REVIEW,
+                            PrePostComparison.NO_REVIEW);
+        }
+
+        public static ExperimentRunSummary review(PrePostComparison summaryStoryPoints, PrePostComparison summaryCycleTime, PrePostComparison summaryBugs) {
+            return new ExperimentRunSummary(
+                            RealismCheckResult.REALISTIC,
+                            ReviewNoReviewComparison.REVIEW,
+                            summaryStoryPoints,
+                            summaryCycleTime,
+                            summaryBugs);
+        }
+    }
+
+    public enum RealismCheckResult {
+        UNREALISTIC,
+        REALISTIC,
+        NOT_SIGNIFICANT
+    }
+
+    public enum ReviewNoReviewComparison {
         UNREALISTIC,
         NO_REVIEW,
-        PRE_BETTER_STORY_POINTS,
-        POST_BETTER_STORY_POINTS,
-        PRE_BETTER_BUGS,
-        POST_BETTER_BUGS,
-        PRE_BETTER_CYCLE_TIME,
-        POST_BETTER_CYCLE_TIME,
+        REVIEW,
+        NOT_SIGNIFICANT
+    }
+
+    public enum PrePostComparison {
+        UNREALISTIC,
+        NO_REVIEW,
+        PRE_BETTER,
+        POST_BETTER,
         NEGLIGIBLE_DIFFERENCE,
         NOT_SIGNIFICANT
     }
@@ -44,7 +140,7 @@ public class ExperimentRun {
     @FunctionalInterface
     public static interface ExperimentRunner {
         public abstract ExperimentResult runExperiment(
-                        final ParametersFactory p, ReviewMode mode, boolean report, String runId);
+                        final ParametersFactory p, ReviewMode mode, File resultDir, String runId);
     }
 
     public static interface SingleRunCallback {
@@ -108,6 +204,7 @@ public class ExperimentRun {
 
     private final ExperimentRunSettings settings;
     private final List<CombinedResult> results = new ArrayList<>();
+    private int numberOfTrials;
 
     /**
      * Constructor hidden, create using {@link #perform}.
@@ -124,76 +221,63 @@ public class ExperimentRun {
         return this.determineSummary(false);
     }
 
+    public ExperimentRunSummary getSignificantSummary() {
+        return this.determineSummary(true);
+    }
+
     private ExperimentRunSummary determineSummary(boolean onlySignificant) {
         final MedianWithConfidenceInterval factorProductiveWork = this.getShareProductiveWork();
         if (factorProductiveWork.smallerThan(this.settings.get(ExperimentRunParameters.LIMIT_UNREALISTIC), onlySignificant)) {
-            return ExperimentRunSummary.UNREALISTIC;
+            return ExperimentRunSummary.unrealistic();
         }
 
         final MedianWithConfidenceInterval factorNoReview = this.getFactorNoReview();
         if (factorNoReview.largerThan(this.settings.get(ExperimentRunParameters.LIMIT_NO_REVIEW), onlySignificant)) {
-            return ExperimentRunSummary.NO_REVIEW;
+            return ExperimentRunSummary.noReview();
         }
 
-        final MedianWithConfidenceInterval factorStoryPoints = this.getFactorStoryPoints();
-        if (factorStoryPoints.smallerThan(-this.settings.get(ExperimentRunParameters.LIMIT_NEGLIGIBLE_DIFFERENCE_STORY_POINTS), onlySignificant)) {
-            return ExperimentRunSummary.PRE_BETTER_STORY_POINTS;
+        final PrePostComparison summaryStoryPoints = this.comparePrePost(
+                        this.getFactorStoryPoints(),
+                        this.settings.get(ExperimentRunParameters.LIMIT_NEGLIGIBLE_DIFFERENCE_STORY_POINTS),
+                        onlySignificant,
+                        true);
+        final PrePostComparison summaryCycleTime = this.comparePrePost(
+                        this.getFactorCycleTime(),
+                        this.settings.get(ExperimentRunParameters.LIMIT_NEGLIGIBLE_DIFFERENCE_CYCLE_TIME),
+                        onlySignificant,
+                        false);
+        final PrePostComparison summaryBugs = this.comparePrePost(
+                        this.getFactorBugs(),
+                        this.settings.get(ExperimentRunParameters.LIMIT_NEGLIGIBLE_DIFFERENCE_BUGS),
+                        onlySignificant,
+                        false);
+
+        return ExperimentRunSummary.review(summaryStoryPoints, summaryCycleTime, summaryBugs);
+    }
+
+    private PrePostComparison comparePrePost(MedianWithConfidenceInterval factorToCompare, double limit, boolean onlySignificant, boolean smallerMeansPre) {
+        if (factorToCompare.smallerThan(-limit, onlySignificant)) {
+            return smallerMeansPre ? PrePostComparison.PRE_BETTER : PrePostComparison.POST_BETTER;
         }
-        if (factorStoryPoints.largerThan(this.settings.get(ExperimentRunParameters.LIMIT_NEGLIGIBLE_DIFFERENCE_STORY_POINTS), onlySignificant)) {
-            return ExperimentRunSummary.POST_BETTER_STORY_POINTS;
+        if (factorToCompare.largerThan(limit, onlySignificant)) {
+            return smallerMeansPre ? PrePostComparison.POST_BETTER : PrePostComparison.PRE_BETTER;
         }
-        if (!factorStoryPoints.largerThan(-this.settings.get(ExperimentRunParameters.LIMIT_NEGLIGIBLE_DIFFERENCE_STORY_POINTS), onlySignificant)
-            || !factorStoryPoints.smallerThan(this.settings.get(ExperimentRunParameters.LIMIT_NEGLIGIBLE_DIFFERENCE_STORY_POINTS), onlySignificant)) {
+        if (!factorToCompare.largerThan(-limit, onlySignificant)
+            || !factorToCompare.smallerThan(limit, onlySignificant)) {
             assert onlySignificant;
-            return ExperimentRunSummary.NOT_SIGNIFICANT;
+            return PrePostComparison.NOT_SIGNIFICANT;
         }
-
-        final MedianWithConfidenceInterval factorBugs = this.getFactorBugs();
-        if (factorBugs.smallerThan(-this.settings.get(ExperimentRunParameters.LIMIT_NEGLIGIBLE_DIFFERENCE_BUGS), onlySignificant)) {
-            return ExperimentRunSummary.POST_BETTER_BUGS;
-        }
-        if (factorBugs.largerThan(this.settings.get(ExperimentRunParameters.LIMIT_NEGLIGIBLE_DIFFERENCE_BUGS), onlySignificant)) {
-            return ExperimentRunSummary.PRE_BETTER_BUGS;
-        }
-        if (!factorBugs.largerThan(-this.settings.get(ExperimentRunParameters.LIMIT_NEGLIGIBLE_DIFFERENCE_BUGS), onlySignificant)
-            || !factorBugs.smallerThan(this.settings.get(ExperimentRunParameters.LIMIT_NEGLIGIBLE_DIFFERENCE_BUGS), onlySignificant)) {
-            assert onlySignificant;
-            return ExperimentRunSummary.NOT_SIGNIFICANT;
-        }
-
-        final MedianWithConfidenceInterval factorCycleTime = this.getFactorCycleTime();
-        if (factorCycleTime.smallerThan(-this.settings.get(ExperimentRunParameters.LIMIT_NEGLIGIBLE_DIFFERENCE_CYCLE_TIME), onlySignificant)) {
-            return ExperimentRunSummary.POST_BETTER_CYCLE_TIME;
-        }
-        if (factorCycleTime.largerThan(this.settings.get(ExperimentRunParameters.LIMIT_NEGLIGIBLE_DIFFERENCE_CYCLE_TIME), onlySignificant)) {
-            return ExperimentRunSummary.PRE_BETTER_CYCLE_TIME;
-        }
-        if (!factorCycleTime.largerThan(-this.settings.get(ExperimentRunParameters.LIMIT_NEGLIGIBLE_DIFFERENCE_CYCLE_TIME), onlySignificant)
-            || !factorCycleTime.smallerThan(this.settings.get(ExperimentRunParameters.LIMIT_NEGLIGIBLE_DIFFERENCE_CYCLE_TIME), onlySignificant)) {
-            assert onlySignificant;
-            return ExperimentRunSummary.NOT_SIGNIFICANT;
-        }
-
-        return ExperimentRunSummary.NEGLIGIBLE_DIFFERENCE;
+        return PrePostComparison.NEGLIGIBLE_DIFFERENCE;
     }
 
     public boolean isSummaryStatisticallySignificant() {
-        return this.determineSummary(false) == this.determineSummary(true);
+        return this.determineSummary(false).equals(this.determineSummary(true));
     }
 
     private boolean stillNeedsNoReviewData() {
         final ExperimentRunSummary summaryNoSig = this.determineSummary(false);
         final ExperimentRunSummary summarySig = this.determineSummary(true);
-        return this.combineSummariesThatDontNeedNoReview(summaryNoSig) != this.combineSummariesThatDontNeedNoReview(summarySig);
-    }
-
-    private ExperimentRunSummary combineSummariesThatDontNeedNoReview(ExperimentRunSummary s) {
-        if (s == ExperimentRunSummary.NO_REVIEW
-            || s == ExperimentRunSummary.UNREALISTIC) {
-            return s;
-        } else {
-            return ExperimentRunSummary.NEGLIGIBLE_DIFFERENCE;
-        }
+        return summaryNoSig.getNoReviewResult() != summarySig.getNoReviewResult();
     }
 
     public MedianWithConfidenceInterval getFinishedStoryMedian() {
@@ -290,6 +374,13 @@ public class ExperimentRun {
         return StatisticsUtil.median(values, this.settings.get(ExperimentRunParameters.CONFIDENCE_P));
     }
 
+    /**
+     * Returns the number of runs that were executed to reach the results (with sufficient statistical significance).
+     */
+    public int getNumberOfTrials() {
+        return this.numberOfTrials;
+    }
+
     public static ExperimentRun perform(
                     ExperimentRunSettings runSettings,
                     ExperimentRunner experimentRunner,
@@ -303,9 +394,12 @@ public class ExperimentRun {
         BulkParameterFactory f = initialParameters;
         int i = 0;
         while (i < minRuns || (i < maxRuns && result.stillNeedsNoReviewData())) {
-            final ExperimentResult no = experimentRunner.runExperiment(f, ReviewMode.NO_REVIEW, false, Integer.toString(i));
-            final ExperimentResult pre = experimentRunner.runExperiment(f, ReviewMode.PRE_COMMIT, false, Integer.toString(i));
-            final ExperimentResult post = experimentRunner.runExperiment(f, ReviewMode.POST_COMMIT, false, Integer.toString(i));
+            final ExperimentResult no = experimentRunner.runExperiment(f, ReviewMode.NO_REVIEW, null, Integer.toString(i));
+            final ExperimentResult pre = experimentRunner.runExperiment(f, ReviewMode.PRE_COMMIT, null, Integer.toString(i));
+            final ExperimentResult post = experimentRunner.runExperiment(f, ReviewMode.POST_COMMIT, null, Integer.toString(i));
+            if (no.hadError() || pre.hadError() || post.hadError()) {
+                throw new RuntimeException("Had an error in run " + i);
+            }
             result.add(no, pre, post);
             detailsCallback.handleResult(no, pre, post);
             f = f.copyWithChangedSeed();
@@ -313,13 +407,17 @@ public class ExperimentRun {
         }
 
         while (i < maxRuns && !result.isSummaryStatisticallySignificant()) {
-            final ExperimentResult pre = experimentRunner.runExperiment(f, ReviewMode.PRE_COMMIT, false, Integer.toString(i));
-            final ExperimentResult post = experimentRunner.runExperiment(f, ReviewMode.POST_COMMIT, false, Integer.toString(i));
+            final ExperimentResult pre = experimentRunner.runExperiment(f, ReviewMode.PRE_COMMIT, null, Integer.toString(i));
+            final ExperimentResult post = experimentRunner.runExperiment(f, ReviewMode.POST_COMMIT, null, Integer.toString(i));
+            if (pre.hadError() || post.hadError()) {
+                throw new RuntimeException("Had an error in run " + i);
+            }
             result.add(null, pre, post);
             detailsCallback.handleResult(null, pre, post);
             f = f.copyWithChangedSeed();
             i++;
         }
+        result.numberOfTrials = i;
 
         return result;
     }

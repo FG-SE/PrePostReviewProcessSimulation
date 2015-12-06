@@ -44,7 +44,7 @@ import org.apache.activemq.ActiveMQConnectionFactory;
 public class ClusterControl {
 
     private static final int MAX_LINES_PER_PACKAGE = 10;
-    private static final long MESSAGE_TIMEOUT = 1000L * 60 * 90;
+    private static final long MESSAGE_TIMEOUT = 1000L * 60 * 60 * 2;
 
     public static void main(String[] args) throws Exception {
         final String url = args[0]; //"tcp://TOBI:61616"
@@ -131,11 +131,11 @@ public class ClusterControl {
                     }
                     if (linesInWorkPackage > 0) {
                         sendWorkPackage(paramsFileContent, session, producer, workPackage, count, resultIds, idsNotToSend);
+                        count++;
                     }
                 }
 
-                assert count == resultIds.size();
-                System.out.println("All " + count + " messages sent.");
+                System.out.println("Finished sending with " + resultIds.size() + " of " + count + " messages sent.");
             } finally {
                 producer.close();
             }
