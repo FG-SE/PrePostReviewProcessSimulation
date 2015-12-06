@@ -1,0 +1,1 @@
+java -Xmx512m -cp MOEAFramework-2.6\lib\* org.moeaframework.analysis.sensitivity.SobolAnalysis -m 0 -i med_FactorBugs.txt -p params.txt -o sobolAnalysis_med_FactorBugs.txt -r 500
