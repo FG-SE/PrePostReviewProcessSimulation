@@ -30,6 +30,6 @@ repositories {
 }
 
 dependencies {
-	compile 'desmoj:desmoj:2.5.1c', 'co.paralleluniverse:quasar-core:0.7.3:jdk8', 'org.eclipse.jetty:jetty-server:9.3.+', 'org.apache.activemq:activemq-client:5.12.1'
+	compile 'desmoj:desmoj:2.5.1c', 'co.paralleluniverse:quasar-core:0.7.3:jdk8', 'org.eclipse.jetty:jetty-server:9.3.+', 'org.apache.activemq:activemq-client:5.12.1', 'org.jfree:jfreechart:1.0.19'
     testCompile 'junit:junit:4.+'
 }

@@ -38,7 +38,6 @@ public class Plotter extends PrePostProcess {
     private static final String TASKS_READY_FOR_REVIEW = "tasksReadyForReview";
     private static final String OPEN_STORY_TASKS = "openStoryTasks";
     private static final String OPEN_BUGFIX_TASKS = "openBugfixTasks";
-    private static final String REMAINING_BUGS = "remainingBugs";
     private static final String FINISHED_STORIES = "finishedStories";
     private static final String STARTED_STORIES = "startedStories";
     private static final String TIME = "time";
@@ -55,7 +54,6 @@ public class Plotter extends PrePostProcess {
             w.addNumericAttribute(TIME);
             w.addNumericAttribute(STARTED_STORIES);
             w.addNumericAttribute(FINISHED_STORIES);
-            w.addNumericAttribute(REMAINING_BUGS);
             w.addNumericAttribute(OPEN_STORY_TASKS);
             w.addNumericAttribute(OPEN_BUGFIX_TASKS);
             w.addNumericAttribute(TASKS_READY_FOR_REVIEW);
@@ -65,7 +63,6 @@ public class Plotter extends PrePostProcess {
                 data.put(TIME, this.presentTime().getTimeAsDouble(TimeUnit.HOURS));
                 data.put(STARTED_STORIES, this.getModel().getStartedStoryCount());
                 data.put(FINISHED_STORIES, this.getModel().getFinishedStoryCount());
-                data.put(REMAINING_BUGS, this.getModel().getBugCountFoundByCustomers());
                 data.put(OPEN_STORY_TASKS, this.getBoard().countOpenStoryTasks());
                 data.put(OPEN_BUGFIX_TASKS, this.getBoard().countOpenBugfixTasks());
                 data.put(TASKS_READY_FOR_REVIEW, this.getBoard().countTasksReadyForReview());

@@ -17,9 +17,12 @@
 
 package de.unihannover.se.processSimulation.interactive;
 
+import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Properties;
@@ -27,6 +30,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.imageio.ImageIO;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -34,6 +38,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.AbstractHandler;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.JFreeChart;
+import org.jfree.data.category.DefaultCategoryDataset;
 
 import com.google.common.io.Files;
 
@@ -67,18 +74,30 @@ public class ServerMain extends AbstractHandler {
         baseRequest.setHandled(true);
 
         final Matcher detailsMainMatcher = Pattern.compile("/details/([0-9]+)/([0-9]+)/overview").matcher(target);
+        final Matcher plotImageMatcher = Pattern.compile("/details/([0-9]+)/([0-9]+)/([A-Z_]+)plot.png").matcher(target);
         final Matcher detailsFileMatcher = Pattern.compile("/details/([0-9]+)/([0-9]+)/(.+)").matcher(target);
 
         if (target.equals("/")) {
-            final int currentRequestId = this.requestIdCounter.getAndIncrement();
+            final int currentRequestId = this.getNewRequestId();
             this.handleMainPage(request, response, currentRequestId);
         } else if (detailsMainMatcher.matches()) {
             this.handleDetailsPage(request, response,
                             Integer.parseInt(detailsMainMatcher.group(1)), Integer.parseInt(detailsMainMatcher.group(2)));
+        } else if (plotImageMatcher.matches()) {
+            this.handlePlotImage(request, response,
+                            Integer.parseInt(plotImageMatcher.group(1)), Integer.parseInt(plotImageMatcher.group(2)), plotImageMatcher.group(3));
         } else if (detailsFileMatcher.matches()) {
             this.handleDetailFileRequest(request, response,
                             Integer.parseInt(detailsFileMatcher.group(1)), Integer.parseInt(detailsFileMatcher.group(2)), detailsFileMatcher.group(3));
         }
+    }
+
+    private int getNewRequestId() {
+        int requestId;
+        do {
+            requestId = this.requestIdCounter.getAndIncrement();
+        } while (this.getRequestDir(requestId).exists());
+        return requestId;
     }
 
     private void handleMainPage(HttpServletRequest request, HttpServletResponse response, int requestId) throws IOException {
@@ -137,18 +156,21 @@ public class ServerMain extends AbstractHandler {
         w.println("Seed: " + f.getSeed());
 
         w.println("<h3>No review</h3>");
+        w.println("<img src=\"NO_REVIEWplot.png\" /><br/>");
         w.println("<a href=\"ExperimentNO_REVIEW_run_report.html\">Report</a><br/>");
         w.println("<a href=\"ExperimentNO_REVIEW_run_trace.html\">Trace</a><br/>");
         w.println("<a href=\"ExperimentNO_REVIEW_run_error.html\">Error log</a><br/>");
         w.println("<a href=\"ExperimentNO_REVIEW_run_debug.html\">Debug</a><br/>");
 
         w.println("<h3>Pre commit review</h3>");
+        w.println("<img src=\"PRE_COMMITplot.png\" /><br/>");
         w.println("<a href=\"ExperimentPRE_COMMIT_run_report.html\">Report</a><br/>");
         w.println("<a href=\"ExperimentPRE_COMMIT_run_trace.html\">Trace</a><br/>");
         w.println("<a href=\"ExperimentPRE_COMMIT_run_error.html\">Error log</a><br/>");
         w.println("<a href=\"ExperimentPRE_COMMIT_run_debug.html\">Debug</a><br/>");
 
         w.println("<h3>Post commit review</h3>");
+        w.println("<img src=\"POST_COMMITplot.png\" /><br/>");
         w.println("<a href=\"ExperimentPOST_COMMIT_run_report.html\">Report</a><br/>");
         w.println("<a href=\"ExperimentPOST_COMMIT_run_trace.html\">Trace</a><br/>");
         w.println("<a href=\"ExperimentPOST_COMMIT_run_error.html\">Error log</a><br/>");
@@ -190,6 +212,33 @@ public class ServerMain extends AbstractHandler {
                 ret = ret.copyWithChangedParam(type, type.parse(properties.getProperty(name)));
             }
             return ret;
+        }
+    }
+
+    private void handlePlotImage(HttpServletRequest request, HttpServletResponse response,
+                    int requestId, int runNbr, String reviewType) throws IOException {
+
+        final DefaultCategoryDataset dataset = this.loadDatasetFromCsv(new File(this.getRunDir(requestId, runNbr),
+                        "Experiment" + reviewType + "_runplot.csv"));
+        response.setContentType("image/png");
+        final JFreeChart chart = ChartFactory.createLineChart("", "time", "count", dataset);
+        final BufferedImage image = chart.createBufferedImage(800, 500);
+        ImageIO.write(image, "PNG", response.getOutputStream());
+    }
+
+    private DefaultCategoryDataset loadDatasetFromCsv(File csvFile) throws IOException {
+        try (BufferedReader r = new BufferedReader(new FileReader(csvFile))) {
+            final DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+            final String[] columnNames = r.readLine().split(";");
+            String line;
+            while ((line = r.readLine()) != null) {
+                final String[] values = line.split(";");
+                final Double time = Double.valueOf(values[0]);
+                for (int i = 1; i < values.length; i++) {
+                    dataset.addValue(Double.parseDouble(values[i]), columnNames[i], time);
+                }
+            }
+            return dataset;
         }
     }
 
@@ -325,7 +374,7 @@ public class ServerMain extends AbstractHandler {
             public void handleResult(ExperimentResult no, ExperimentResult pre, ExperimentResult post) {
                 System.err.println("run " + count + " finished");
                 detailsTable.append("<tr>");
-                detailsTable.append("<td><a href=\"details/").append(requestId).append("/overview").append(count).append("\">").append(count).append("</a></td>");
+                detailsTable.append("<td><a href=\"details/").append(requestId).append("/").append(count).append("/overview\">").append(count).append("</a></td>");
                 detailsTable.append("<td>").append(no == null ? "" : no.getFinishedStoryPoints()).append("</td>");
                 detailsTable.append("<td>").append(pre.getFinishedStoryPoints()).append("</td>");
                 detailsTable.append("<td>").append(post.getFinishedStoryPoints()).append("</td>");
