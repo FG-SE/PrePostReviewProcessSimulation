@@ -22,18 +22,25 @@ import java.util.EnumMap;
 public class ExperimentRunSettings {
 
     public static enum ExperimentRunParameters {
-        MIN_RUNS,
-        MAX_RUNS,
-        LIMIT_UNREALISTIC,
-        LIMIT_NO_REVIEW,
-        LIMIT_NEGLIGIBLE_DIFFERENCE_STORY_POINTS,
-        LIMIT_NEGLIGIBLE_DIFFERENCE_BUGS,
-        LIMIT_NEGLIGIBLE_DIFFERENCE_CYCLE_TIME,
-        CONFIDENCE_P;
+        MIN_RUNS("Mindestanzahl an Simulationsdurchläufen mit unterschiedlichen Zufallswerten"),
+        MAX_RUNS("Höchstzahl an Simulationsdurchläufen, nach der abgebrochen wird selbst wenn eine Ergebniszuordnung noch nicht statistisch signifikant ist."),
+        LIMIT_UNREALISTIC("Grenzwert, bei der als Gesamtergebnis 'unrealistisch' angenommen wird. Angegeben als Verhältnis 'produktiver Arbeit' zu 'geleisteten Stunden', d.h. 1 ist das Optimimum und 0 ist totale Unproduktivität."),
+        LIMIT_NO_REVIEW("Grenzwert für das Verhältnis der ohne und mit Review erzielten Story-Points, ab dem 'kein Review' als beste Lösung angesehen wird. Werte größer 1 bedeuten, dass Review selbst dann noch gemacht wird (z.B. zur Wissensverteilung), wenn es laut Simulation etwas schlechtere Story Point-Werte liefert."),
+        LIMIT_NEGLIGIBLE_DIFFERENCE_STORY_POINTS("Grenzwert für den Korridor, innerhalb dessen ein Unterschied bei den erzielten Story Points als 'vernachlässigbar' gilt. 0,05 heißt z.B., dass Unterschiede von -5% bis %5 vernachlässigbar sind."),
+        LIMIT_NEGLIGIBLE_DIFFERENCE_BUGS("Grenzwert für den Korridor, innerhalb dessen ein Unterschied bei den vom Kunden entdeckten Bugs als 'vernachlässigbar' gilt. 0,05 heißt z.B., dass Unterschiede von -5% bis %5 vernachlässigbar sind."),
+        LIMIT_NEGLIGIBLE_DIFFERENCE_CYCLE_TIME("Grenzwert für den Korridor, innerhalb dessen ein Unterschied bei der durchschnittlichen Story-Durchlaufzeit als 'vernachlässigbar' gilt. 0,05 heißt z.B., dass Unterschiede von -5% bis %5 vernachlässigbar sind."),
+        CONFIDENCE_P("p-Wert, mit dem die Konfidenzintervalle bestimmt werden"),
+        WORKING_DAYS_FOR_STARTUP("Anzahl Werktage, die als 'Aufwärm-Zeit' nicht in die Auswertung einbezogen werden."),
+        WORKING_DAYS_FOR_MEASUREMENT("Anzahl Werktage, die nach dem aufwärmen für die Messung verwendet werden.");
+
+        private final String description;
+
+        private ExperimentRunParameters(String description) {
+            this.description = description;
+        }
 
         public String getDescription() {
-            //TODO
-            return "";
+            return this.description;
         }
     }
 
@@ -49,6 +56,8 @@ public class ExperimentRunSettings {
         ret.params.put(ExperimentRunParameters.LIMIT_NEGLIGIBLE_DIFFERENCE_BUGS, 0.05);
         ret.params.put(ExperimentRunParameters.LIMIT_NEGLIGIBLE_DIFFERENCE_CYCLE_TIME, 0.05);
         ret.params.put(ExperimentRunParameters.CONFIDENCE_P, 0.01);
+        ret.params.put(ExperimentRunParameters.WORKING_DAYS_FOR_STARTUP, 400.0);
+        ret.params.put(ExperimentRunParameters.WORKING_DAYS_FOR_MEASUREMENT, 600.0);
         return ret;
     }
 

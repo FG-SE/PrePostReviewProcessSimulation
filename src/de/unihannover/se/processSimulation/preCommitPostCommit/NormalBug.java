@@ -78,6 +78,13 @@ class NormalBug extends Bug {
     protected void becomeVisible(boolean byCustomer) {
         if (byCustomer) {
             this.getModel().countBugFoundByCustomer();
+        } else {
+            this.getModel().dynamicCount("bugCountFoundByDevelopers");
+        }
+        if (this.getTask() instanceof StoryTask) {
+            this.getModel().dynamicCount("occurredBugsInStory");
+        } else {
+            this.getModel().dynamicCount("occurredBugsInBug");
         }
         this.getBoard().addUnassessedBug(this);
     }

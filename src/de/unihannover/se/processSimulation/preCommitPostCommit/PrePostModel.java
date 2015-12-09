@@ -50,10 +50,9 @@ public class PrePostModel extends Model {
         Experiment.setReferenceUnit(TimeUnit.HOURS);
     }
 
-    public static final int HOURS_TO_RESET = 8 * 400;
-
     private final ReviewMode reviewMode;
     private final boolean plot;
+    private final int hoursToReset;
 
     private Board board;
     private SourceRepository<Task> sourceRepository;
@@ -62,6 +61,7 @@ public class PrePostModel extends Model {
     private Count bugCountFoundByCustomers;
     private Tally storyCycleTime;
     private final Map<String, Aggregate> timeCounters = new HashMap<>();
+    private final Map<String, Count> dynamicCounters = new HashMap<>();
 
     private final List<Developer> developers = new ArrayList<>();
     private final ParametersFactory parameterFactory;
@@ -73,11 +73,12 @@ public class PrePostModel extends Model {
     /**
      * Creates a model with the given parameters and the given {@link ReviewMode}.
      */
-    public PrePostModel(String name, ReviewMode reviewMode, ParametersFactory parameterFactory, boolean plot) {
+    public PrePostModel(String name, ReviewMode reviewMode, ParametersFactory parameterFactory, boolean plot, int hoursToReset) {
         super(null, name, true, true);
         this.reviewMode = reviewMode;
         this.parameterFactory = parameterFactory;
         this.plot = plot;
+        this.hoursToReset = hoursToReset;
     }
 
     @Override
@@ -135,7 +136,7 @@ public class PrePostModel extends Model {
             d.activate();
         }
         //reset after some time, so that starting effects are not measured
-        new ExternalEventReset(this, true).schedule(new TimeInstant(HOURS_TO_RESET, TimeUnit.HOURS));
+        new ExternalEventReset(this, true).schedule(new TimeInstant(this.hoursToReset, TimeUnit.HOURS));
     }
 
     /**
@@ -250,14 +251,33 @@ public class PrePostModel extends Model {
     /**
      * Adjusts the statistics for a certain kind of work that was done since a given time instant until now.
      */
-    void countTime(String typeOfWork, TimeInstant startTime) {
-        Aggregate agg = this.timeCounters.get(typeOfWork);
+    void countTime(String name, TimeInstant startTime) {
+        Aggregate agg = this.timeCounters.get(name);
         if (agg == null) {
-            agg = new Aggregate(this, "timeFor_" + typeOfWork, true, true);
+            agg = new Aggregate(this, name, true, true);
             agg.setShowTimeSpansInReport(true);
-            this.timeCounters.put(typeOfWork, agg);
+            this.timeCounters.put(name, agg);
         }
         agg.update(TimeOperations.diff(this.presentTime(), startTime));
+    }
+
+    /**
+     * Increments the counter with the given name by one.
+     */
+    void dynamicCount(String name) {
+        this.dynamicCount(name, 1);
+    }
+
+    /**
+     * Increments the counter with the given name by the given count.
+     */
+    void dynamicCount(String name, int count) {
+        Count cnt = this.dynamicCounters.get(name);
+        if (cnt == null) {
+            cnt = new Count(this, name, true, true);
+            this.dynamicCounters.put(name, cnt);
+        }
+        cnt.update(count);
     }
 
 }

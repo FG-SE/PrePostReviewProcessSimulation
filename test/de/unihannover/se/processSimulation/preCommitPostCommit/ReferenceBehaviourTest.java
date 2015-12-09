@@ -44,7 +44,8 @@ public class ReferenceBehaviourTest {
     }
 
     private static PrePostModel runExperiment(ParametersFactory p, ReviewMode mode) throws Exception {
-        final PrePostModel model = new PrePostModel("RealProcessingModel", mode, p, false);
+        final int hoursToReset = 8 * 400;
+        final PrePostModel model = new PrePostModel("RealProcessingModel", mode, p, false, hoursToReset);
         final ArrayList<String> noOutputs = new ArrayList<>();
         final Experiment exp = new Experiment("UnitTest" + mode + "_" + p.hashCode(),
                         ".", null, noOutputs, noOutputs, noOutputs, noOutputs);
@@ -54,7 +55,7 @@ public class ReferenceBehaviourTest {
         exp.setSilent(true);
         exp.getOutputPath();
         exp.setShowProgressBar(false);
-        exp.stop(new TimeInstant(PrePostModel.HOURS_TO_RESET + 8 * 600, TimeUnit.HOURS));
+        exp.stop(new TimeInstant(hoursToReset + 8 * 600, TimeUnit.HOURS));
         exp.start();
         exp.finish();
 

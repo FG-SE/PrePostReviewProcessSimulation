@@ -46,7 +46,7 @@ public class ExperimentRunTest {
         }
 
         @Override
-        public ExperimentResult runExperiment(ParametersFactory p, ReviewMode mode, File resultDir, String runId) {
+        public ExperimentResult runExperiment(ParametersFactory p, ReviewMode mode, File resultDir, String runId, int daysForStartup, int daysForMeasurement) {
             return this.data.get(new Pair<String, ReviewMode>(runId, mode));
         }
 

@@ -130,7 +130,7 @@ abstract class Task extends PrePostEntity implements MemoryItem {
         final TimeSpan bugTime = TimeOperations.add(
                         implementationTime,
                         TimeOperations.multiply(taskSwitchTime, this.getModel().getParameters().getTaskSwitchTimeBugFactor()));
-        this.createBugs(bugTime, this instanceof BugfixTask);
+        this.createBugs(bugTime, this instanceof BugfixTask, false);
         this.endImplementation();
     }
 
@@ -161,7 +161,7 @@ abstract class Task extends PrePostEntity implements MemoryItem {
      * Inject bugs into this task. The number of bugs depends on the given time/effort that went into
      * implementation, if it was bug fixing or new implementation and the developer.
      */
-    private void createBugs(TimeSpan relevantTime, boolean fixing) {
+    private void createBugs(TimeSpan relevantTime, boolean fixing, boolean reviewRemark) {
         //determine number of bugs to create
         double bugsToCreate = this.implementor.getImplementationSkill() * relevantTime.getTimeAsDouble(TimeUnit.HOURS);
         if (fixing) {
@@ -179,13 +179,24 @@ abstract class Task extends PrePostEntity implements MemoryItem {
         }
 
         //create bugs
+        int normalBugsCreated = 0;
         while (bugsToCreate > 1) {
             this.createNormalBug();
             bugsToCreate -= 1.0;
+            normalBugsCreated++;
         }
         final boolean withExtraBug = this.getModel().getRandomBool(bugsToCreate);
         if (withExtraBug) {
             this.createNormalBug();
+            normalBugsCreated++;
+        }
+        if (reviewRemark) {
+            assert fixing;
+            this.getModel().dynamicCount("bugsInjectedWhileFixingReviewRemarks", normalBugsCreated);
+        } else if (fixing) {
+            this.getModel().dynamicCount("bugsInjectedWhileFixingBugs", normalBugsCreated);
+        } else {
+            this.getModel().dynamicCount("bugsInjectedWhileImplementing", normalBugsCreated);
         }
 
         if (this.implementor.makesBlockerBug()) {
@@ -200,10 +211,12 @@ abstract class Task extends PrePostEntity implements MemoryItem {
     }
 
     private void handleAdditionalWaitsForInterruptions() throws SuspendExecution {
+        final TimeInstant startTime = this.presentTime();
         while (!this.implementationInterruptions.isEmpty()) {
             final TimeSpan interruption = this.implementationInterruptions.remove(0);
             this.implementor.hold(interruption);
         }
+        this.getModel().countTime("timeWasted_interruptions", startTime);
     }
 
     /**
@@ -309,7 +322,7 @@ abstract class Task extends PrePostEntity implements MemoryItem {
         final TimeSpan bugTime = TimeOperations.add(
                         timeForFixing,
                         TimeOperations.multiply(taskSwitchTime, this.getModel().getParameters().getTaskSwitchTimeBugFactor()));
-        this.createBugs(bugTime, true);
+        this.createBugs(bugTime, true, true);
         this.endImplementation();
     }
 
@@ -321,6 +334,7 @@ abstract class Task extends PrePostEntity implements MemoryItem {
         this.handleTaskSwitchOverhead(dev);
         dev.hold(this.getModel().getParameters().getBugAssessmentTimeDist().sampleTimeSpan(TimeUnit.HOURS));
 
+        this.getModel().dynamicCount("bugAssessmentResult" + this.state);
         switch (this.state) {
         case OPEN:
             throw new AssertionError("Should not happen: Bug in open task " + this);
@@ -363,8 +377,10 @@ abstract class Task extends PrePostEntity implements MemoryItem {
             "more than a day? something must be wrong " + taskSwitchOverhead;
 
         if (taskSwitchOverhead.getTimeInEpsilon() != 0) {
+            final TimeInstant startTime = this.presentTime();
             this.sendTraceNote("has task switch overhead switching to " + this);
             dev.hold(taskSwitchOverhead);
+            this.getModel().countTime("timeWasted_taskSwitch", startTime);
         }
         return taskSwitchOverhead;
     }
@@ -410,8 +426,10 @@ abstract class Task extends PrePostEntity implements MemoryItem {
 
         while (!this.getSourceRepository().tryCommit(this)) {
             //conflict found => update, resolve conflict, retry
+            final TimeInstant resolveStartTime = this.presentTime();
             this.getSourceRepository().restartWork(this);
             commiter.hold(this.getModel().getParameters().getConflictResolutionTimeDist().sampleTimeSpan(TimeUnit.HOURS));
+            this.getModel().countTime("timeWasted_resolvingConflicts", resolveStartTime);
             this.handleAdditionalWaitsForInterruptions();
         }
 

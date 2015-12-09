@@ -69,7 +69,7 @@ class Developer extends PrePostProcess {
                 final Task buggyTask = unassessedBug.getTask();
                 buggyTask.performBugAssessment(this, unassessedBug);
                 this.saveLastTimeIHadToDoWith(buggyTask);
-                this.getModel().countTime("assessingBugs", startTime);
+                this.getModel().countTime("timeFor_assessingBugs", startTime);
                 continue;
             }
 
@@ -77,7 +77,7 @@ class Developer extends PrePostProcess {
             if (taskWithReviewRemarks != null) {
                 taskWithReviewRemarks.performFixingOfReviewRemarks(this);
                 this.saveLastTimeIHadToDoWith(taskWithReviewRemarks);
-                this.getModel().countTime("fixingReviewRemarks", startTime);
+                this.getModel().countTime("timeFor_fixingReviewRemarks", startTime);
                 continue;
             }
 
@@ -85,7 +85,7 @@ class Developer extends PrePostProcess {
             if (taskToReview != null) {
                 taskToReview.performReview(this);
                 this.saveLastTimeIHadToDoWith(taskToReview);
-                this.getModel().countTime("reviewing", startTime);
+                this.getModel().countTime("timeFor_reviewing", startTime);
                 continue;
             }
 
@@ -93,7 +93,7 @@ class Developer extends PrePostProcess {
             if (bugToFix != null) {
                 bugToFix.performImplementation(this);
                 this.saveLastTimeIHadToDoWith(bugToFix);
-                this.getModel().countTime("fixingBugs", startTime);
+                this.getModel().countTime("timeFor_fixingBugs", startTime);
                 continue;
             }
 
@@ -101,14 +101,14 @@ class Developer extends PrePostProcess {
             if (taskToImplement != null) {
                 taskToImplement.performImplementation(this);
                 this.saveLastTimeIHadToDoWith(taskToImplement);
-                this.getModel().countTime("implementing", startTime);
+                this.getModel().countTime("timeFor_implementing", startTime);
                 continue;
             }
 
             final Story toPlan = board.getStoryToPlan();
             toPlan.plan(this);
             this.saveLastTimeIHadToDoWith(toPlan);
-            this.getModel().countTime("planning", startTime);
+            this.getModel().countTime("timeFor_planning", startTime);
         }
     }
 

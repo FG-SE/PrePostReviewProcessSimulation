@@ -62,6 +62,7 @@ import de.unihannover.se.processSimulation.dataGenerator.MedianWithConfidenceInt
 public class ServerMain extends AbstractHandler {
 
     private static final String PARAMS_PROPERTIES = "params.properties";
+    private static final String SETTINGS_PROPERTIES = "settings.properties";
     private final AtomicInteger requestIdCounter = new AtomicInteger();
 
     @Override
@@ -74,12 +75,15 @@ public class ServerMain extends AbstractHandler {
         baseRequest.setHandled(true);
 
         final Matcher detailsMainMatcher = Pattern.compile("/details/([0-9]+)/([0-9]+)/overview").matcher(target);
-        final Matcher plotImageMatcher = Pattern.compile("/details/([0-9]+)/([0-9]+)/([A-Z_]+)plot.png").matcher(target);
+        final Matcher plotImageMatcher = Pattern.compile("/details/([0-9]+)/([0-9]+)/(.+)\\.png").matcher(target);
         final Matcher detailsFileMatcher = Pattern.compile("/details/([0-9]+)/([0-9]+)/(.+)").matcher(target);
 
         if (target.equals("/")) {
             final int currentRequestId = this.getNewRequestId();
-            this.handleMainPage(request, response, currentRequestId);
+            this.handleMainPage(request, response, currentRequestId, false);
+        } else if (target.equals("/full")) {
+            final int currentRequestId = this.getNewRequestId();
+            this.handleMainPage(request, response, currentRequestId, true);
         } else if (detailsMainMatcher.matches()) {
             this.handleDetailsPage(request, response,
                             Integer.parseInt(detailsMainMatcher.group(1)), Integer.parseInt(detailsMainMatcher.group(2)));
@@ -100,7 +104,8 @@ public class ServerMain extends AbstractHandler {
         return requestId;
     }
 
-    private void handleMainPage(HttpServletRequest request, HttpServletResponse response, int requestId) throws IOException {
+    private void handleMainPage(
+                    HttpServletRequest request, HttpServletResponse response, int requestId, boolean allParams) throws IOException {
         response.setContentType("text/html;charset=utf-8");
         response.setStatus(HttpServletResponse.SC_OK);
 
@@ -108,22 +113,26 @@ public class ServerMain extends AbstractHandler {
         this.printHeader(w);
         w.println("<h1>Pre/Post commit review comparison - Process simulation</h1>");
         final BulkParameterFactory f = this.getParameters(w, request);
-        this.saveParameters(requestId, f);
         final ExperimentRunSettings s = this.getExperimentSettings(w, request);
-        this.printInputParameters(w, f, s);
+        this.saveParametersAndSettings(requestId, f, s);
+        this.printInputParameters(w, f, s, allParams);
         if (this.shallSimulate(request)) {
             this.simulateAndPrintOutput(w, f, s, requestId);
         }
         this.printFooter(w);
     }
 
-    private void saveParameters(int requestId, BulkParameterFactory f) throws IOException {
+    private void saveParametersAndSettings(int requestId, BulkParameterFactory f, ExperimentRunSettings s) throws IOException {
         final File requestDir = this.getRequestDir(requestId);
         requestDir.mkdirs();
 
-        final Properties p = this.parametersToProperties(f);
-        try (FileOutputStream out = new FileOutputStream(new File(requestDir, PARAMS_PROPERTIES))) {
-            p.store(out, "Params for request id " + requestId);
+        this.storeProperties(this.parametersToProperties(f), requestDir, PARAMS_PROPERTIES, "Params for request id " + requestId);
+        this.storeProperties(this.settingsToProperties(s), requestDir, SETTINGS_PROPERTIES, "Settings for request id " + requestId);
+    }
+
+    private void storeProperties(Properties p, File requestDir, String name, String comment) throws IOException {
+        try (FileOutputStream out = new FileOutputStream(new File(requestDir, name))) {
+            p.store(out, comment);
         }
     }
 
@@ -135,6 +144,14 @@ public class ServerMain extends AbstractHandler {
         final Properties ret = new Properties();
         for (final ParameterType type : ParameterType.values()) {
             ret.setProperty(type.name(), f.getParam(type).toString());
+        }
+        return ret;
+    }
+
+    private Properties settingsToProperties(ExperimentRunSettings s) {
+        final Properties ret = new Properties();
+        for (final ExperimentRunParameters type : ExperimentRunParameters.values()) {
+            ret.setProperty(type.name(), Double.toString(s.get(type)));
         }
         return ret;
     }
@@ -156,22 +173,22 @@ public class ServerMain extends AbstractHandler {
         w.println("Seed: " + f.getSeed());
 
         w.println("<h3>No review</h3>");
-        w.println("<img src=\"NO_REVIEWplot.png\" /><br/>");
-        w.println("<a href=\"ExperimentNO_REVIEW_run_report.html\">Report</a><br/>");
+        w.println("<img src=\"ExperimentNO_REVIEW_runplotBoard.png\" /><img src=\"ExperimentNO_REVIEW_runplotResults.png\" /><br/>");
+        w.println("<iframe width=\"800\" height=\"400\" src=\"ExperimentNO_REVIEW_run_report.html\">Report</iframe><br/>");
         w.println("<a href=\"ExperimentNO_REVIEW_run_trace.html\">Trace</a><br/>");
         w.println("<a href=\"ExperimentNO_REVIEW_run_error.html\">Error log</a><br/>");
         w.println("<a href=\"ExperimentNO_REVIEW_run_debug.html\">Debug</a><br/>");
 
         w.println("<h3>Pre commit review</h3>");
-        w.println("<img src=\"PRE_COMMITplot.png\" /><br/>");
-        w.println("<a href=\"ExperimentPRE_COMMIT_run_report.html\">Report</a><br/>");
+        w.println("<img src=\"ExperimentPRE_COMMIT_runplotBoard.png\" /><img src=\"ExperimentPRE_COMMIT_runplotResults.png\" /><br/>");
+        w.println("<iframe width=\"800\" height=\"400\" src=\"ExperimentPRE_COMMIT_run_report.html\">Report</iframe><br/>");
         w.println("<a href=\"ExperimentPRE_COMMIT_run_trace.html\">Trace</a><br/>");
         w.println("<a href=\"ExperimentPRE_COMMIT_run_error.html\">Error log</a><br/>");
         w.println("<a href=\"ExperimentPRE_COMMIT_run_debug.html\">Debug</a><br/>");
 
         w.println("<h3>Post commit review</h3>");
-        w.println("<img src=\"POST_COMMITplot.png\" /><br/>");
-        w.println("<a href=\"ExperimentPOST_COMMIT_run_report.html\">Report</a><br/>");
+        w.println("<img src=\"ExperimentPOST_COMMIT_runplotBoard.png\" /><img src=\"ExperimentPOST_COMMIT_runplotResults.png\" /><br/>");
+        w.println("<iframe width=\"800\" height=\"400\" src=\"ExperimentPOST_COMMIT_run_report.html\">Report</iframe><br/>");
         w.println("<a href=\"ExperimentPOST_COMMIT_run_trace.html\">Trace</a><br/>");
         w.println("<a href=\"ExperimentPOST_COMMIT_run_error.html\">Error log</a><br/>");
         w.println("<a href=\"ExperimentPOST_COMMIT_run_debug.html\">Debug</a><br/>");
@@ -179,6 +196,7 @@ public class ServerMain extends AbstractHandler {
 
     private BulkParameterFactory createRunDirectoryIfMissing(int requestId, int runNbr) throws IOException {
         BulkParameterFactory f = this.loadParameters(requestId);
+        final ExperimentRunSettings s = this.loadSettings(requestId);
         for (int i = 0; i < runNbr; i++) {
             f = f.copyWithChangedSeed();
         }
@@ -187,9 +205,12 @@ public class ServerMain extends AbstractHandler {
         if (!runDirectory.exists()) {
             runDirectory.mkdir();
 
-            DataGenerator.runExperiment(f, ReviewMode.NO_REVIEW, runDirectory, "run");
-            DataGenerator.runExperiment(f, ReviewMode.PRE_COMMIT, runDirectory, "run");
-            DataGenerator.runExperiment(f, ReviewMode.POST_COMMIT, runDirectory, "run");
+            final int daysForStartup = (int) s.get(ExperimentRunParameters.WORKING_DAYS_FOR_STARTUP);
+            final int daysForMeasurement = (int) s.get(ExperimentRunParameters.WORKING_DAYS_FOR_MEASUREMENT);
+
+            DataGenerator.runExperiment(f, ReviewMode.NO_REVIEW, runDirectory, "run", daysForStartup, daysForMeasurement);
+            DataGenerator.runExperiment(f, ReviewMode.PRE_COMMIT, runDirectory, "run", daysForStartup, daysForMeasurement);
+            DataGenerator.runExperiment(f, ReviewMode.POST_COMMIT, runDirectory, "run", daysForStartup, daysForMeasurement);
         }
 
         return f;
@@ -215,11 +236,26 @@ public class ServerMain extends AbstractHandler {
         }
     }
 
-    private void handlePlotImage(HttpServletRequest request, HttpServletResponse response,
-                    int requestId, int runNbr, String reviewType) throws IOException {
+    private ExperimentRunSettings loadSettings(int requestId) throws IOException {
+        final File requestDir = this.getRequestDir(requestId);
+        final File paramsFile = new File(requestDir, SETTINGS_PROPERTIES);
+        try (FileInputStream in = new FileInputStream(paramsFile)) {
+            final Properties properties = new Properties();
+            properties.load(in);
 
-        final DefaultCategoryDataset dataset = this.loadDatasetFromCsv(new File(this.getRunDir(requestId, runNbr),
-                        "Experiment" + reviewType + "_runplot.csv"));
+            ExperimentRunSettings ret = ExperimentRunSettings.defaultSettings();
+            for (final String name : properties.stringPropertyNames()) {
+                final ExperimentRunParameters type = ExperimentRunParameters.valueOf(name);
+                ret = ret.copyWithChangedParam(type, Double.parseDouble(properties.getProperty(name)));
+            }
+            return ret;
+        }
+    }
+
+    private void handlePlotImage(HttpServletRequest request, HttpServletResponse response,
+                    int requestId, int runNbr, String plotName) throws IOException {
+
+        final DefaultCategoryDataset dataset = this.loadDatasetFromCsv(new File(this.getRunDir(requestId, runNbr), plotName + ".csv"));
         response.setContentType("image/png");
         final JFreeChart chart = ChartFactory.createLineChart("", "time", "count", dataset);
         final BufferedImage image = chart.createBufferedImage(800, 500);
@@ -304,16 +340,20 @@ public class ServerMain extends AbstractHandler {
         w.println("</body></html>");
     }
 
-    private void printInputParameters(final PrintWriter w, BulkParameterFactory f, ExperimentRunSettings s) {
+    private void printInputParameters(
+                    final PrintWriter w, BulkParameterFactory f, ExperimentRunSettings s, boolean allParams) {
         w.println("<form action=\".\">");
         w.println("<h2>Input parameters</h2>");
         w.println("<table>");
         for (final ParameterType t : ParameterType.values()) {
-            w.println("<tr><td>");
+            if (!allParams && t.getDescription().isEmpty()) {
+                continue;
+            }
+            w.println("<tr><td style=\"vertical-align:top;text-align:right\">");
             w.println(t.toString());
-            w.println("</td><td>");
+            w.println("</td><td style=\"vertical-align:top\">");
             w.println(this.getInputFor(t, f));
-            w.println("</td><td>");
+            w.println("</td><td style=\"vertical-align:top\">");
             w.println(t.getDescription());
             w.println("</td></tr>");
         }
@@ -321,11 +361,11 @@ public class ServerMain extends AbstractHandler {
         w.println("<h2>Experiment settings</h2>");
         w.println("<table>");
         for (final ExperimentRunParameters t : ExperimentRunParameters.values()) {
-            w.println("<tr><td>");
+            w.println("<tr><td style=\"vertical-align:top;text-align:right\">");
             w.println(t.toString());
-            w.println("</td><td>");
+            w.println("</td><td style=\"vertical-align:top\">");
             w.println(this.getInputFor(t, s));
-            w.println("</td><td>");
+            w.println("</td><td style=\"vertical-align:top\">");
             w.println(t.getDescription());
             w.println("</td></tr>");
         }
@@ -374,7 +414,7 @@ public class ServerMain extends AbstractHandler {
             public void handleResult(ExperimentResult no, ExperimentResult pre, ExperimentResult post) {
                 System.err.println("run " + count + " finished");
                 detailsTable.append("<tr>");
-                detailsTable.append("<td><a href=\"details/").append(requestId).append("/").append(count).append("/overview\">").append(count).append("</a></td>");
+                detailsTable.append("<td><a href=\"details/").append(requestId).append("/").append(count).append("/overview\" target=\"_blank\">").append(count).append("</a></td>");
                 detailsTable.append("<td>").append(no == null ? "" : no.getFinishedStoryPoints()).append("</td>");
                 detailsTable.append("<td>").append(pre.getFinishedStoryPoints()).append("</td>");
                 detailsTable.append("<td>").append(post.getFinishedStoryPoints()).append("</td>");

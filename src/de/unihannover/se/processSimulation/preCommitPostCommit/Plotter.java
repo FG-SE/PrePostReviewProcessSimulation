@@ -26,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 
 import co.paralleluniverse.fibers.SuspendExecution;
 import de.unihannover.se.processSimulation.dataGenerator.CsvWriter;
+import desmoj.core.simulator.Experiment;
 import desmoj.core.simulator.TimeSpan;
 
 /**
@@ -36,6 +37,8 @@ public class Plotter extends PrePostProcess {
 
     private static final String TASKS_WITH_REVIEW_REMARKS = "tasksWithReviewRemarks";
     private static final String TASKS_READY_FOR_REVIEW = "tasksReadyForReview";
+    private static final String BUGS_FOUND_BY_CUSTOMER = "bugsFoundByCustomer";
+
     private static final String OPEN_STORY_TASKS = "openStoryTasks";
     private static final String OPEN_BUGFIX_TASKS = "openBugfixTasks";
     private static final String FINISHED_STORIES = "finishedStories";
@@ -48,30 +51,42 @@ public class Plotter extends PrePostProcess {
 
     @Override
     public void lifeCycle() throws SuspendExecution {
-        final String filename = this.getModel().getExperiment().getName() + "plot.csv";
-        final File file = new File(this.getModel().getExperiment().getOutputPath(), filename);
-        try (CsvWriter w = new CsvWriter(new FileWriter(file))) {
-            w.addNumericAttribute(TIME);
-            w.addNumericAttribute(STARTED_STORIES);
-            w.addNumericAttribute(FINISHED_STORIES);
-            w.addNumericAttribute(OPEN_STORY_TASKS);
-            w.addNumericAttribute(OPEN_BUGFIX_TASKS);
-            w.addNumericAttribute(TASKS_READY_FOR_REVIEW);
-            w.addNumericAttribute(TASKS_WITH_REVIEW_REMARKS);
+        final Experiment exp = this.getModel().getExperiment();
+        final File fileResults = new File(exp.getOutputPath(), exp.getName() + "plotResults.csv");
+        final File fileBoard = new File(exp.getOutputPath(), exp.getName() + "plotBoard.csv");
+        try (CsvWriter wResults = new CsvWriter(new FileWriter(fileResults));
+            CsvWriter wBoard = new CsvWriter(new FileWriter(fileBoard))) {
+            wResults.addNumericAttribute(TIME);
+            wResults.addNumericAttribute(STARTED_STORIES);
+            wResults.addNumericAttribute(FINISHED_STORIES);
+            wResults.addNumericAttribute(BUGS_FOUND_BY_CUSTOMER);
+
+            wBoard.addNumericAttribute(TIME);
+            wBoard.addNumericAttribute(OPEN_STORY_TASKS);
+            wBoard.addNumericAttribute(OPEN_BUGFIX_TASKS);
+            wBoard.addNumericAttribute(TASKS_READY_FOR_REVIEW);
+            wBoard.addNumericAttribute(TASKS_WITH_REVIEW_REMARKS);
+
             while (true) {
-                final Map<String, Object> data = new HashMap<>();
-                data.put(TIME, this.presentTime().getTimeAsDouble(TimeUnit.HOURS));
-                data.put(STARTED_STORIES, this.getModel().getStartedStoryCount());
-                data.put(FINISHED_STORIES, this.getModel().getFinishedStoryCount());
-                data.put(OPEN_STORY_TASKS, this.getBoard().countOpenStoryTasks());
-                data.put(OPEN_BUGFIX_TASKS, this.getBoard().countOpenBugfixTasks());
-                data.put(TASKS_READY_FOR_REVIEW, this.getBoard().countTasksReadyForReview());
-                data.put(TASKS_WITH_REVIEW_REMARKS, this.getBoard().countTasksWithReviewRemarks());
-                w.writeTuple(data);
+                final Map<String, Object> dataResults = new HashMap<>();
+                dataResults.put(TIME, this.presentTime().getTimeAsDouble(TimeUnit.HOURS));
+                dataResults.put(STARTED_STORIES, this.getModel().getStartedStoryCount());
+                dataResults.put(FINISHED_STORIES, this.getModel().getFinishedStoryCount());
+                dataResults.put(BUGS_FOUND_BY_CUSTOMER, this.getModel().getBugCountFoundByCustomers());
+                wResults.writeTuple(dataResults);
+
+                final Map<String, Object> dataBoard = new HashMap<>();
+                dataBoard.put(TIME, this.presentTime().getTimeAsDouble(TimeUnit.HOURS));
+                dataBoard.put(OPEN_STORY_TASKS, this.getBoard().countOpenStoryTasks());
+                dataBoard.put(OPEN_BUGFIX_TASKS, this.getBoard().countOpenBugfixTasks());
+                dataBoard.put(TASKS_READY_FOR_REVIEW, this.getBoard().countTasksReadyForReview());
+                dataBoard.put(TASKS_WITH_REVIEW_REMARKS, this.getBoard().countTasksWithReviewRemarks());
+                wBoard.writeTuple(dataBoard);
+
                 this.hold(new TimeSpan(16, TimeUnit.HOURS));
             }
         } catch (final IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 

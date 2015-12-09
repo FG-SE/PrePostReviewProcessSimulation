@@ -140,7 +140,7 @@ public class ExperimentRun {
     @FunctionalInterface
     public static interface ExperimentRunner {
         public abstract ExperimentResult runExperiment(
-                        final ParametersFactory p, ReviewMode mode, File resultDir, String runId);
+                        final ParametersFactory p, ReviewMode mode, File resultDir, String runId, int workingDaysForStartup, int workingDaysForMeasurement);
     }
 
     public static interface SingleRunCallback {
@@ -389,14 +389,16 @@ public class ExperimentRun {
 
         final int minRuns = (int) runSettings.get(ExperimentRunParameters.MIN_RUNS);
         final int maxRuns = (int) runSettings.get(ExperimentRunParameters.MAX_RUNS);
+        final int daysForStartup = (int) runSettings.get(ExperimentRunParameters.WORKING_DAYS_FOR_STARTUP);
+        final int daysForMeasurement = (int) runSettings.get(ExperimentRunParameters.WORKING_DAYS_FOR_MEASUREMENT);
         final ExperimentRun result = new ExperimentRun(runSettings);
 
         BulkParameterFactory f = initialParameters;
         int i = 0;
         while (i < minRuns || (i < maxRuns && result.stillNeedsNoReviewData())) {
-            final ExperimentResult no = experimentRunner.runExperiment(f, ReviewMode.NO_REVIEW, null, Integer.toString(i));
-            final ExperimentResult pre = experimentRunner.runExperiment(f, ReviewMode.PRE_COMMIT, null, Integer.toString(i));
-            final ExperimentResult post = experimentRunner.runExperiment(f, ReviewMode.POST_COMMIT, null, Integer.toString(i));
+            final ExperimentResult no = experimentRunner.runExperiment(f, ReviewMode.NO_REVIEW, null, Integer.toString(i), daysForStartup, daysForMeasurement);
+            final ExperimentResult pre = experimentRunner.runExperiment(f, ReviewMode.PRE_COMMIT, null, Integer.toString(i), daysForStartup, daysForMeasurement);
+            final ExperimentResult post = experimentRunner.runExperiment(f, ReviewMode.POST_COMMIT, null, Integer.toString(i), daysForStartup, daysForMeasurement);
             if (no.hadError() || pre.hadError() || post.hadError()) {
                 throw new RuntimeException("Had an error in run " + i);
             }
@@ -407,8 +409,8 @@ public class ExperimentRun {
         }
 
         while (i < maxRuns && !result.isSummaryStatisticallySignificant()) {
-            final ExperimentResult pre = experimentRunner.runExperiment(f, ReviewMode.PRE_COMMIT, null, Integer.toString(i));
-            final ExperimentResult post = experimentRunner.runExperiment(f, ReviewMode.POST_COMMIT, null, Integer.toString(i));
+            final ExperimentResult pre = experimentRunner.runExperiment(f, ReviewMode.PRE_COMMIT, null, Integer.toString(i), daysForStartup, daysForMeasurement);
+            final ExperimentResult post = experimentRunner.runExperiment(f, ReviewMode.POST_COMMIT, null, Integer.toString(i), daysForStartup, daysForMeasurement);
             if (pre.hadError() || post.hadError()) {
                 throw new RuntimeException("Had an error in run " + i);
             }

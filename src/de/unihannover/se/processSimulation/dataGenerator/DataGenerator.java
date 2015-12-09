@@ -30,10 +30,13 @@ import desmoj.core.simulator.TimeInstant;
 
 public class DataGenerator {
 
+    private static final int HOURS_PER_WORKING_DAY = 8;
+
     public static ExperimentResult runExperiment(
-                    final ParametersFactory p, ReviewMode mode, File resultDir, String runId) {
+                    final ParametersFactory p, ReviewMode mode, File resultDir, String runId, int workingDaysForStartup, int workingDaysForMeasurement) {
         final boolean report = resultDir != null;
-        final PrePostModel model = new PrePostModel("RealProcessingModel", mode, p, report);
+        final int hoursToReset = workingDaysForStartup * HOURS_PER_WORKING_DAY;
+        final PrePostModel model = new PrePostModel("RealProcessingModel", mode, p, report, hoursToReset);
         final Experiment exp;
         if (report) {
             exp = new Experiment("Experiment" + mode + "_" + runId,
@@ -55,10 +58,11 @@ public class DataGenerator {
         if (report) {
             exp.tracePeriod(new TimeInstant(0), new TimeInstant(160, TimeUnit.HOURS));
         }
-        final int relevantRunningHours = 8 * 600;
-        exp.stop(new TimeInstant(PrePostModel.HOURS_TO_RESET + relevantRunningHours, TimeUnit.HOURS));
+        final int relevantRunningHours = HOURS_PER_WORKING_DAY * workingDaysForMeasurement;
+        exp.stop(new TimeInstant(hoursToReset + relevantRunningHours, TimeUnit.HOURS));
         exp.start();
         if (report) {
+            model.sortReportables();
             exp.report();
         }
         exp.finish();

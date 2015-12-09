@@ -54,6 +54,7 @@ class GlobalBlockerBug extends Bug {
     @Override
     protected void becomeVisible(boolean byCustomer) {
         assert !byCustomer;
+        this.getModel().dynamicCount("occurredGlobalBugs");
         //TODO: wenn gerade nichts im Implementierung ist wird das Problem gelöst, ohne dass es Zeit gekostet hat. Das ist unrealistisch. Ist das schlimm?
         for (final Task t : this.getBoard().getAllTasksInImplementation()) {
             t.suspendImplementation(this.getModel().getParameters().getGlobalBugSuspendTimeDist().sampleTimeSpan(TimeUnit.HOURS));
