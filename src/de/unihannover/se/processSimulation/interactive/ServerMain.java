@@ -172,13 +172,6 @@ public class ServerMain extends AbstractHandler {
         }
         w.println("Seed: " + f.getSeed());
 
-        w.println("<h3>No review</h3>");
-        w.println("<img src=\"ExperimentNO_REVIEW_runplotBoard.png\" /><img src=\"ExperimentNO_REVIEW_runplotResults.png\" /><br/>");
-        w.println("<iframe width=\"800\" height=\"400\" src=\"ExperimentNO_REVIEW_run_report.html\">Report</iframe><br/>");
-        w.println("<a href=\"ExperimentNO_REVIEW_run_trace.html\">Trace</a><br/>");
-        w.println("<a href=\"ExperimentNO_REVIEW_run_error.html\">Error log</a><br/>");
-        w.println("<a href=\"ExperimentNO_REVIEW_run_debug.html\">Debug</a><br/>");
-
         w.println("<h3>Pre commit review</h3>");
         w.println("<img src=\"ExperimentPRE_COMMIT_runplotBoard.png\" /><img src=\"ExperimentPRE_COMMIT_runplotResults.png\" /><br/>");
         w.println("<iframe width=\"800\" height=\"400\" src=\"ExperimentPRE_COMMIT_run_report.html\">Report</iframe><br/>");
@@ -192,6 +185,13 @@ public class ServerMain extends AbstractHandler {
         w.println("<a href=\"ExperimentPOST_COMMIT_run_trace.html\">Trace</a><br/>");
         w.println("<a href=\"ExperimentPOST_COMMIT_run_error.html\">Error log</a><br/>");
         w.println("<a href=\"ExperimentPOST_COMMIT_run_debug.html\">Debug</a><br/>");
+
+        w.println("<h3>No review</h3>");
+        w.println("<img src=\"ExperimentNO_REVIEW_runplotBoard.png\" /><img src=\"ExperimentNO_REVIEW_runplotResults.png\" /><br/>");
+        w.println("<iframe width=\"800\" height=\"400\" src=\"ExperimentNO_REVIEW_run_report.html\">Report</iframe><br/>");
+        w.println("<a href=\"ExperimentNO_REVIEW_run_trace.html\">Trace</a><br/>");
+        w.println("<a href=\"ExperimentNO_REVIEW_run_error.html\">Error log</a><br/>");
+        w.println("<a href=\"ExperimentNO_REVIEW_run_debug.html\">Debug</a><br/>");
     }
 
     private BulkParameterFactory createRunDirectoryIfMissing(int requestId, int runNbr) throws IOException {

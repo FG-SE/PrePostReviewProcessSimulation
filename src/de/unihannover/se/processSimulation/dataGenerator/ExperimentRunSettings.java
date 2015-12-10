@@ -31,7 +31,7 @@ public class ExperimentRunSettings {
         LIMIT_NEGLIGIBLE_DIFFERENCE_CYCLE_TIME("Grenzwert für den Korridor, innerhalb dessen ein Unterschied bei der durchschnittlichen Story-Durchlaufzeit als 'vernachlässigbar' gilt. 0,05 heißt z.B., dass Unterschiede von -5% bis %5 vernachlässigbar sind."),
         CONFIDENCE_P("p-Wert, mit dem die Konfidenzintervalle bestimmt werden"),
         WORKING_DAYS_FOR_STARTUP("Anzahl Werktage, die als 'Aufwärm-Zeit' nicht in die Auswertung einbezogen werden."),
-        WORKING_DAYS_FOR_MEASUREMENT("Anzahl Werktage, die nach dem aufwärmen für die Messung verwendet werden.");
+        WORKING_DAYS_FOR_MEASUREMENT("Anzahl Werktage, die nach dem Aufwärmen für die Messung verwendet werden.");
 
         private final String description;
 
