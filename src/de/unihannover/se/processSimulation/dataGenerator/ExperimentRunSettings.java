@@ -52,11 +52,11 @@ public class ExperimentRunSettings {
         ret.params.put(ExperimentRunParameters.MAX_RUNS, 30.0);
         ret.params.put(ExperimentRunParameters.LIMIT_UNREALISTIC, 0.1);
         ret.params.put(ExperimentRunParameters.LIMIT_NO_REVIEW, 1.1);
-        ret.params.put(ExperimentRunParameters.LIMIT_NEGLIGIBLE_DIFFERENCE_STORY_POINTS, 0.05);
-        ret.params.put(ExperimentRunParameters.LIMIT_NEGLIGIBLE_DIFFERENCE_BUGS, 0.05);
-        ret.params.put(ExperimentRunParameters.LIMIT_NEGLIGIBLE_DIFFERENCE_CYCLE_TIME, 0.05);
+        ret.params.put(ExperimentRunParameters.LIMIT_NEGLIGIBLE_DIFFERENCE_STORY_POINTS, 0.1);
+        ret.params.put(ExperimentRunParameters.LIMIT_NEGLIGIBLE_DIFFERENCE_BUGS, 0.075);
+        ret.params.put(ExperimentRunParameters.LIMIT_NEGLIGIBLE_DIFFERENCE_CYCLE_TIME, 0.15);
         ret.params.put(ExperimentRunParameters.CONFIDENCE_P, 0.01);
-        ret.params.put(ExperimentRunParameters.WORKING_DAYS_FOR_STARTUP, 400.0);
+        ret.params.put(ExperimentRunParameters.WORKING_DAYS_FOR_STARTUP, 600.0);
         ret.params.put(ExperimentRunParameters.WORKING_DAYS_FOR_MEASUREMENT, 600.0);
         return ret;
     }

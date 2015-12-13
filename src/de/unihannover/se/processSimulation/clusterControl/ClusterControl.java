@@ -43,8 +43,8 @@ import org.apache.activemq.ActiveMQConnectionFactory;
  */
 public class ClusterControl {
 
-    private static final int MAX_LINES_PER_PACKAGE = 10;
-    private static final long MESSAGE_TIMEOUT = 1000L * 60 * 60 * 2;
+    private static final int MAX_LINES_PER_PACKAGE = 20;
+    private static final long MESSAGE_TIMEOUT = 1000L * 60 * 60 * 3;
 
     public static void main(String[] args) throws Exception {
         final String url = args[0]; //"tcp://TOBI:61616"

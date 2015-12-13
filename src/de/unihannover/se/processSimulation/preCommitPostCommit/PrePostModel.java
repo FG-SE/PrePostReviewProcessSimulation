@@ -60,6 +60,7 @@ public class PrePostModel extends Model {
     private Count finishedStoryPoints;
     private Count bugCountFoundByCustomers;
     private Tally storyCycleTime;
+    private Tally planningGroupSize;
     private final Map<String, Aggregate> timeCounters = new HashMap<>();
     private final Map<String, Count> dynamicCounters = new HashMap<>();
 
@@ -115,6 +116,7 @@ public class PrePostModel extends Model {
         this.finishedStoryPoints = new Count(this, "finishedStoryPoints", true, true);
         this.storyCycleTime = new Tally(this, "storyCycleTime", true, true);
         this.bugCountFoundByCustomers = new Count(this, "bugCountFoundByCustomers", true, true);
+        this.planningGroupSize = new Tally(this, "planningGroupSize", true, true);
 
         for (int i = 0; i < this.parameters.getNumDevelopers(); i++) {
             this.developers.add(new Developer(this,
@@ -278,6 +280,10 @@ public class PrePostModel extends Model {
             this.dynamicCounters.put(name, cnt);
         }
         cnt.update(count);
+    }
+
+    public Tally getPlanningGroupSizeTally() {
+        return this.planningGroupSize;
     }
 
 }

@@ -17,6 +17,8 @@
 
 package de.unihannover.se.processSimulation.preCommitPostCommit;
 
+import java.util.concurrent.TimeUnit;
+
 import desmoj.core.simulator.ExternalEvent;
 import desmoj.core.simulator.Model;
 import desmoj.core.simulator.TimeSpan;
@@ -57,6 +59,7 @@ abstract class Bug extends PrePostEntity {
     private boolean startedForDevelopers;
     private boolean startedForCustomers;
     private boolean fixed;
+    private final TimeSpan fixEffort;
 
     /**
      * Creates a new bug that was injected during implementation of the given task.
@@ -64,6 +67,7 @@ abstract class Bug extends PrePostEntity {
     public Bug(Task task, String name) {
         super(task.getModel(), name);
         this.task = task;
+        this.fixEffort = task.getModel().getParameters().getReviewRemarkFixDist().sampleTimeSpan(TimeUnit.HOURS);
     }
 
     /**
@@ -136,6 +140,13 @@ abstract class Bug extends PrePostEntity {
      */
     final boolean isFixed() {
         return this.fixed;
+    }
+
+    /**
+     * The time/effort needed to fix this problem when it is fixed as a review remark.
+     */
+    public TimeSpan getFixEffort() {
+        return this.fixEffort;
     }
 
 }

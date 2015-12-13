@@ -55,6 +55,8 @@ import de.unihannover.se.processSimulation.dataGenerator.ExperimentRun.SingleRun
 import de.unihannover.se.processSimulation.dataGenerator.ExperimentRunSettings;
 import de.unihannover.se.processSimulation.dataGenerator.ExperimentRunSettings.ExperimentRunParameters;
 import de.unihannover.se.processSimulation.dataGenerator.MedianWithConfidenceInterval;
+import desmoj.core.simulator.CoroutineModel;
+import desmoj.core.simulator.Experiment;
 
 /**
  * Main class of the interactive web-based simulation view.
@@ -202,15 +204,17 @@ public class ServerMain extends AbstractHandler {
         }
 
         final File runDirectory = this.getRunDir(requestId, runNbr);
-        if (!runDirectory.exists()) {
-            runDirectory.mkdir();
+        synchronized (this) {
+            if (!runDirectory.exists()) {
+                runDirectory.mkdir();
 
-            final int daysForStartup = (int) s.get(ExperimentRunParameters.WORKING_DAYS_FOR_STARTUP);
-            final int daysForMeasurement = (int) s.get(ExperimentRunParameters.WORKING_DAYS_FOR_MEASUREMENT);
+                final int daysForStartup = (int) s.get(ExperimentRunParameters.WORKING_DAYS_FOR_STARTUP);
+                final int daysForMeasurement = (int) s.get(ExperimentRunParameters.WORKING_DAYS_FOR_MEASUREMENT);
 
-            DataGenerator.runExperiment(f, ReviewMode.NO_REVIEW, runDirectory, "run", daysForStartup, daysForMeasurement);
-            DataGenerator.runExperiment(f, ReviewMode.PRE_COMMIT, runDirectory, "run", daysForStartup, daysForMeasurement);
-            DataGenerator.runExperiment(f, ReviewMode.POST_COMMIT, runDirectory, "run", daysForStartup, daysForMeasurement);
+                DataGenerator.runExperiment(f, ReviewMode.NO_REVIEW, runDirectory, "run", daysForStartup, daysForMeasurement);
+                DataGenerator.runExperiment(f, ReviewMode.PRE_COMMIT, runDirectory, "run", daysForStartup, daysForMeasurement);
+                DataGenerator.runExperiment(f, ReviewMode.POST_COMMIT, runDirectory, "run", daysForStartup, daysForMeasurement);
+            }
         }
 
         return f;
@@ -255,11 +259,16 @@ public class ServerMain extends AbstractHandler {
     private void handlePlotImage(HttpServletRequest request, HttpServletResponse response,
                     int requestId, int runNbr, String plotName) throws IOException {
 
-        final DefaultCategoryDataset dataset = this.loadDatasetFromCsv(new File(this.getRunDir(requestId, runNbr), plotName + ".csv"));
-        response.setContentType("image/png");
-        final JFreeChart chart = ChartFactory.createLineChart("", "time", "count", dataset);
-        final BufferedImage image = chart.createBufferedImage(800, 500);
-        ImageIO.write(image, "PNG", response.getOutputStream());
+        try {
+            final DefaultCategoryDataset dataset = this.loadDatasetFromCsv(new File(this.getRunDir(requestId, runNbr), plotName + ".csv"));
+            response.setContentType("image/png");
+            final JFreeChart chart = ChartFactory.createLineChart("", "time", "count", dataset);
+            final BufferedImage image = chart.createBufferedImage(800, 500);
+            ImageIO.write(image, "PNG", response.getOutputStream());
+        } catch (final Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     private DefaultCategoryDataset loadDatasetFromCsv(File csvFile) throws IOException {
@@ -342,7 +351,7 @@ public class ServerMain extends AbstractHandler {
 
     private void printInputParameters(
                     final PrintWriter w, BulkParameterFactory f, ExperimentRunSettings s, boolean allParams) {
-        w.println("<form action=\".\">");
+        w.println("<form action=\"#\">");
         w.println("<h2>Input parameters</h2>");
         w.println("<table>");
         for (final ParameterType t : ParameterType.values()) {
@@ -448,7 +457,7 @@ public class ServerMain extends AbstractHandler {
         w.println("Median share of productive work: " + result.getShareProductiveWork().toHtmlPercent() + "<br/>");
         w.println("Median share no review/review story points: " + result.getFactorNoReview().toHtmlPercent() + "<br/>");
         w.println("Median difference pre/post story points: " + this.formatDiff(result.getFactorStoryPoints(), "pre", "post") + "<br/>");
-        w.println("Median difference pre/post bugs found by customer: " + this.formatDiff(result.getFactorBugs(), "post", "pre") + "<br/>");
+        w.println("Median difference pre/post bugs found by customer/story point: " + this.formatDiff(result.getFactorBugs(), "post", "pre") + "<br/>");
         w.println("Median difference pre/post cycle time: " + this.formatDiff(result.getFactorCycleTime(), "post", "pre") + "<br/>");
         w.println("<br/>");
 
@@ -473,34 +482,13 @@ public class ServerMain extends AbstractHandler {
     }
 
     public static void main(String[] args) throws Exception {
-        final Server server = new Server(8080);
+        Experiment.setCoroutineModel(CoroutineModel.FIBERS);
+        final Server server = new Server(args.length > 0 ? Integer.parseInt(args[0]) : 8080);
         server.setHandler(new ServerMain());
 
         server.start();
         server.join();
     }
 }
-
-//    public static void main(final String[] args) throws IOException {
-//        final Properties settings = loadSettings(args[0]);
-//
-//        final List<Contestant> contestants = Contestant.loadFromCsv(settings);
-//        final Writer redo = new FileWriter("redo." + System.currentTimeMillis() + ".log");
-//        final Tournament t = new Tournament(contestants, redo);
-//
-//        final HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);
-//        server.createContext("/doubleOut", new Handler(t, Integer.parseInt(settings.getProperty("breakLimit"))));
-//        server.setExecutor(null);
-//        server.start();
-//        System.out.println("Server started...");
-//    }
-//
-//    private static Properties loadSettings(final String filename) throws IOException {
-//        try (FileInputStream is = new FileInputStream(filename)) {
-//            final Properties settings = new Properties();
-//            settings.load(is);
-//            return settings;
-//        }
-//    }
 
 

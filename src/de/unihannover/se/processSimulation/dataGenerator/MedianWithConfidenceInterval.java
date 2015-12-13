@@ -23,7 +23,7 @@ package de.unihannover.se.processSimulation.dataGenerator;
  */
 public class MedianWithConfidenceInterval {
 
-    private static final double EPSILON = 0.00000001;
+    private static final double EPSILON = 0.000001;
 
     private final double median;
     private final double lowerConfidence;

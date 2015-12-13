@@ -140,7 +140,7 @@ public class ExperimentRunTest {
 
         assertEquals(median(10/21.0, 10/25.0, 10/17.0), result.getFactorStoryPoints());
         assertEquals(median(10/16.5, 10/17.5, 10/15.5), result.getFactorCycleTime());
-        assertEquals(median(10/17.0, 10/19.0, 10/15.0), result.getFactorBugs());
+        assertEquals(median(0.1078167, 0.07604563, 0.12853470), result.getFactorBugs());
 
         assertEquals(PrePostComparison.POST_BETTER, result.getSummary().getStoryPointsResult());
         assertTrue(result.isSummaryStatisticallySignificant());
@@ -162,32 +162,32 @@ public class ExperimentRunTest {
         stub.put("0", ReviewMode.NO_REVIEW, result(100, 1, 1, 1));
         stub.put("1", ReviewMode.NO_REVIEW, result(100, 1, 1, 1));
         stub.put("2", ReviewMode.NO_REVIEW, result(100, 1, 1, 1));
-        stub.put("3", ReviewMode.NO_REVIEW, result(200, 1, 1, 1));
-        stub.put("4", ReviewMode.NO_REVIEW, result(200, 1, 1, 1));
-        stub.put("5", ReviewMode.NO_REVIEW, result(200, 1, 1, 1));
-        stub.put("6", ReviewMode.NO_REVIEW, result(300, 1, 1, 1));
-        stub.put("7", ReviewMode.NO_REVIEW, result(300, 1, 1, 1));
-        stub.put("8", ReviewMode.NO_REVIEW, result(300, 1, 1, 1));
+        stub.put("3", ReviewMode.NO_REVIEW, result(200, 1, 1, 2));
+        stub.put("4", ReviewMode.NO_REVIEW, result(200, 1, 1, 2));
+        stub.put("5", ReviewMode.NO_REVIEW, result(200, 1, 1, 2));
+        stub.put("6", ReviewMode.NO_REVIEW, result(300, 1, 1, 3));
+        stub.put("7", ReviewMode.NO_REVIEW, result(300, 1, 1, 3));
+        stub.put("8", ReviewMode.NO_REVIEW, result(300, 1, 1, 3));
 
-        stub.put("0", ReviewMode.PRE_COMMIT, result(101, 1, 1, 1));
-        stub.put("1", ReviewMode.PRE_COMMIT, result(101, 1, 1, 1));
-        stub.put("2", ReviewMode.PRE_COMMIT, result(101, 1, 1, 1));
-        stub.put("3", ReviewMode.PRE_COMMIT, result(201, 1, 1, 1));
-        stub.put("4", ReviewMode.PRE_COMMIT, result(201, 1, 1, 1));
-        stub.put("5", ReviewMode.PRE_COMMIT, result(201, 1, 1, 1));
-        stub.put("6", ReviewMode.PRE_COMMIT, result(301, 1, 1, 1));
-        stub.put("7", ReviewMode.PRE_COMMIT, result(301, 1, 1, 1));
-        stub.put("8", ReviewMode.PRE_COMMIT, result(301, 1, 1, 1));
+        stub.put("0", ReviewMode.PRE_COMMIT, result(101, 1, 1, 10));
+        stub.put("1", ReviewMode.PRE_COMMIT, result(101, 1, 1, 10));
+        stub.put("2", ReviewMode.PRE_COMMIT, result(101, 1, 1, 10));
+        stub.put("3", ReviewMode.PRE_COMMIT, result(201, 1, 1, 20));
+        stub.put("4", ReviewMode.PRE_COMMIT, result(201, 1, 1, 20));
+        stub.put("5", ReviewMode.PRE_COMMIT, result(201, 1, 1, 20));
+        stub.put("6", ReviewMode.PRE_COMMIT, result(301, 1, 1, 30));
+        stub.put("7", ReviewMode.PRE_COMMIT, result(301, 1, 1, 30));
+        stub.put("8", ReviewMode.PRE_COMMIT, result(301, 1, 1, 30));
 
-        stub.put("0", ReviewMode.POST_COMMIT, result(111, 1, 1, 1));
-        stub.put("1", ReviewMode.POST_COMMIT, result(111, 1, 1, 1));
-        stub.put("2", ReviewMode.POST_COMMIT, result(111, 1, 1, 1));
-        stub.put("3", ReviewMode.POST_COMMIT, result(211, 1, 1, 1));
-        stub.put("4", ReviewMode.POST_COMMIT, result(211, 1, 1, 1));
-        stub.put("5", ReviewMode.POST_COMMIT, result(211, 1, 1, 1));
-        stub.put("6", ReviewMode.POST_COMMIT, result(311, 1, 1, 1));
-        stub.put("7", ReviewMode.POST_COMMIT, result(311, 1, 1, 1));
-        stub.put("8", ReviewMode.POST_COMMIT, result(311, 1, 1, 1));
+        stub.put("0", ReviewMode.POST_COMMIT, result(111, 1, 1, 11));
+        stub.put("1", ReviewMode.POST_COMMIT, result(111, 1, 1, 11));
+        stub.put("2", ReviewMode.POST_COMMIT, result(111, 1, 1, 11));
+        stub.put("3", ReviewMode.POST_COMMIT, result(211, 1, 1, 21));
+        stub.put("4", ReviewMode.POST_COMMIT, result(211, 1, 1, 21));
+        stub.put("5", ReviewMode.POST_COMMIT, result(211, 1, 1, 21));
+        stub.put("6", ReviewMode.POST_COMMIT, result(311, 1, 1, 31));
+        stub.put("7", ReviewMode.POST_COMMIT, result(311, 1, 1, 31));
+        stub.put("8", ReviewMode.POST_COMMIT, result(311, 1, 1, 31));
 
         final ExperimentRunSettings settings4 = fixedRunCountSettings(9)
                         .copyWithChangedParam(ExperimentRunParameters.LIMIT_NEGLIGIBLE_DIFFERENCE_STORY_POINTS, 0.04);

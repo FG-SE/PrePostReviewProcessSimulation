@@ -314,6 +314,11 @@ public class ExperimentRun {
         return this.median(values);
     }
 
+    public MedianWithConfidenceInterval getBugCountPerStoryPointMedian(ReviewMode mode) {
+        final double[] values = this.getResults(mode, ExperimentResult::getBugCountFoundByCustomersPerStoryPoint);
+        return this.median(values);
+    }
+
     private double[] getResults(ReviewMode mode, ToDoubleFunction<ExperimentResult> getter) {
         return this.results.stream().filter(x -> x.getFor(mode) != null).map(x -> x.getFor(mode)).mapToDouble(getter).toArray();
     }
@@ -334,7 +339,7 @@ public class ExperimentRun {
      * I.e. if the result is > 0, post commit review resulted in more remaining bugs.
      */
     public MedianWithConfidenceInterval getFactorBugs() {
-        final double[] values = this.results.stream().mapToDouble(x -> x.factorPrePost(ExperimentResult::getBugCountFoundByCustomers)).toArray();
+        final double[] values = this.results.stream().mapToDouble(x -> x.factorPrePost(ExperimentResult::getBugCountFoundByCustomersPerStoryPoint)).toArray();
         return this.median(values);
     }
 

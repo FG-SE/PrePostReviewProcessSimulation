@@ -75,6 +75,13 @@ public class ExperimentResult {
         return this.bugCountFoundByCustomers;
     }
 
+    public double getBugCountFoundByCustomersPerStoryPoint() {
+        if (this.finishedStoryPoints == 0) {
+            return this.bugCountFoundByCustomers;
+        }
+        return ((double) this.bugCountFoundByCustomers) / this.finishedStoryPoints;
+    }
+
     public long getInvestedPersonHours() {
         return this.investedPersonHours;
     }

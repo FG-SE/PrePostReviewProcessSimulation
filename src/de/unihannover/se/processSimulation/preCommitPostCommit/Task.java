@@ -128,11 +128,16 @@ abstract class Task extends PrePostEntity implements MemoryItem {
         this.implementor.hold(implementationTime);
 
         final TimeSpan bugTime = TimeOperations.add(
-                        implementationTime,
+                        this.getTimeRelevantForBugCreation(),
                         TimeOperations.multiply(taskSwitchTime, this.getModel().getParameters().getTaskSwitchTimeBugFactor()));
         this.createBugs(bugTime, this instanceof BugfixTask, false);
         this.endImplementation();
     }
+
+    /**
+     * Returns the time/effort that is used to calculate the number of bugs injected while implementing this task.
+     */
+    protected abstract TimeSpan getTimeRelevantForBugCreation();
 
     /**
      * Perform the work that has to be done at the end of implementation:
@@ -302,7 +307,7 @@ abstract class Task extends PrePostEntity implements MemoryItem {
         this.setState(State.IN_IMPLEMENTATION);
 
         if (this.getModel().getReviewMode() == ReviewMode.POST_COMMIT) {
-            //in post commit mode, the code was already commited and has to be "checked out" again
+            //in post commit mode, the code was already committed and has to be "checked out" again
             this.getSourceRepository().startWork(this);
         }
 
@@ -313,7 +318,7 @@ abstract class Task extends PrePostEntity implements MemoryItem {
 
         TimeSpan timeForFixing = new TimeSpan(0);
         for (final Bug b : this.currentReview.getRemarks()) {
-            timeForFixing = TimeOperations.add(timeForFixing, this.sampleRemarkFixTime());
+            timeForFixing = TimeOperations.add(timeForFixing, b.getFixEffort());
         }
         dev.hold(timeForFixing);
         this.lurkingBugs.removeAll(this.currentReview.getRemarks());
@@ -334,13 +339,13 @@ abstract class Task extends PrePostEntity implements MemoryItem {
         this.handleTaskSwitchOverhead(dev);
         dev.hold(this.getModel().getParameters().getBugAssessmentTimeDist().sampleTimeSpan(TimeUnit.HOURS));
 
-        this.getModel().dynamicCount("bugAssessmentResult" + this.state);
+        this.getModel().dynamicCount("bugAssessmentResult" + this.state + "withStory" + (this.getStory().isFinished() ? "Finished" : "InWork"));
         switch (this.state) {
         case OPEN:
             throw new AssertionError("Should not happen: Bug in open task " + this);
         case IN_IMPLEMENTATION:
             //task is currently in work: fixing is done while the author is at it and delays the implementation
-            this.suspendImplementation(this.sampleRemarkFixTime());
+            this.suspendImplementation(bug.getFixEffort());
             break;
         case READY_FOR_REVIEW:
             //tasks is ready for review: bug assessment is seen as a review round
@@ -361,10 +366,6 @@ abstract class Task extends PrePostEntity implements MemoryItem {
             this.getBoard().addBugToBeFixed(new BugfixTask(bug));
             break;
         }
-    }
-
-    private TimeSpan sampleRemarkFixTime() {
-        return this.getModel().getParameters().getReviewRemarkFixDist().sampleTimeSpan(TimeUnit.HOURS);
     }
 
     /**

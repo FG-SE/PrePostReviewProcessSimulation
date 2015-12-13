@@ -21,6 +21,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import desmoj.core.simulator.TimeOperations;
+import desmoj.core.simulator.TimeSpan;
+
 /**
  * A {@link Task} in which a certain {@link NormalBug} shall be fixed.
  */
@@ -33,7 +36,10 @@ class BugfixTask extends Task {
      * Creates a new bugfix task for the given bug.
      */
     public BugfixTask(NormalBug bug) {
-        super(bug.getModel(), "bug", bug.getModel().getParameters().getBugfixTaskTimeDist().sampleTimeSpan(TimeUnit.HOURS));
+        super(bug.getModel(), "bug",
+                        TimeOperations.add(
+                                        bug.getFixEffort(),
+                                        bug.getModel().getParameters().getBugfixTaskOverheadTimeDist().sampleTimeSpan(TimeUnit.HOURS)));
         this.bug = bug;
         this.cachedStory = this.bug.getTask().getStory();
         this.cachedStory.registerBug(this);
@@ -88,6 +94,11 @@ class BugfixTask extends Task {
                 this.cachedStory.finish();
             }
         }
+    }
+
+    @Override
+    protected TimeSpan getTimeRelevantForBugCreation() {
+        return TimeOperations.multiply(this.bug.getFixEffort(), this.getModel().getParameters().getReviewFixToTaskFactor());
     }
 
 }

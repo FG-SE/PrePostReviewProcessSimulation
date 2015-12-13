@@ -136,7 +136,7 @@ public class BulkFileExecutor {
     private static ExperimentRun executeSingle(BulkParameterFactory parameters, int lineNumber) {
         final ExperimentRunSettings runSettings = ExperimentRunSettings.defaultSettings()
                         .copyWithChangedParam(ExperimentRunParameters.MIN_RUNS, 20.0)
-                        .copyWithChangedParam(ExperimentRunParameters.MAX_RUNS, 1500.0);
+                        .copyWithChangedParam(ExperimentRunParameters.MAX_RUNS, 2500.0);
         return ExperimentRun.perform(runSettings, DataGenerator::runExperiment, parameters, new SingleRunCallback() {
             int runCount = 1;
             @Override
@@ -170,6 +170,12 @@ public class BulkFileExecutor {
         write(output, result.getBugCountMedian(ReviewMode.PRE_COMMIT));
         output.write(';');
         write(output, result.getBugCountMedian(ReviewMode.POST_COMMIT));
+        output.write(';');
+        write(output, result.getBugCountPerStoryPointMedian(ReviewMode.NO_REVIEW));
+        output.write(';');
+        write(output, result.getBugCountPerStoryPointMedian(ReviewMode.PRE_COMMIT));
+        output.write(';');
+        write(output, result.getBugCountPerStoryPointMedian(ReviewMode.POST_COMMIT));
         output.write(';');
         output.write(summary.getBugsResult().toString());
         output.write(';');
@@ -215,6 +221,9 @@ public class BulkFileExecutor {
         addMedianAttributes(ret, "BugCountMedian_NO_REVIEW");
         addMedianAttributes(ret, "BugCountMedian_PRE_COMMIT");
         addMedianAttributes(ret, "BugCountMedian_POST_COMMIT");
+        addMedianAttributes(ret, "BugCountPerStoryPointMedian_NO_REVIEW");
+        addMedianAttributes(ret, "BugCountPerStoryPointMedian_PRE_COMMIT");
+        addMedianAttributes(ret, "BugCountPerStoryPointMedian_POST_COMMIT");
         ret.add(new Pair<>("summaryBugs", PrePostComparison.class));
         addMedianAttributes(ret, "FactorCycleTime");
         addMedianAttributes(ret, "StoryCycleTimeMeanMedian_NO_REVIEW");

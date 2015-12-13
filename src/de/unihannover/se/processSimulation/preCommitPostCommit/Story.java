@@ -101,6 +101,7 @@ class Story extends PrePostEntity implements MemoryItem {
 
         this.state = State.IN_IMPLEMENTATION;
         this.getBoard().addPlannedStory(this);
+        this.getModel().getPlanningGroupSizeTally().update(this.additionalPlanners.size() + 1);
 
         for (final Developer helper : this.additionalPlanners) {
             helper.activate();

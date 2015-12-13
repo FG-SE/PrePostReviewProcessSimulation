@@ -91,9 +91,9 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
         IMPLEMENTATION_TIME_DIST(DistributionFactory.class, ""),
         IMPLEMENTATION_TIME_MODE(Double.class, ""),
         IMPLEMENTATION_TIME_MEAN_DIFF(Double.class, "Die Dauer für die Implementierung eines Story-Tasks in Stunden (ohne Overhead). Angegeben als Differenz zwischen Modus und arithmetischem Mittel der Log-Normal-Verteilung, entspricht bei üblich kleinen Werten für den Modus also grob dem Mittelwert."),
-        BUGFIX_TASK_TIME_DIST(DistributionFactory.class, ""),
-        BUGFIX_TASK_TIME_MODE(Double.class, ""),
-        BUGFIX_TASK_TIME_MEAN_DIFF(Double.class, "Die Dauer für die Implementierung eines Bugfix-Tasks in Stunden (ohne Overhead). Angegeben als Differenz zwischen Modus und arithmetischem Mittel der Log-Normal-Verteilung, entspricht bei üblich kleinen Werten für den Modus also grob dem Mittelwert."),
+        BUGFIX_TASK_OVERHEAD_TIME_DIST(DistributionFactory.class, ""),
+        BUGFIX_TASK_OVERHEAD_TIME_MODE(Double.class, ""),
+        BUGFIX_TASK_OVERHEAD_TIME_MEAN_DIFF(Double.class, "Die Dauer für die Analyse eines Bugfix-Tasks in Stunden (ohne Taskwechsel-Overhead). Die Zeit für das eigentliche Fixen ist dann die gleiche wie beim Review-Remark. Angegeben als Differenz zwischen Modus und arithmetischem Mittel der Log-Normal-Verteilung, entspricht bei üblich kleinen Werten für den Modus also grob dem Mittelwert."),
         REVIEW_REMARK_FIX_TIME_DIST(DistributionFactory.class, ""),
         REVIEW_REMARK_FIX_TIME_MODE(Double.class, ""),
         REVIEW_REMARK_FIX_TIME_MEAN_DIFF(Double.class, "Die Dauer für die Korrektur einer einzelnen Review-Anmerkung in Stunden (ohne Overhead). Angegeben als Differenz zwischen Modus und arithmetischem Mittel der Log-Normal-Verteilung, entspricht bei üblich kleinen Werten für den Modus also grob dem Mittelwert."),
@@ -104,8 +104,10 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
         CONFLICT_RESOLUTION_TIME_MODE(Double.class, "Dauer des Commit-Konfliktauflösung, angegeben in Stunden (Modus einer Dreiecksverteilung)."),
         CONFLICT_RESOLUTION_TIME_TRIANGLE_WIDTH(Double.class, ""),
         INTERNAL_BUG_SHARE(Double.class, "Anteil an internen (Wartbarkeits- o.ä.) Problemen an der Gesamtzahl"),
-        BUG_ACTIVATION_TIME_DEVELOPER_EXPECTED_VALUE(Double.class, "Durchschnittliche Zeit in Stunden zwischen Commit eines Problems und (zufälliger) Entdeckung durch einen Entwickler (Mittelwert einer Exponentialverteilung)."),
-        BUG_ACTIVATION_TIME_CUSTOMER_EXPECTED_VALUE(Double.class, "Durchschnittliche Zeit in Stunden zwischen 'Auslieferung' eines Problems und Entdeckung durch einen Kunden (Mittelwert einer Exponentialverteilung)."),
+        BUG_ACTIVATION_TIME_DEVELOPER_MODE(Double.class, ""),
+        BUG_ACTIVATION_TIME_DEVELOPER_MEAN_DIFF(Double.class, "Durchschnittliche Zeit in Stunden zwischen Commit eines Problems und (zufälliger) Entdeckung durch einen Entwickler (Mittelwert einer Exponentialverteilung)."),
+        BUG_ACTIVATION_TIME_CUSTOMER_MODE(Double.class, ""),
+        BUG_ACTIVATION_TIME_CUSTOMER_MEAN_DIFF(Double.class, "Durchschnittliche Zeit in Stunden zwischen 'Auslieferung' eines Problems und Entdeckung durch einen Kunden (Mittelwert einer Exponentialverteilung)."),
         PLANNING_TIME_DIST(DistributionFactory.class, ""),
         PLANNING_TIME_MEAN(Double.class, ""),
         REVIEW_TIME_DIST(DistributionFactory.class, ""),
@@ -118,6 +120,7 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
         TASK_SWITCH_TIME_BUG_FACTOR(Double.class, ""),
         FIXING_BUG_RATE_FACTOR(Double.class, "Faktor der festlegt, wie viel 'ungefährlicher' Korrekturen gegenüber Neuentwicklung sind. Wird als Multiplikator des Implementierungs-Skills des Entwicklers aufgefasst. 1,0 heißt 'bei Fixes und Neuentwicklung macht man gleich viel Fehler pro Stunde', Werte kleiner 0 heißen 'bei Fixes macht man weniger Fehler pro Stunde', Werte größer 0 heißen 'bei Fixes macht man mehr Fehler pro Stunde'."),
         FOLLOW_UP_BUG_SPAWN_PROBABILITY(Double.class, ""),
+        REVIEW_FIX_TO_TASK_FACTOR(Double.class, ""),
         DEPENDENCY_GRAPH_CONSTELLATION(DependencyGraphConstellation.class, "Struktur der Abhängigkeiten zwischen Story-Tasks, d.h. inwiefern andere Tasks erst begonnen werden können, nachdem andere commitet sind. 'REALISTIC' beruht z.B. auf Echtdaten, bei 'NO_DEPENDENCIES' gibt es keine Abhängigkeiten, und bei 'CHAINS' und 'DIAMONDS' gibt es recht viele.");
 
 
@@ -282,9 +285,9 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
         ret.parameters.put(ParameterType.IMPLEMENTATION_TIME_DIST, DistributionFactory.LOGNORMAL);
         ret.parameters.put(ParameterType.IMPLEMENTATION_TIME_MODE, 0.3357338);
         ret.parameters.put(ParameterType.IMPLEMENTATION_TIME_MEAN_DIFF, 19.8);
-        ret.parameters.put(ParameterType.BUGFIX_TASK_TIME_DIST, DistributionFactory.LOGNORMAL);
-        ret.parameters.put(ParameterType.BUGFIX_TASK_TIME_MODE, 0.03317843);
-        ret.parameters.put(ParameterType.BUGFIX_TASK_TIME_MEAN_DIFF, 15.77376);
+        ret.parameters.put(ParameterType.BUGFIX_TASK_OVERHEAD_TIME_DIST, DistributionFactory.LOGNORMAL);
+        ret.parameters.put(ParameterType.BUGFIX_TASK_OVERHEAD_TIME_MODE, 0.01317843);
+        ret.parameters.put(ParameterType.BUGFIX_TASK_OVERHEAD_TIME_MEAN_DIFF, 14.0);
         ret.parameters.put(ParameterType.REVIEW_REMARK_FIX_TIME_DIST, DistributionFactory.LOGNORMAL);
         ret.parameters.put(ParameterType.REVIEW_REMARK_FIX_TIME_MODE, 0.02);
         ret.parameters.put(ParameterType.REVIEW_REMARK_FIX_TIME_MEAN_DIFF, 1.8);
@@ -295,8 +298,10 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
         ret.parameters.put(ParameterType.CONFLICT_RESOLUTION_TIME_MODE, 0.3);
         ret.parameters.put(ParameterType.CONFLICT_RESOLUTION_TIME_TRIANGLE_WIDTH, 0.2);
         ret.parameters.put(ParameterType.INTERNAL_BUG_SHARE, 0.6);
-        ret.parameters.put(ParameterType.BUG_ACTIVATION_TIME_DEVELOPER_EXPECTED_VALUE, 1000.0);
-        ret.parameters.put(ParameterType.BUG_ACTIVATION_TIME_CUSTOMER_EXPECTED_VALUE, 1000.0);
+        ret.parameters.put(ParameterType.BUG_ACTIVATION_TIME_DEVELOPER_MODE, 0.5);
+        ret.parameters.put(ParameterType.BUG_ACTIVATION_TIME_DEVELOPER_MEAN_DIFF, 1000.0);
+        ret.parameters.put(ParameterType.BUG_ACTIVATION_TIME_CUSTOMER_MODE, 4.0);
+        ret.parameters.put(ParameterType.BUG_ACTIVATION_TIME_CUSTOMER_MEAN_DIFF, 1000.0);
         ret.parameters.put(ParameterType.PLANNING_TIME_DIST, DistributionFactory.LOGNORMAL);
         ret.parameters.put(ParameterType.PLANNING_TIME_MEAN, 4.0);
         ret.parameters.put(ParameterType.REVIEW_TIME_DIST, DistributionFactory.LOGNORMAL);
@@ -309,6 +314,7 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
         ret.parameters.put(ParameterType.TASK_SWITCH_TIME_BUG_FACTOR, 0.0);
         ret.parameters.put(ParameterType.FIXING_BUG_RATE_FACTOR, 0.5);
         ret.parameters.put(ParameterType.FOLLOW_UP_BUG_SPAWN_PROBABILITY, 0.05);
+        ret.parameters.put(ParameterType.REVIEW_FIX_TO_TASK_FACTOR, 1.1);
         ret.parameters.put(ParameterType.DEPENDENCY_GRAPH_CONSTELLATION, DependencyGraphConstellation.REALISTIC);
         return ret;
     }
@@ -335,9 +341,9 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
                         this.getParamDi(ParameterType.IMPLEMENTATION_TIME_DIST).create(b, "implementationTimeDist",
                                         this.getParamD(ParameterType.IMPLEMENTATION_TIME_MODE) + this.getParamD(ParameterType.IMPLEMENTATION_TIME_MEAN_DIFF),
                                         this.getParamD(ParameterType.IMPLEMENTATION_TIME_MODE)),
-                        this.getParamDi(ParameterType.BUGFIX_TASK_TIME_DIST).create(b, "bugfixTaskTimeDist",
-                                        this.getParamD(ParameterType.BUGFIX_TASK_TIME_MODE) + this.getParamD(ParameterType.BUGFIX_TASK_TIME_MEAN_DIFF),
-                                        this.getParamD(ParameterType.BUGFIX_TASK_TIME_MODE)),
+                        this.getParamDi(ParameterType.BUGFIX_TASK_OVERHEAD_TIME_DIST).create(b, "bugfixTaskOverheadTimeDist",
+                                        this.getParamD(ParameterType.BUGFIX_TASK_OVERHEAD_TIME_MODE) + this.getParamD(ParameterType.BUGFIX_TASK_OVERHEAD_TIME_MEAN_DIFF),
+                                        this.getParamD(ParameterType.BUGFIX_TASK_OVERHEAD_TIME_MODE)),
                         this.getParamDi(ParameterType.REVIEW_REMARK_FIX_TIME_DIST).create(b, "reviewRemarkFixTimeDist",
                                         this.getParamD(ParameterType.REVIEW_REMARK_FIX_TIME_MODE) + this.getParamD(ParameterType.REVIEW_REMARK_FIX_TIME_MEAN_DIFF),
                                         this.getParamD(ParameterType.REVIEW_REMARK_FIX_TIME_MODE)),
@@ -358,10 +364,12 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
                                         Double.MAX_VALUE),
                         b.bernoulli("internalBugDist",
                                         this.getParamD(ParameterType.INTERNAL_BUG_SHARE)),
-                        b.exp("bugActivationTimeDeveloperDist",
-                                        this.getParamD(ParameterType.BUG_ACTIVATION_TIME_DEVELOPER_EXPECTED_VALUE)),
-                        b.exp("bugActivationTimeCustomerDist",
-                                        this.getParamD(ParameterType.BUG_ACTIVATION_TIME_CUSTOMER_EXPECTED_VALUE)),
+                        b.expShift("bugActivationTimeDeveloperDist",
+                                        this.getParamD(ParameterType.BUG_ACTIVATION_TIME_DEVELOPER_MODE) + this.getParamD(ParameterType.BUG_ACTIVATION_TIME_DEVELOPER_MEAN_DIFF),
+                                        this.getParamD(ParameterType.BUG_ACTIVATION_TIME_DEVELOPER_MODE)),
+                        b.expShift("bugActivationTimeCustomerDist",
+                                        this.getParamD(ParameterType.BUG_ACTIVATION_TIME_CUSTOMER_MODE) + this.getParamD(ParameterType.BUG_ACTIVATION_TIME_CUSTOMER_MEAN_DIFF),
+                                        this.getParamD(ParameterType.BUG_ACTIVATION_TIME_CUSTOMER_MODE)),
                         this.getParamDi(ParameterType.PLANNING_TIME_DIST).create(b, "planningTimeDist",
                                         this.getParamD(ParameterType.PLANNING_TIME_MEAN)),
                         this.getParamDi(ParameterType.REVIEW_TIME_DIST).create(b, "reviewTimeDist",
@@ -374,6 +382,7 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
                         this.getParamD(ParameterType.TASK_SWITCH_TIME_BUG_FACTOR),
                         this.getParamD(ParameterType.FIXING_BUG_RATE_FACTOR),
                         this.getParamD(ParameterType.FOLLOW_UP_BUG_SPAWN_PROBABILITY),
+                        this.getParamD(ParameterType.REVIEW_FIX_TO_TASK_FACTOR),
                         nextLong(r),
                         (DependencyGraphConstellation) this.getParam(ParameterType.DEPENDENCY_GRAPH_CONSTELLATION));
     }

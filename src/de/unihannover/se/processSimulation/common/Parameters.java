@@ -29,7 +29,7 @@ public class Parameters {
     private final NumericalDist<Double> globalBugDist;
     private final BoolDist conflictDist;
     private final NumericalDist<Double> implementationTimeDist;
-    private final NumericalDist<Double> bugfixTaskTimeDist;
+    private final NumericalDist<Double> bugfixTaskOverheadTimeDist;
     private final NumericalDist<Double> reviewRemarkFixTimeDist;
     private final NumericalDist<Double> globalBugSuspendTimeDist;
     private final NumericalDist<Double> bugAssessmentTimeDist;
@@ -47,6 +47,7 @@ public class Parameters {
     private final double taskSwitchTimeBugFactor;
     private final double fixingBugRateFactor;
     private final double followUpBugSpawnProbability;
+    private final double reviewFixToTaskFactor;
     private final long genericRandomSeed;
 
     public Parameters(
@@ -55,7 +56,7 @@ public class Parameters {
                     NumericalDist<Double> globalBugDist,
                     BoolDist conflictDist,
                     NumericalDist<Double> implementationTimeDist,
-                    NumericalDist<Double> bugfixTaskTimeDist,
+                    NumericalDist<Double> bugfixTaskOverheadTimeDist,
                     NumericalDist<Double> reviewRemarkFixTimeDist,
                     NumericalDist<Double> globalBugSuspendTimeDist,
                     NumericalDist<Double> bugAssessmentTimeDist,
@@ -72,6 +73,7 @@ public class Parameters {
                     double taskSwitchTimeBugFactor,
                     double fixingBugRateFactor,
                     double followUpBugSpawnProbability,
+                    double reviewFixToTaskFactor,
                     long genericRandomSeed,
                     DependencyGraphConstellation dependencyGraphConstellation) {
         this.implementationSkillDist = implementationSkillDist;
@@ -79,7 +81,7 @@ public class Parameters {
         this.globalBugDist = globalBugDist;
         this.conflictDist = conflictDist;
         this.implementationTimeDist = implementationTimeDist;
-        this.bugfixTaskTimeDist = bugfixTaskTimeDist;
+        this.bugfixTaskOverheadTimeDist = bugfixTaskOverheadTimeDist;
         this.reviewRemarkFixTimeDist = reviewRemarkFixTimeDist;
         this.globalBugSuspendTimeDist = globalBugSuspendTimeDist;
         this.bugAssessmentTimeDist = bugAssessmentTimeDist;
@@ -97,6 +99,7 @@ public class Parameters {
         this.fixingBugRateFactor = fixingBugRateFactor;
         this.followUpBugSpawnProbability = followUpBugSpawnProbability;
         this.genericRandomSeed = genericRandomSeed;
+        this.reviewFixToTaskFactor = reviewFixToTaskFactor;
         this.internalBugDist = internalBugDist;
     }
 
@@ -147,11 +150,14 @@ public class Parameters {
     }
 
     /**
-     * Liefert die Verteilung, aus der die Implementierungsdauer von Bugfix-Tasks bezogen wird.
-     * Die gesampelten Werte werden als "Stunden" interpretiert.
+     * Liefert die Verteilung, aus der die "Analysedauer" von Bugfix-Tasks bezogen wird.
+     * Die gesampelten Werte werden als "Stunden" interpretiert. Die Gesamtdauer eines Tasks
+     * ergibt sich aus dem Korrekturaufwand (gleiche Verteilung wie bei Review-Remarks) und
+     * dem Analyseaufwand. Die Analysedauer ist für die beim Bug-Fixen eingebauten Folgefehler
+     * irrelevant.
      */
-    public NumericalDist<Double> getBugfixTaskTimeDist() {
-        return this.bugfixTaskTimeDist;
+    public NumericalDist<Double> getBugfixTaskOverheadTimeDist() {
+        return this.bugfixTaskOverheadTimeDist;
     }
 
     /**
@@ -264,6 +270,10 @@ public class Parameters {
 
     public double getFollowUpBugSpawnProbability() {
         return this.followUpBugSpawnProbability;
+    }
+
+    public double getReviewFixToTaskFactor() {
+        return this.reviewFixToTaskFactor;
     }
 
     public long getGenericRandomSeed() {

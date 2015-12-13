@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import desmoj.core.simulator.TimeSpan;
+
 /**
  * Represenation of a task that belongs to the implementation of a {@link Story}.
  * It can depend on other tasks from that story.
@@ -98,6 +100,11 @@ class StoryTask extends Task {
         if (this.story.canBeFinished()) {
             this.story.finish();
         }
+    }
+
+    @Override
+    protected TimeSpan getTimeRelevantForBugCreation() {
+        return this.getImplementationTime();
     }
 
 }

@@ -74,6 +74,7 @@ public class Plotter extends PrePostProcess {
                 dataResults.put(FINISHED_STORIES, this.getModel().getFinishedStoryCount());
                 dataResults.put(BUGS_FOUND_BY_CUSTOMER, this.getModel().getBugCountFoundByCustomers());
                 wResults.writeTuple(dataResults);
+                wResults.flush();
 
                 final Map<String, Object> dataBoard = new HashMap<>();
                 dataBoard.put(TIME, this.presentTime().getTimeAsDouble(TimeUnit.HOURS));
@@ -82,6 +83,7 @@ public class Plotter extends PrePostProcess {
                 dataBoard.put(TASKS_READY_FOR_REVIEW, this.getBoard().countTasksReadyForReview());
                 dataBoard.put(TASKS_WITH_REVIEW_REMARKS, this.getBoard().countTasksWithReviewRemarks());
                 wBoard.writeTuple(dataBoard);
+                wBoard.flush();
 
                 this.hold(new TimeSpan(16, TimeUnit.HOURS));
             }
