@@ -49,7 +49,7 @@ class Developer extends PrePostProcess {
         this.reviewerSkill = new BoolDistBernoulli(owner, "reviewerSkill-" + this, reviewerSkill, true, true);
         this.globalBugDist = new BoolDistBernoulli(owner, "globalBugDist-" + this, globalBugProbability, true, true);
         //as distribution, so that it can be seen in the DESMO report
-        this.implementationSkill = new ContDistConstant(owner, "implementationSkill-" + this, implementationSkill, true, true);
+        this.implementationSkill = new ContDistConstant(owner, "implementationSkill-" + this, implementationSkill, true, false);
         this.memory = new LinkedHashMap<>();
     }
 

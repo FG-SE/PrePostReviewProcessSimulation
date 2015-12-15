@@ -31,6 +31,7 @@ import desmoj.core.simulator.TimeInstant;
 public class DataGenerator {
 
     private static final int HOURS_PER_WORKING_DAY = 8;
+    private static final int TRACE_DAYS = 100;
 
     public static ExperimentResult runExperiment(
                     final ParametersFactory p, ReviewMode mode, File resultDir, String runId, int workingDaysForStartup, int workingDaysForMeasurement) {
@@ -56,7 +57,7 @@ public class DataGenerator {
         exp.getOutputPath();
         exp.setShowProgressBar(false);
         if (report) {
-            exp.tracePeriod(new TimeInstant(0), new TimeInstant(160, TimeUnit.HOURS));
+            exp.tracePeriod(new TimeInstant(0), new TimeInstant(HOURS_PER_WORKING_DAY * TRACE_DAYS, TimeUnit.HOURS));
         }
         final int relevantRunningHours = HOURS_PER_WORKING_DAY * workingDaysForMeasurement;
         exp.stop(new TimeInstant(hoursToReset + relevantRunningHours, TimeUnit.HOURS));

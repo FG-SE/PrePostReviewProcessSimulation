@@ -46,7 +46,7 @@ public class Plotter extends PrePostProcess {
     private static final String TIME = "time";
 
     public Plotter(PrePostModel owner) {
-        super(owner, "plotter");
+        super(owner, "plotter", false);
     }
 
     @Override

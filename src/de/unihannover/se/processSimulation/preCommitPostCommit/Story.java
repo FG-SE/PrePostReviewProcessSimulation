@@ -18,6 +18,7 @@
 package de.unihannover.se.processSimulation.preCommitPostCommit;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -98,6 +99,15 @@ class Story extends PrePostEntity implements MemoryItem {
                 to.addPrerequisite(from);
             }
         });
+
+        if (this.getModel().getExperiment().traceIsOn()) {
+            final StringBuilder note = new StringBuilder();
+            note.append(this).append(" was planned to contain tasks ");
+            for (final StoryTask t : this.tasks) {
+                note.append(t.getName()).append(" ").append(Arrays.toString(t.getPrerequisites().stream().map(p -> p.getName()).toArray())).append(", ");
+            }
+            this.getModel().sendTraceNote(note.toString());
+        }
 
         this.state = State.IN_IMPLEMENTATION;
         this.getBoard().addPlannedStory(this);

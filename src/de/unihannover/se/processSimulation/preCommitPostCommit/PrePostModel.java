@@ -113,10 +113,10 @@ public class PrePostModel extends Model {
             }
         });
 
-        this.finishedStoryPoints = new Count(this, "finishedStoryPoints", true, true);
-        this.storyCycleTime = new Tally(this, "storyCycleTime", true, true);
-        this.bugCountFoundByCustomers = new Count(this, "bugCountFoundByCustomers", true, true);
-        this.planningGroupSize = new Tally(this, "planningGroupSize", true, true);
+        this.finishedStoryPoints = new Count(this, "finishedStoryPoints", true, false);
+        this.storyCycleTime = new Tally(this, "storyCycleTime", true, false);
+        this.bugCountFoundByCustomers = new Count(this, "bugCountFoundByCustomers", true, false);
+        this.planningGroupSize = new Tally(this, "planningGroupSize", true, false);
 
         for (int i = 0; i < this.parameters.getNumDevelopers(); i++) {
             this.developers.add(new Developer(this,
@@ -260,7 +260,10 @@ public class PrePostModel extends Model {
             agg.setShowTimeSpansInReport(true);
             this.timeCounters.put(name, agg);
         }
-        agg.update(TimeOperations.diff(this.presentTime(), startTime));
+        final TimeSpan diff = TimeOperations.diff(this.presentTime(), startTime);
+        if (!diff.isZero()) {
+            agg.update(diff);
+        }
     }
 
     /**
@@ -279,7 +282,9 @@ public class PrePostModel extends Model {
             cnt = new Count(this, name, true, true);
             this.dynamicCounters.put(name, cnt);
         }
-        cnt.update(count);
+        if (count != 0) {
+            cnt.update(count);
+        }
     }
 
     public Tally getPlanningGroupSizeTally() {

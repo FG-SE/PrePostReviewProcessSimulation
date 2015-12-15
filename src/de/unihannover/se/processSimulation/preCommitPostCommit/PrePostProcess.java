@@ -26,7 +26,11 @@ import desmoj.core.simulator.SimProcess;
 abstract class PrePostProcess extends SimProcess {
 
     public PrePostProcess(PrePostModel owner, String name) {
-        super(owner, name, true);
+        this(owner, name, true);
+    }
+
+    public PrePostProcess(PrePostModel owner, String name, boolean showInTrace) {
+        super(owner, name, showInTrace);
     }
 
     protected Board getBoard() {

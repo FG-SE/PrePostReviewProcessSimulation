@@ -261,7 +261,7 @@ abstract class Task extends PrePostEntity implements MemoryItem {
         }
         foundBugs.addAll(this.bugsFoundByOthersDuringReview);
         this.bugsFoundByOthersDuringReview = null;
-        reviewer.sendTraceNote("ends review of " + this + ", found " + foundBugs.size() + " of " + this.lurkingBugs.size() + " bugs");
+        reviewer.sendTraceNote("ends review of " + this + ", found " + foundBugs.size() + " of " + this.lurkingBugs.size() + " bugs " + foundBugs);
         this.currentReview = new Review(foundBugs);
         if (foundBugs.isEmpty()) {
             this.endReviewWithoutRemarks(reviewer);
