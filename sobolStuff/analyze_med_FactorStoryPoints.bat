@@ -1,1 +1,1 @@
-java -Xmx512m -cp MOEAFramework-2.6\lib\* org.moeaframework.analysis.sensitivity.SobolAnalysis -m 0 -i med_FactorStoryPoints.txt -p params.txt -o sobolAnalysis_med_FactorStoryPoints.txt -r 500
+java -Xmx512m -cp MOEAFramework-2.6\lib\* org.moeaframework.analysis.sensitivity.SobolAnalysis -m 0 -i med_FactorStoryPoints.txt -p params.txt -o sobolAnalysis_med_FactorStoryPoints.txt -r 1500
