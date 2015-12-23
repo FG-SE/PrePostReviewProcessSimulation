@@ -291,4 +291,28 @@ public class PrePostModel extends Model {
         return this.planningGroupSize;
     }
 
+    /**
+     * Returns the time (in hours) that has been spent on task switch overhead.
+     */
+    public double getWastedTimeTaskSwitch() {
+        final Aggregate agg = this.timeCounters.get("timeWasted_taskSwitch");
+        return agg == null ? 0.0 : agg.getValue();
+    }
+
+    /**
+     * Returns the number of global bugs that occurred.
+     */
+    public long getGlobalBugCount() {
+        final Count cnt = this.dynamicCounters.get("occurredGlobalBugs");
+        return cnt == null ? 0 : cnt.getValue();
+    }
+
+    /**
+     * Returns the number of conflicts that occurred.
+     */
+    public long getConflictCount() {
+        final Aggregate agg = this.timeCounters.get("timeWasted_resolvingConflicts");
+        return agg == null ? 0 : agg.getObservations();
+    }
+
 }

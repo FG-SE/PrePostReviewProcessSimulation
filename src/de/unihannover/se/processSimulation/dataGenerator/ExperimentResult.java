@@ -27,6 +27,9 @@ public class ExperimentResult {
     private final long bugCountFoundByCustomers;
     private final long investedPersonHours;
     private final long elapsedHours;
+    private final double wastedTimeTaskSwitch;
+    private final long conflictCount;
+    private final long globalBugCount;
     private final long expWallClockDuration;
     private final boolean hadError;
 
@@ -39,6 +42,9 @@ public class ExperimentResult {
                     long bugCountFoundByCustomers,
                     long investedPersonHours,
                     long elapsedHours,
+                    double wastedTimeTaskSwitch,
+                    long conflictCount,
+                    long globalBugCount,
                     long expWallClockDuration,
                     boolean hadError) {
         this.finishedStoryPoints = finishedStoryPoints;
@@ -49,6 +55,9 @@ public class ExperimentResult {
         this.bugCountFoundByCustomers = bugCountFoundByCustomers;
         this.investedPersonHours = investedPersonHours;
         this.elapsedHours = elapsedHours;
+        this.wastedTimeTaskSwitch = wastedTimeTaskSwitch;
+        this.conflictCount = conflictCount;
+        this.globalBugCount = globalBugCount;
         this.expWallClockDuration = expWallClockDuration;
         this.hadError = hadError;
     }
@@ -92,6 +101,18 @@ public class ExperimentResult {
 
     public long getInvestedPersonHours() {
         return this.investedPersonHours;
+    }
+
+    public double getWastedTimeTaskSwitch() {
+        return this.wastedTimeTaskSwitch;
+    }
+
+    public long getConflictCount() {
+        return this.conflictCount;
+    }
+
+    public long getGlobalBugCount() {
+        return this.globalBugCount;
     }
 
     public long getExperimentDuration() {

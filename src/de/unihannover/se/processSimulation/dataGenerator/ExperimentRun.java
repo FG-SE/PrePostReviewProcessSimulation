@@ -319,6 +319,21 @@ public class ExperimentRun {
         return this.median(values);
     }
 
+    public MedianWithConfidenceInterval getWastedTimeTaskSwitchMedian(ReviewMode mode) {
+        final double[] values = this.getResults(mode, ExperimentResult::getWastedTimeTaskSwitch);
+        return this.median(values);
+    }
+
+    public MedianWithConfidenceInterval getConflictCountMedian(ReviewMode mode) {
+        final double[] values = this.getResults(mode, ExperimentResult::getConflictCount);
+        return this.median(values);
+    }
+
+    public MedianWithConfidenceInterval getGlobalBugCountMedian(ReviewMode mode) {
+        final double[] values = this.getResults(mode, ExperimentResult::getGlobalBugCount);
+        return this.median(values);
+    }
+
     private double[] getResults(ReviewMode mode, ToDoubleFunction<ExperimentResult> getter) {
         return this.results.stream().filter(x -> x.getFor(mode) != null).map(x -> x.getFor(mode)).mapToDouble(getter).toArray();
     }
@@ -384,6 +399,24 @@ public class ExperimentRun {
      */
     public int getNumberOfTrials() {
         return this.numberOfTrials;
+    }
+
+    public int getCountFinishedStoryPointsPreLarger() {
+        return (int) this.results.stream().filter(
+                        x -> x.getFor(ReviewMode.PRE_COMMIT).getFinishedStoryPoints() > x.getFor(ReviewMode.POST_COMMIT).getFinishedStoryPoints()
+                    ).count();
+    }
+
+    public int getCountBugCountPerStoryPointPreLarger() {
+        return (int) this.results.stream().filter(
+                        x -> x.getFor(ReviewMode.PRE_COMMIT).getBugCountFoundByCustomersPerStoryPoint() > x.getFor(ReviewMode.POST_COMMIT).getBugCountFoundByCustomersPerStoryPoint()
+                    ).count();
+    }
+
+    public int getCountCycleTimePreLarger() {
+        return (int) this.results.stream().filter(
+                        x -> x.getFor(ReviewMode.PRE_COMMIT).getStoryCycleTimeMeanWithDefault() > x.getFor(ReviewMode.POST_COMMIT).getStoryCycleTimeMeanWithDefault()
+                    ).count();
     }
 
     public static ExperimentRun perform(

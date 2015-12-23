@@ -163,6 +163,8 @@ public class BulkFileExecutor {
         output.write(';');
         output.write(summary.getStoryPointsResult().toString());
         output.write(';');
+        output.write(Integer.toString(result.getCountFinishedStoryPointsPreLarger()));
+        output.write(';');
         write(output, result.getFactorBugs());
         output.write(';');
         write(output, result.getBugCountMedian(ReviewMode.NO_REVIEW));
@@ -179,6 +181,8 @@ public class BulkFileExecutor {
         output.write(';');
         output.write(summary.getBugsResult().toString());
         output.write(';');
+        output.write(Integer.toString(result.getCountBugCountPerStoryPointPreLarger()));
+        output.write(';');
         write(output, result.getFactorCycleTime());
         output.write(';');
         write(output, result.getStoryCycleTimeMeanMedian(ReviewMode.NO_REVIEW));
@@ -189,6 +193,8 @@ public class BulkFileExecutor {
         output.write(';');
         output.write(summary.getCycleTimeResult().toString());
         output.write(';');
+        output.write(Integer.toString(result.getCountCycleTimePreLarger()));
+        output.write(';');
         write(output, result.getShareProductiveWork());
         output.write(';');
         output.write(summary.getRealismCheckResult().toString());
@@ -196,6 +202,18 @@ public class BulkFileExecutor {
         write(output, result.getFactorNoReview());
         output.write(';');
         output.write(summary.getNoReviewResult().toString());
+        output.write(';');
+        write(output, result.getWastedTimeTaskSwitchMedian(ReviewMode.PRE_COMMIT));
+        output.write(';');
+        write(output, result.getWastedTimeTaskSwitchMedian(ReviewMode.POST_COMMIT));
+        output.write(';');
+        write(output, result.getConflictCountMedian(ReviewMode.PRE_COMMIT));
+        output.write(';');
+        write(output, result.getConflictCountMedian(ReviewMode.POST_COMMIT));
+        output.write(';');
+        write(output, result.getGlobalBugCountMedian(ReviewMode.PRE_COMMIT));
+        output.write(';');
+        write(output, result.getGlobalBugCountMedian(ReviewMode.POST_COMMIT));
         output.write(';');
         output.write(Integer.toString(result.getNumberOfTrials()));
         output.write('\n');
@@ -217,6 +235,7 @@ public class BulkFileExecutor {
         addMedianAttributes(ret, "FinishedStoryPointsMedian_PRE_COMMIT");
         addMedianAttributes(ret, "FinishedStoryPointsMedian_POST_COMMIT");
         ret.add(new Pair<>("summaryStoryPoints", PrePostComparison.class));
+        ret.add(new Pair<>("storyPointsPreLargerCount", Integer.class));
         addMedianAttributes(ret, "FactorBugs");
         addMedianAttributes(ret, "BugCountMedian_NO_REVIEW");
         addMedianAttributes(ret, "BugCountMedian_PRE_COMMIT");
@@ -225,15 +244,23 @@ public class BulkFileExecutor {
         addMedianAttributes(ret, "BugCountPerStoryPointMedian_PRE_COMMIT");
         addMedianAttributes(ret, "BugCountPerStoryPointMedian_POST_COMMIT");
         ret.add(new Pair<>("summaryBugs", PrePostComparison.class));
+        ret.add(new Pair<>("bugsPreLargerCount", Integer.class));
         addMedianAttributes(ret, "FactorCycleTime");
         addMedianAttributes(ret, "StoryCycleTimeMeanMedian_NO_REVIEW");
         addMedianAttributes(ret, "StoryCycleTimeMeanMedian_PRE_COMMIT");
         addMedianAttributes(ret, "StoryCycleTimeMeanMedian_POST_COMMIT");
         ret.add(new Pair<>("summaryCycleTime", PrePostComparison.class));
+        ret.add(new Pair<>("cycleTimePreLargerCount", Integer.class));
         addMedianAttributes(ret, "ShareProductiveWork");
         ret.add(new Pair<>("summaryProductiveWork", RealismCheckResult.class));
         addMedianAttributes(ret, "FactorNoReview");
         ret.add(new Pair<>("summaryNoReview", ReviewNoReviewComparison.class));
+        addMedianAttributes(ret, "wastedTimeTaskSwitch_PRE_COMMIT");
+        addMedianAttributes(ret, "wastedTimeTaskSwitch_POST_COMMIT");
+        addMedianAttributes(ret, "conflictCount_PRE_COMMIT");
+        addMedianAttributes(ret, "conflictCount_POST_COMMIT");
+        addMedianAttributes(ret, "globalBugCount_PRE_COMMIT");
+        addMedianAttributes(ret, "globalBugCount_POST_COMMIT");
         ret.add(new Pair<>("numberOfTrials", Integer.class));
         return ret;
     }

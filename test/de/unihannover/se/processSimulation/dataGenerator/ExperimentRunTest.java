@@ -66,6 +66,9 @@ public class ExperimentRunTest {
                         bugCountFoundByCustomers,
                         finishedStoryPoints * 2,
                         finishedStoryPoints * 3,
+                        1,
+                        2,
+                        3,
                         23,
                         false);
     }
