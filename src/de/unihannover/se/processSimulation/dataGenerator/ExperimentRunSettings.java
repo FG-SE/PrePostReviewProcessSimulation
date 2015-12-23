@@ -56,7 +56,7 @@ public class ExperimentRunSettings {
         ret.params.put(ExperimentRunParameters.LIMIT_NEGLIGIBLE_DIFFERENCE_BUGS, 0.075);
         ret.params.put(ExperimentRunParameters.LIMIT_NEGLIGIBLE_DIFFERENCE_CYCLE_TIME, 0.15);
         ret.params.put(ExperimentRunParameters.CONFIDENCE_P, 0.01);
-        ret.params.put(ExperimentRunParameters.WORKING_DAYS_FOR_STARTUP, 600.0);
+        ret.params.put(ExperimentRunParameters.WORKING_DAYS_FOR_STARTUP, 700.0);
         ret.params.put(ExperimentRunParameters.WORKING_DAYS_FOR_MEASUREMENT, 600.0);
         return ret;
     }

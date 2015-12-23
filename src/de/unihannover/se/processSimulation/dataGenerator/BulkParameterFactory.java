@@ -99,8 +99,8 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
         REVIEW_REMARK_FIX_TIME_MEAN_DIFF(Double.class, "Die Dauer für die Korrektur einer einzelnen Review-Anmerkung in Stunden (ohne Overhead). Angegeben als Differenz zwischen Modus und arithmetischem Mittel der Log-Normal-Verteilung, entspricht bei üblich kleinen Werten für den Modus also grob dem Mittelwert."),
         GLOBAL_BUG_SUSPEND_TIME_MODE(Double.class, "Dauer der Unterbrechung der Implementierung durch ein 'globales Problem', angegeben in Stunden (Modus einer Dreiecksverteilung)."),
         GLOBAL_BUG_SUSPEND_TIME_TRIANGLE_WIDTH(Double.class, ""),
-        BUG_ASSESSMENT_TIME_MODE(Double.class, "Dauer des Bug-Assessments (ohne Overhead), angegeben in Stunden (Modus einer Dreiecksverteilung)."),
-        BUG_ASSESSMENT_TIME_TRIANGLE_WIDTH(Double.class, ""),
+        BUG_ASSESSMENT_TIME_MODE(Double.class, ""),
+        BUG_ASSESSMENT_TIME_MEAN_DIFF(Double.class, ""),
         CONFLICT_RESOLUTION_TIME_MODE(Double.class, "Dauer des Commit-Konfliktauflösung, angegeben in Stunden (Modus einer Dreiecksverteilung)."),
         CONFLICT_RESOLUTION_TIME_TRIANGLE_WIDTH(Double.class, ""),
         INTERNAL_BUG_SHARE(Double.class, "Anteil an internen (Wartbarkeits- o.ä.) Problemen an der Gesamtzahl"),
@@ -287,8 +287,8 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
         ret.parameters.put(ParameterType.REVIEW_REMARK_FIX_TIME_MEAN_DIFF, 0.7);
         ret.parameters.put(ParameterType.GLOBAL_BUG_SUSPEND_TIME_MODE, 0.15);
         ret.parameters.put(ParameterType.GLOBAL_BUG_SUSPEND_TIME_TRIANGLE_WIDTH, 0.1);
-        ret.parameters.put(ParameterType.BUG_ASSESSMENT_TIME_MODE, 0.4);
-        ret.parameters.put(ParameterType.BUG_ASSESSMENT_TIME_TRIANGLE_WIDTH, 0.5);
+        ret.parameters.put(ParameterType.BUG_ASSESSMENT_TIME_MODE, 0.1);
+        ret.parameters.put(ParameterType.BUG_ASSESSMENT_TIME_MEAN_DIFF, 0.35);
         ret.parameters.put(ParameterType.CONFLICT_RESOLUTION_TIME_MODE, 0.3);
         ret.parameters.put(ParameterType.CONFLICT_RESOLUTION_TIME_TRIANGLE_WIDTH, 0.2);
         ret.parameters.put(ParameterType.INTERNAL_BUG_SHARE, 0.5);
@@ -346,11 +346,9 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
                                         this.getParamD(ParameterType.GLOBAL_BUG_SUSPEND_TIME_TRIANGLE_WIDTH),
                                         0,
                                         Double.MAX_VALUE),
-                        b.triangular("bugAssessmentTimeDist",
-                                        this.getParamD(ParameterType.BUG_ASSESSMENT_TIME_MODE),
-                                        this.getParamD(ParameterType.BUG_ASSESSMENT_TIME_TRIANGLE_WIDTH),
-                                        0,
-                                        Double.MAX_VALUE),
+                        b.logNormal("bugAssessmentTimeDist",
+                                        this.getParamD(ParameterType.BUG_ASSESSMENT_TIME_MODE) + this.getParamD(ParameterType.BUG_ASSESSMENT_TIME_MEAN_DIFF),
+                                        this.getParamD(ParameterType.BUG_ASSESSMENT_TIME_MODE)),
                         b.triangular("conflictResolutionTimeDist",
                                         this.getParamD(ParameterType.CONFLICT_RESOLUTION_TIME_MODE),
                                         this.getParamD(ParameterType.CONFLICT_RESOLUTION_TIME_TRIANGLE_WIDTH),
