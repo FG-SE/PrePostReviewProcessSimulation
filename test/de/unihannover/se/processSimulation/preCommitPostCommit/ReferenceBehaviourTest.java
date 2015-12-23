@@ -17,6 +17,7 @@
 
 package de.unihannover.se.processSimulation.preCommitPostCommit;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
@@ -210,4 +211,71 @@ public class ReferenceBehaviourTest {
         assertThat(modelNo, isSignificantlyLargerThan(modelPost));
     }
 
+    @Test
+    public void testLongerReviewDurationIncreasesCycleTimeWhenReviewIsActive() throws Exception {
+        final BulkParameterFactory p1 = BulkParameterFactory
+                        .forCommercial()
+                        .copyWithChangedParam(ParameterType.REVIEW_TIME_MEAN_DIFF, 1.0);
+        final BulkParameterFactory p2 = BulkParameterFactory
+                        .forCommercial()
+                        .copyWithChangedParam(ParameterType.REVIEW_TIME_MEAN_DIFF, 22.0);
+        final Double modelShortPre = runExperimentAndGetMedianResult(p1, ReviewMode.PRE_COMMIT, PrePostModel::getStoryCycleTimeMean);
+        final Double modelLongPre = runExperimentAndGetMedianResult(p2, ReviewMode.PRE_COMMIT, PrePostModel::getStoryCycleTimeMean);
+        assertThat(modelLongPre, isSignificantlyLargerThan(modelShortPre));
+
+        final Double modelShortPost = runExperimentAndGetMedianResult(p1, ReviewMode.POST_COMMIT, PrePostModel::getStoryCycleTimeMean);
+        final Double modelLongPost = runExperimentAndGetMedianResult(p2, ReviewMode.POST_COMMIT, PrePostModel::getStoryCycleTimeMean);
+        assertThat(modelLongPost, isSignificantlyLargerThan(modelShortPost));
+
+        final Double modelShortNo = runExperimentAndGetMedianResult(p1, ReviewMode.NO_REVIEW, PrePostModel::getStoryCycleTimeMean);
+        final Double modelLongNo = runExperimentAndGetMedianResult(p2, ReviewMode.NO_REVIEW, PrePostModel::getStoryCycleTimeMean);
+        assertEquals(modelLongNo, modelShortNo);
+    }
+
+    @Test
+    public void testLongerReviewDurationDecreasesStoryPointsWhenReviewIsActive() throws Exception {
+        final BulkParameterFactory p1 = BulkParameterFactory
+                        .forCommercial()
+                        .copyWithChangedParam(ParameterType.REVIEW_TIME_MEAN_DIFF, 1.0);
+        final BulkParameterFactory p2 = BulkParameterFactory
+                        .forCommercial()
+                        .copyWithChangedParam(ParameterType.REVIEW_TIME_MEAN_DIFF, 22.0);
+        final Long modelShortPre = runExperimentAndGetMedianResult(p1, ReviewMode.PRE_COMMIT, PrePostModel::getFinishedStoryPoints);
+        final Long modelLongPre = runExperimentAndGetMedianResult(p2, ReviewMode.PRE_COMMIT, PrePostModel::getFinishedStoryPoints);
+        assertThat(modelShortPre, isSignificantlyLargerThan(modelLongPre));
+
+        final Long modelShortPost = runExperimentAndGetMedianResult(p1, ReviewMode.POST_COMMIT, PrePostModel::getFinishedStoryPoints);
+        final Long modelLongPost = runExperimentAndGetMedianResult(p2, ReviewMode.POST_COMMIT, PrePostModel::getFinishedStoryPoints);
+        assertThat(modelShortPost, isSignificantlyLargerThan(modelLongPost));
+
+        final Long modelShortNo = runExperimentAndGetMedianResult(p1, ReviewMode.NO_REVIEW, PrePostModel::getFinishedStoryPoints);
+        final Long modelLongNo = runExperimentAndGetMedianResult(p2, ReviewMode.NO_REVIEW, PrePostModel::getFinishedStoryPoints);
+        assertEquals(modelShortNo, modelLongNo);
+    }
+
+    @Test
+    public void testWorseReviewSkillDecreasesStoryPointsPost() throws Exception {
+        final BulkParameterFactory p1 = BulkParameterFactory
+                        .forCommercial()
+                        .copyWithChangedParam(ParameterType.REVIEW_SKILL_MODE, 0.1);
+        final BulkParameterFactory p2 = BulkParameterFactory
+                        .forCommercial()
+                        .copyWithChangedParam(ParameterType.REVIEW_SKILL_MODE, 0.9);
+        final Long modelBadPre = runExperimentAndGetMedianResult(p1, ReviewMode.POST_COMMIT, PrePostModel::getFinishedStoryPoints);
+        final Long modelGoodPre = runExperimentAndGetMedianResult(p2, ReviewMode.POST_COMMIT, PrePostModel::getFinishedStoryPoints);
+        assertThat(modelGoodPre, isSignificantlyLargerThan(modelBadPre));
+    }
+
+    @Test
+    public void testWorseImplementationSkillDecreasesStoryPointsPost() throws Exception {
+        final BulkParameterFactory p1 = BulkParameterFactory
+                        .forCommercial()
+                        .copyWithChangedParam(ParameterType.IMPLEMENTATION_SKILL_MODE, 0.9);
+        final BulkParameterFactory p2 = BulkParameterFactory
+                        .forCommercial()
+                        .copyWithChangedParam(ParameterType.IMPLEMENTATION_SKILL_MODE, 0.1);
+        final Long modelBadPre = runExperimentAndGetMedianResult(p1, ReviewMode.POST_COMMIT, PrePostModel::getFinishedStoryPoints);
+        final Long modelGoodPre = runExperimentAndGetMedianResult(p2, ReviewMode.POST_COMMIT, PrePostModel::getFinishedStoryPoints);
+        assertThat(modelGoodPre, isSignificantlyLargerThan(modelBadPre));
+    }
 }
