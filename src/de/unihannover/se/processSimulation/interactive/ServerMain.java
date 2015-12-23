@@ -197,9 +197,11 @@ public class ServerMain extends AbstractHandler {
     }
 
     private BulkParameterFactory createRunDirectoryIfMissing(int requestId, int runNbr) throws IOException {
+        assert runNbr > 0;
+
         BulkParameterFactory f = this.loadParameters(requestId);
         final ExperimentRunSettings s = this.loadSettings(requestId);
-        for (int i = 0; i < runNbr; i++) {
+        for (int i = 1; i < runNbr; i++) {
             f = f.copyWithChangedSeed();
         }
 
