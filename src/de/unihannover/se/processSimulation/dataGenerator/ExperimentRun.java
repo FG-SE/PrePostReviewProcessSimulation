@@ -305,7 +305,7 @@ public class ExperimentRun {
     }
 
     public MedianWithConfidenceInterval getStoryCycleTimeMeanMedian(ReviewMode mode) {
-        final double[] values = this.getResults(mode, ExperimentResult::getStoryCycleTimeMean);
+        final double[] values = this.getResults(mode, ExperimentResult::getStoryCycleTimeMeanWithDefault);
         return this.median(values);
     }
 
@@ -349,7 +349,7 @@ public class ExperimentRun {
      * I.e. if the result is > 0, post commit review had a larger cycle time.
      */
     public MedianWithConfidenceInterval getFactorCycleTime() {
-        final double[] values = this.results.stream().mapToDouble(x -> x.factorPrePost(ExperimentResult::getStoryCycleTimeMean)).toArray();
+        final double[] values = this.results.stream().mapToDouble(x -> x.factorPrePost(ExperimentResult::getStoryCycleTimeMeanWithDefault)).toArray();
         return this.median(values);
     }
 

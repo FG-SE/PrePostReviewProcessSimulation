@@ -65,6 +65,7 @@ public class ExperimentRunTest {
                         finishedStoryCount,
                         bugCountFoundByCustomers,
                         finishedStoryPoints * 2,
+                        finishedStoryPoints * 3,
                         23,
                         false);
     }
@@ -121,7 +122,8 @@ public class ExperimentRunTest {
         stub.put("10", ReviewMode.POST_COMMIT, result(31, 21.5, 24, 25));
 
         final ExperimentRunSettings settings = fixedRunCountSettings(11)
-                        .copyWithChangedParam(ExperimentRunParameters.CONFIDENCE_P, 0.05);
+                        .copyWithChangedParam(ExperimentRunParameters.CONFIDENCE_P, 0.05)
+                        .copyWithChangedParam(ExperimentRunParameters.LIMIT_NEGLIGIBLE_DIFFERENCE_BUGS, 0.05);
         final ExperimentRun result = ExperimentRun.perform(settings, stub, f, dummyCallback());
 
         assertEquals(median(6, 2, 10), result.getFinishedStoryPointsMedian(ReviewMode.NO_REVIEW));
@@ -140,7 +142,7 @@ public class ExperimentRunTest {
 
         assertEquals(median(10/21.0, 10/25.0, 10/17.0), result.getFactorStoryPoints());
         assertEquals(median(10/16.5, 10/17.5, 10/15.5), result.getFactorCycleTime());
-        assertEquals(median(0.1078167, 0.07604563, 0.12853470), result.getFactorBugs());
+        assertEquals(median(0.097087, 0.067114, 0.116009), result.getFactorBugs());
 
         assertEquals(PrePostComparison.POST_BETTER, result.getSummary().getStoryPointsResult());
         assertTrue(result.isSummaryStatisticallySignificant());

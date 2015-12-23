@@ -24,10 +24,10 @@ public class ExperimentResult {
     private final double storyCycleTimeStdDev;
     private final long startedStoryCount;
     private final long finishedStoryCount;
-    //TODO sollte auch noch eine Kennzahl für den Technical Debt eingebaut werden?
     private final long bugCountFoundByCustomers;
     private final long investedPersonHours;
-    private final long expDuration;
+    private final long elapsedHours;
+    private final long expWallClockDuration;
     private final boolean hadError;
 
     public ExperimentResult(
@@ -38,7 +38,8 @@ public class ExperimentResult {
                     long finishedStoryCount,
                     long bugCountFoundByCustomers,
                     long investedPersonHours,
-                    long expDuration,
+                    long elapsedHours,
+                    long expWallClockDuration,
                     boolean hadError) {
         this.finishedStoryPoints = finishedStoryPoints;
         this.storyCycleTimeMean = storyCycleTimeMean;
@@ -47,7 +48,8 @@ public class ExperimentResult {
         this.finishedStoryCount = finishedStoryCount;
         this.bugCountFoundByCustomers = bugCountFoundByCustomers;
         this.investedPersonHours = investedPersonHours;
-        this.expDuration = expDuration;
+        this.elapsedHours = elapsedHours;
+        this.expWallClockDuration = expWallClockDuration;
         this.hadError = hadError;
     }
 
@@ -57,6 +59,14 @@ public class ExperimentResult {
 
     public double getStoryCycleTimeMean() {
         return this.storyCycleTimeMean;
+    }
+
+    /**
+     * Return the mean of the story cycle time. When no story was finished, the experiment duration in simulation clock hours
+     * is returned (because the cycle time must be at least this long).
+     */
+    public double getStoryCycleTimeMeanWithDefault() {
+        return this.storyCycleTimeMean > 0 ? this.storyCycleTimeMean : this.elapsedHours;
     }
 
     public double getStoryCycleTimeStdDev() {
@@ -76,10 +86,8 @@ public class ExperimentResult {
     }
 
     public double getBugCountFoundByCustomersPerStoryPoint() {
-        if (this.finishedStoryPoints == 0) {
-            return this.bugCountFoundByCustomers;
-        }
-        return ((double) this.bugCountFoundByCustomers) / this.finishedStoryPoints;
+        //adjustment by 1.0 for cases where no story points were done
+        return (this.bugCountFoundByCustomers + 1.0) / (this.finishedStoryPoints + 1.0);
     }
 
     public long getInvestedPersonHours() {
@@ -87,7 +95,7 @@ public class ExperimentResult {
     }
 
     public long getExperimentDuration() {
-        return this.expDuration;
+        return this.expWallClockDuration;
     }
 
     public boolean hadError() {
