@@ -46,7 +46,7 @@ import desmoj.core.statistic.Tally;
 public class PrePostModel extends Model {
 
     static {
-        Experiment.setEpsilon(TimeUnit.MINUTES);
+        Experiment.setEpsilon(TimeUnit.SECONDS);
         Experiment.setReferenceUnit(TimeUnit.HOURS);
     }
 

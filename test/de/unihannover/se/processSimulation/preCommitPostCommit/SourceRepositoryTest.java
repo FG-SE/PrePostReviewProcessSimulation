@@ -32,7 +32,7 @@ import desmoj.core.simulator.TimeInstant;
 public class SourceRepositoryTest {
 
     static {
-        Experiment.setEpsilon(TimeUnit.MINUTES);
+        Experiment.setEpsilon(TimeUnit.SECONDS);
         Experiment.setReferenceUnit(TimeUnit.HOURS);
     }
 
