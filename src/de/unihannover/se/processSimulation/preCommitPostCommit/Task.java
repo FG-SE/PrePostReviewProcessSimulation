@@ -141,8 +141,8 @@ abstract class Task extends PrePostEntity implements MemoryItem {
 
     /**
      * Perform the work that has to be done at the end of implementation:
-     * Further waiting (if interruptions occured)
-     * Commiting (if the review mode demands it)
+     * Further waiting (if interruptions occurred)
+     * Committing (if the review mode demands it)
      * Changing the state and the board according to the review mode
      */
     private void endImplementation() throws SuspendExecution {
@@ -234,6 +234,16 @@ abstract class Task extends PrePostEntity implements MemoryItem {
         assert this.state == State.IN_IMPLEMENTATION;
         this.getModel().sendTraceNote("suspends implementation of " + this + " for " + timeSpan);
         this.implementationInterruptions.add(timeSpan);
+    }
+
+    /**
+     * Suspends the current implementation for the given amount to fix a bug/remark.
+     * @pre this.state == State.IN_IMPLEMENTATION
+     */
+    public void suspendImplementationForFixing(TimeSpan timeSpan) {
+        //there is no task switch overhead because the fix belongs to the current task
+        this.createBugs(timeSpan, true, true);
+        this.suspendImplementation(timeSpan);
     }
 
     /**
@@ -345,7 +355,7 @@ abstract class Task extends PrePostEntity implements MemoryItem {
             throw new AssertionError("Should not happen: Bug in open task " + this);
         case IN_IMPLEMENTATION:
             //task is currently in work: fixing is done while the author is at it and delays the implementation
-            this.suspendImplementation(bug.getFixEffort());
+            this.suspendImplementationForFixing(bug.getFixEffort());
             break;
         case READY_FOR_REVIEW:
             //tasks is ready for review: bug assessment is seen as a review round
