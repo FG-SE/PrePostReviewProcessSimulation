@@ -268,38 +268,32 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
     }
 
     public static BulkParameterFactory forCommercial() {
-        //implementationSkill calculation:
-        //  4196 review remarks in tickets that took 46879 hours
-        //  and (508+542) new bugs in last two years, from (940+923) tasks
-        //  and rough guess of about 1000 more problems in the same tasks
-        //  => 4196/46879 + 2000/(1900*15) = 0.09 + 0.07 = 0.16
-
         final BulkParameterFactory ret = new BulkParameterFactory();
-        ret.parameters.put(ParameterType.IMPLEMENTATION_SKILL_MODE, 0.16);
+        ret.parameters.put(ParameterType.IMPLEMENTATION_SKILL_MODE, 0.26);
         ret.parameters.put(ParameterType.IMPLEMENTATION_SKILL_TRIANGLE_WIDTH, 0.1);
-        ret.parameters.put(ParameterType.REVIEW_SKILL_MODE, 0.56);
+        ret.parameters.put(ParameterType.REVIEW_SKILL_MODE, 0.45);
         ret.parameters.put(ParameterType.REVIEW_SKILL_TRIANGLE_WIDTH, 0.05);
         ret.parameters.put(ParameterType.GLOBAL_BUG_MODE, 0.001);
         ret.parameters.put(ParameterType.GLOBAL_BUG_TRIANGLE_WIDTH, 0.001);
-        ret.parameters.put(ParameterType.CONFLICT_PROBABILITY, 0.01);
+        ret.parameters.put(ParameterType.CONFLICT_PROBABILITY, 0.012);
         ret.parameters.put(ParameterType.IMPLEMENTATION_TIME_DIST, DistributionFactory.LOGNORMAL);
-        ret.parameters.put(ParameterType.IMPLEMENTATION_TIME_MODE, 0.3357338);
-        ret.parameters.put(ParameterType.IMPLEMENTATION_TIME_MEAN_DIFF, 19.8);
+        ret.parameters.put(ParameterType.IMPLEMENTATION_TIME_MODE, 0.2);
+        ret.parameters.put(ParameterType.IMPLEMENTATION_TIME_MEAN_DIFF, 9.5);
         ret.parameters.put(ParameterType.BUGFIX_TASK_OVERHEAD_TIME_DIST, DistributionFactory.LOGNORMAL);
         ret.parameters.put(ParameterType.BUGFIX_TASK_OVERHEAD_TIME_MODE, 0.01317843);
-        ret.parameters.put(ParameterType.BUGFIX_TASK_OVERHEAD_TIME_MEAN_DIFF, 14.0);
+        ret.parameters.put(ParameterType.BUGFIX_TASK_OVERHEAD_TIME_MEAN_DIFF, 5.5);
         ret.parameters.put(ParameterType.REVIEW_REMARK_FIX_TIME_DIST, DistributionFactory.LOGNORMAL);
         ret.parameters.put(ParameterType.REVIEW_REMARK_FIX_TIME_MODE, 0.02);
-        ret.parameters.put(ParameterType.REVIEW_REMARK_FIX_TIME_MEAN_DIFF, 1.8);
+        ret.parameters.put(ParameterType.REVIEW_REMARK_FIX_TIME_MEAN_DIFF, 0.7);
         ret.parameters.put(ParameterType.GLOBAL_BUG_SUSPEND_TIME_MODE, 0.15);
         ret.parameters.put(ParameterType.GLOBAL_BUG_SUSPEND_TIME_TRIANGLE_WIDTH, 0.1);
-        ret.parameters.put(ParameterType.BUG_ASSESSMENT_TIME_MODE, 0.5);
+        ret.parameters.put(ParameterType.BUG_ASSESSMENT_TIME_MODE, 0.4);
         ret.parameters.put(ParameterType.BUG_ASSESSMENT_TIME_TRIANGLE_WIDTH, 0.5);
         ret.parameters.put(ParameterType.CONFLICT_RESOLUTION_TIME_MODE, 0.3);
         ret.parameters.put(ParameterType.CONFLICT_RESOLUTION_TIME_TRIANGLE_WIDTH, 0.2);
-        ret.parameters.put(ParameterType.INTERNAL_BUG_SHARE, 0.6);
+        ret.parameters.put(ParameterType.INTERNAL_BUG_SHARE, 0.5);
         ret.parameters.put(ParameterType.BUG_ACTIVATION_TIME_DEVELOPER_MODE, 0.5);
-        ret.parameters.put(ParameterType.BUG_ACTIVATION_TIME_DEVELOPER_MEAN_DIFF, 1000.0);
+        ret.parameters.put(ParameterType.BUG_ACTIVATION_TIME_DEVELOPER_MEAN_DIFF, 2000.0);
         ret.parameters.put(ParameterType.BUG_ACTIVATION_TIME_CUSTOMER_MODE, 4.0);
         ret.parameters.put(ParameterType.BUG_ACTIVATION_TIME_CUSTOMER_MEAN_DIFF, 1000.0);
         ret.parameters.put(ParameterType.PLANNING_TIME_DIST, DistributionFactory.LOGNORMAL);
@@ -312,7 +306,7 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
         ret.parameters.put(ParameterType.MAX_TASK_SWITCH_OVERHEAD, new TimeSpan(30, TimeUnit.MINUTES).getTimeAsDouble(TimeUnit.HOURS));
         ret.parameters.put(ParameterType.BOARD_SEARCH_CUTOFF_LIMIT, 100);
         ret.parameters.put(ParameterType.TASK_SWITCH_TIME_BUG_FACTOR, 0.0);
-        ret.parameters.put(ParameterType.FIXING_BUG_RATE_FACTOR, 0.5);
+        ret.parameters.put(ParameterType.FIXING_BUG_RATE_FACTOR, 0.3);
         ret.parameters.put(ParameterType.FOLLOW_UP_BUG_SPAWN_PROBABILITY, 0.05);
         ret.parameters.put(ParameterType.REVIEW_FIX_TO_TASK_FACTOR, 1.1);
         ret.parameters.put(ParameterType.DEPENDENCY_GRAPH_CONSTELLATION, DependencyGraphConstellation.REALISTIC);
