@@ -245,11 +245,7 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
         }
 
         public ContDistLognormal logNormal(String name, double mean, double mode) {
-            assert mean >= mode;
-            final double mu = (2 * Math.log(mean) + Math.log(mode)) / 3;
-            final double sigma = Math.sqrt(2.0 * (Math.log(mean) - mu));
-            final ContDistLognormal dist = new ContDistLognormal(this.owner, name, true, true, mu, sigma);
-            return this.setSeed(dist);
+            return this.setSeed(ContDistLognormal.createWithMeanAndMode(this.owner, name, true, true, mean, mode));
         }
 
 //        public int numberBetween(int lowerInclusive, int upperInclusive) {

@@ -19,6 +19,7 @@ package de.unihannover.se.processSimulation.dataGenerator;
 
 import desmoj.core.dist.ContDist;
 import desmoj.core.dist.ContDistNormal;
+import desmoj.core.dist.UniformRandomGenerator;
 import desmoj.core.simulator.Model;
 
 /**
@@ -47,6 +48,12 @@ public class ContDistLognormal extends ContDist {
     }
 
     @Override
+    public void changeRandomGenerator(UniformRandomGenerator rg) {
+        super.changeRandomGenerator(rg);
+        this.r.changeRandomGenerator(rg);
+    }
+
+    @Override
     public Double sample() {
         this.incrementObservations();
 
@@ -62,6 +69,16 @@ public class ContDistLognormal extends ContDist {
     @Override
     public Double getInverseOfCumulativeProbabilityFunction(double p) {
         throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Creates a log-normal distribution with the given mean and mode.
+     */
+    public static ContDistLognormal createWithMeanAndMode(Model owner, String name, boolean showInReport, boolean showInTrace, double mean, double mode) {
+        assert mean >= mode;
+        final double mu = (2 * Math.log(mean) + Math.log(mode)) / 3;
+        final double sigma = Math.sqrt(2.0 * (Math.log(mean) - mu));
+        return new ContDistLognormal(owner, name, showInReport, showInTrace, mu, sigma);
     }
 
 }
