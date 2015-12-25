@@ -303,7 +303,7 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
         ret.parameters.put(ParameterType.BOARD_SEARCH_CUTOFF_LIMIT, 100);
         ret.parameters.put(ParameterType.TASK_SWITCH_TIME_BUG_FACTOR, 0.0);
         ret.parameters.put(ParameterType.FIXING_BUG_RATE_FACTOR, 0.3);
-        ret.parameters.put(ParameterType.FOLLOW_UP_BUG_SPAWN_PROBABILITY, 0.05);
+        ret.parameters.put(ParameterType.FOLLOW_UP_BUG_SPAWN_PROBABILITY, 0.005);
         ret.parameters.put(ParameterType.REVIEW_FIX_TO_TASK_FACTOR, 1.1);
         ret.parameters.put(ParameterType.DEPENDENCY_GRAPH_CONSTELLATION, DependencyGraphConstellation.REALISTIC);
         return ret;

@@ -278,4 +278,35 @@ public class ReferenceBehaviourTest {
         final Long modelGoodPre = runExperimentAndGetMedianResult(p2, ReviewMode.POST_COMMIT, PrePostModel::getFinishedStoryPoints);
         assertThat(modelGoodPre, isSignificantlyLargerThan(modelBadPre));
     }
+
+    @Test
+    public void testMoreFollowUpBugsHasInfluenceWithDependencies() throws Exception {
+        final BulkParameterFactory p1 = BulkParameterFactory
+                        .forCommercial()
+                        .copyWithChangedParam(ParameterType.DEPENDENCY_GRAPH_CONSTELLATION, DependencyGraphConstellation.CHAINS)
+                        .copyWithChangedParam(ParameterType.FOLLOW_UP_BUG_SPAWN_PROBABILITY, 0.001);
+        final BulkParameterFactory p2 = BulkParameterFactory
+                        .forCommercial()
+                        .copyWithChangedParam(ParameterType.DEPENDENCY_GRAPH_CONSTELLATION, DependencyGraphConstellation.CHAINS)
+                        .copyWithChangedParam(ParameterType.FOLLOW_UP_BUG_SPAWN_PROBABILITY, 0.1);
+        final Long modelLowProb = runExperimentAndGetMedianResult(p1, ReviewMode.POST_COMMIT, PrePostModel::getFinishedStoryPoints);
+        final Long modelHighProb = runExperimentAndGetMedianResult(p2, ReviewMode.POST_COMMIT, PrePostModel::getFinishedStoryPoints);
+        assertThat(modelLowProb, isSignificantlyLargerThan(modelHighProb));
+    }
+
+    @Test
+    public void testMoreFollowUpBugsHasNoInfluenceWithoutDependencies() throws Exception {
+        final BulkParameterFactory p1 = BulkParameterFactory
+                        .forCommercial()
+                        .copyWithChangedParam(ParameterType.DEPENDENCY_GRAPH_CONSTELLATION, DependencyGraphConstellation.NO_DEPENDENCIES)
+                        .copyWithChangedParam(ParameterType.FOLLOW_UP_BUG_SPAWN_PROBABILITY, 0.001);
+        final BulkParameterFactory p2 = BulkParameterFactory
+                        .forCommercial()
+                        .copyWithChangedParam(ParameterType.DEPENDENCY_GRAPH_CONSTELLATION, DependencyGraphConstellation.NO_DEPENDENCIES)
+                        .copyWithChangedParam(ParameterType.FOLLOW_UP_BUG_SPAWN_PROBABILITY, 0.1);
+        final Long modelLowProb = runExperimentAndGetMedianResult(p1, ReviewMode.POST_COMMIT, PrePostModel::getFinishedStoryPoints);
+        final Long modelHighProb = runExperimentAndGetMedianResult(p2, ReviewMode.POST_COMMIT, PrePostModel::getFinishedStoryPoints);
+        assertEquals(modelLowProb, modelHighProb);
+    }
+
 }

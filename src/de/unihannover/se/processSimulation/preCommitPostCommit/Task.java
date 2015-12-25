@@ -178,7 +178,7 @@ abstract class Task extends PrePostEntity implements MemoryItem {
                 final boolean bugSpawnsFollowUpBug = this.getModel().getRandomBool(
                                 this.getModel().getParameters().getFollowUpBugSpawnProbability());
                 if (bugSpawnsFollowUpBug) {
-                    bugsToCreate *= 1;
+                    bugsToCreate += 1;
                 }
             }
         }
