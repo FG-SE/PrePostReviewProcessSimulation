@@ -61,6 +61,7 @@ public class PrePostModel extends Model {
     private Count bugCountFoundByCustomers;
     private Tally storyCycleTime;
     private Tally planningGroupSize;
+    private Tally reviewRoundCount;
     private final Map<String, Aggregate> timeCounters = new HashMap<>();
     private final Map<String, Count> dynamicCounters = new HashMap<>();
 
@@ -117,6 +118,7 @@ public class PrePostModel extends Model {
         this.storyCycleTime = new Tally(this, "storyCycleTime", true, false);
         this.bugCountFoundByCustomers = new Count(this, "bugCountFoundByCustomers", true, false);
         this.planningGroupSize = new Tally(this, "planningGroupSize", true, false);
+        this.reviewRoundCount = new Tally(this, "reviewRoundCount", true, false);
 
         for (int i = 0; i < this.parameters.getNumDevelopers(); i++) {
             this.developers.add(new Developer(this,
@@ -266,6 +268,17 @@ public class PrePostModel extends Model {
         }
     }
 
+    private double getTimeCounterAvg(String name) {
+        final Aggregate agg = this.timeCounters.get(name);
+        if (agg == null) {
+            return -1;
+        }
+        if (agg.getObservations() == 0) {
+            return -1;
+        }
+        return agg.getValue() / agg.getObservations();
+    }
+
     /**
      * Increments the counter with the given name by one.
      */
@@ -313,6 +326,46 @@ public class PrePostModel extends Model {
     public long getConflictCount() {
         final Aggregate agg = this.timeCounters.get("timeWasted_resolvingConflicts");
         return agg == null ? 0 : agg.getObservations();
+    }
+
+    /**
+     * Updates the statistic for the number of review rounds when the last review for a task
+     * has been finished.
+     */
+    public void updateReviewRoundStatistic(int reviewRounds) {
+        this.reviewRoundCount.update(reviewRounds);
+    }
+
+    /**
+     * Returns the average number of review rounds (not including bug assessment short-cut review)
+     * performed per task.
+     */
+    public double getAvgReviewRoundCount() {
+        return this.reviewRoundCount.getMean();
+    }
+
+    public double getAvgImplementationTime() {
+        return this.getTimeCounterAvg("timeFor_implementing");
+    }
+
+    public double getAvgReviewTime() {
+        return this.getTimeCounterAvg("timeFor_reviewing");
+    }
+
+    public double getAvgRemarkFixingTime() {
+        return this.getTimeCounterAvg("timeFor_fixingReviewRemarks");
+    }
+
+    public double getAvgBugFixingTime() {
+        return this.getTimeCounterAvg("timeFor_fixingBugs");
+    }
+
+    public double getAvgBugAssessmentTime() {
+        return this.getTimeCounterAvg("timeFor_assessingBugs");
+    }
+
+    public double getAvgPlanningTime() {
+        return this.getTimeCounterAvg("timeFor_planning");
     }
 
 }

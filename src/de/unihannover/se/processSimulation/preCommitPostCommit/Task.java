@@ -92,6 +92,11 @@ abstract class Task extends PrePostEntity implements MemoryItem {
     private Review currentReview;
 
     /**
+     * The number of reviews that were performed (including the one that is currently performed).
+     */
+    private int reviewRounds;
+
+    /**
      * Bugs that have been noticed to belong to this task by other developers while it was in review.
      */
     private List<NormalBug> bugsFoundByOthersDuringReview;
@@ -154,6 +159,7 @@ abstract class Task extends PrePostEntity implements MemoryItem {
         assert this.implementationInterruptions.isEmpty();
         if (this.getModel().getReviewMode() == ReviewMode.NO_REVIEW) {
             this.setState(State.DONE);
+            this.getModel().updateReviewRoundStatistic(this.reviewRounds);
             this.getBoard().removeTaskFromInImplementation(this);
             this.handleFinishedTask();
         } else {
@@ -260,6 +266,7 @@ abstract class Task extends PrePostEntity implements MemoryItem {
         assert this.getModel().getReviewMode() != ReviewMode.NO_REVIEW;
 
         this.setState(State.IN_REVIEW);
+        this.reviewRounds++;
         this.bugsFoundByOthersDuringReview = new ArrayList<>();
         this.handleTaskSwitchOverhead(reviewer);
 
@@ -298,6 +305,7 @@ abstract class Task extends PrePostEntity implements MemoryItem {
             this.commit(reviewer);
         }
         this.setState(State.DONE);
+        this.getModel().updateReviewRoundStatistic(this.reviewRounds);
         this.handleFinishedTask();
     }
 
@@ -360,7 +368,7 @@ abstract class Task extends PrePostEntity implements MemoryItem {
             this.suspendImplementationForFixing(bug.getFixEffort());
             break;
         case READY_FOR_REVIEW:
-            //tasks is ready for review: bug assessment is seen as a review round
+            //tasks is ready for review: bug assessment is seen as a review round (but not counted as one)
             this.getBoard().removeTaskFromReviewQueue(this);
             this.currentReview = new Review(Collections.singletonList(bug));
             this.endReviewWithRemarks();

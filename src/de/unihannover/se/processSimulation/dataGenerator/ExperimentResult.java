@@ -32,6 +32,13 @@ public class ExperimentResult {
     private final long globalBugCount;
     private final long expWallClockDuration;
     private final boolean hadError;
+    private final double avgImplementationTime;
+    private final double avgReviewTime;
+    private final double avgRemarkFixingTime;
+    private final double avgBugFixingTime;
+    private final double avgBugAssessmentTime;
+    private final double avgPlanningTime;
+    private final double avgReviewRoundCount;
 
     public ExperimentResult(
                     long finishedStoryPoints,
@@ -45,6 +52,13 @@ public class ExperimentResult {
                     double wastedTimeTaskSwitch,
                     long conflictCount,
                     long globalBugCount,
+                    double avgImplementationTime,
+                    double avgReviewTime,
+                    double avgRemarkFixingTime,
+                    double avgBugFixingTime,
+                    double avgBugAssessmentTime,
+                    double avgPlanningTime,
+                    double avgReviewRoundCount,
                     long expWallClockDuration,
                     boolean hadError) {
         this.finishedStoryPoints = finishedStoryPoints;
@@ -58,6 +72,13 @@ public class ExperimentResult {
         this.wastedTimeTaskSwitch = wastedTimeTaskSwitch;
         this.conflictCount = conflictCount;
         this.globalBugCount = globalBugCount;
+        this.avgImplementationTime = avgImplementationTime;
+        this.avgReviewTime = avgReviewTime;
+        this.avgRemarkFixingTime = avgRemarkFixingTime;
+        this.avgBugFixingTime = avgBugFixingTime;
+        this.avgBugAssessmentTime = avgBugAssessmentTime;
+        this.avgPlanningTime = avgPlanningTime;
+        this.avgReviewRoundCount = avgReviewRoundCount;
         this.expWallClockDuration = expWallClockDuration;
         this.hadError = hadError;
     }
@@ -101,6 +122,34 @@ public class ExperimentResult {
 
     public long getInvestedPersonHours() {
         return this.investedPersonHours;
+    }
+
+    public double getAvgImplementationTime() {
+        return this.avgImplementationTime;
+    }
+
+    public double getAvgReviewTime() {
+        return this.avgReviewTime;
+    }
+
+    public double getAvgRemarkFixingTime() {
+        return this.avgRemarkFixingTime;
+    }
+
+    public double getAvgBugFixingTime() {
+        return this.avgBugFixingTime;
+    }
+
+    public double getAvgBugAssessmentTime() {
+        return this.avgBugAssessmentTime;
+    }
+
+    public double getAvgPlanningTime() {
+        return this.avgPlanningTime;
+    }
+
+    public double getAvgReviewRoundCount() {
+        return this.avgReviewRoundCount;
     }
 
     public double getWastedTimeTaskSwitch() {

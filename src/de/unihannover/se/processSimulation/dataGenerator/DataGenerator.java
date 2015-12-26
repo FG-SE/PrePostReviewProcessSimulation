@@ -81,6 +81,13 @@ public class DataGenerator {
                         model.getWastedTimeTaskSwitch(),
                         model.getConflictCount(),
                         model.getGlobalBugCount(),
+                        model.getAvgImplementationTime(),
+                        model.getAvgReviewTime(),
+                        model.getAvgRemarkFixingTime(),
+                        model.getAvgBugFixingTime(),
+                        model.getAvgBugAssessmentTime(),
+                        model.getAvgPlanningTime(),
+                        model.getAvgReviewRoundCount(),
                         expDuration,
                         exp.hasError());
 

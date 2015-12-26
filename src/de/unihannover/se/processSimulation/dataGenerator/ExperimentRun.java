@@ -319,6 +319,41 @@ public class ExperimentRun {
         return this.median(values);
     }
 
+    public MedianWithConfidenceInterval getAvgImplementationTimeMedian(ReviewMode mode) {
+        final double[] values = this.getResults(mode, ExperimentResult::getAvgImplementationTime);
+        return this.median(values);
+    }
+
+    public MedianWithConfidenceInterval getAvgReviewTimeMedian(ReviewMode mode) {
+        final double[] values = this.getResults(mode, ExperimentResult::getAvgReviewTime);
+        return this.median(values);
+    }
+
+    public MedianWithConfidenceInterval getAvgRemarkFixingTimeMedian(ReviewMode mode) {
+        final double[] values = this.getResults(mode, ExperimentResult::getAvgRemarkFixingTime);
+        return this.median(values);
+    }
+
+    public MedianWithConfidenceInterval getAvgBugFixingTimeMedian(ReviewMode mode) {
+        final double[] values = this.getResults(mode, ExperimentResult::getAvgBugFixingTime);
+        return this.median(values);
+    }
+
+    public MedianWithConfidenceInterval getAvgBugAssessmentTimeMedian(ReviewMode mode) {
+        final double[] values = this.getResults(mode, ExperimentResult::getAvgBugAssessmentTime);
+        return this.median(values);
+    }
+
+    public MedianWithConfidenceInterval getAvgPlanningTimeMedian(ReviewMode mode) {
+        final double[] values = this.getResults(mode, ExperimentResult::getAvgPlanningTime);
+        return this.median(values);
+    }
+
+    public MedianWithConfidenceInterval getAvgReviewRoundCountMedian(ReviewMode mode) {
+        final double[] values = this.getResults(mode, ExperimentResult::getAvgReviewRoundCount);
+        return this.median(values);
+    }
+
     public MedianWithConfidenceInterval getWastedTimeTaskSwitchMedian(ReviewMode mode) {
         final double[] values = this.getResults(mode, ExperimentResult::getWastedTimeTaskSwitch);
         return this.median(values);
