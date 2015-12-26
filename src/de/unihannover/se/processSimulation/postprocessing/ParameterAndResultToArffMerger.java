@@ -34,10 +34,14 @@ import de.unihannover.se.processSimulation.dataGenerator.BulkParameterFactory.Pa
 public class ParameterAndResultToArffMerger {
 
     public static void main(String[] args) throws Exception {
-        mergeToArff(new File("sobolStuff/params.txt"),
-                    new File("sobolStuff/sobolParameterSets.txt"),
-                    new File("sobolStuff/results.txt"),
-                    new File("sobolStuff/combined.arff"));
+//        mergeToArff(new File("sobolStuff/params.txt"),
+//                    new File("sobolStuff/sobolParameterSets.txt"),
+//                    new File("sobolStuff/results.txt"),
+//                    new File("sobolStuff/combined.arff"));
+        mergeToArff(new File("sobolStuff/paramsSETNarrow.txt"),
+                        new File("sobolStuff/randomParameterSets.txt"),
+                        new File("sobolStuff/result.txt"),
+                        new File("sobolStuff/combined.arff"));
     }
 
     private static void mergeToArff(

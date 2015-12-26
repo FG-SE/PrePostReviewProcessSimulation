@@ -136,7 +136,7 @@ public class BulkFileExecutor {
     private static ExperimentRun executeSingle(BulkParameterFactory parameters, int lineNumber) {
         final ExperimentRunSettings runSettings = ExperimentRunSettings.defaultSettings()
                         .copyWithChangedParam(ExperimentRunParameters.MIN_RUNS, 20.0)
-                        .copyWithChangedParam(ExperimentRunParameters.MAX_RUNS, 2500.0);
+                        .copyWithChangedParam(ExperimentRunParameters.MAX_RUNS, 2000.0);
         return ExperimentRun.perform(runSettings, DataGenerator::runExperiment, parameters, new SingleRunCallback() {
             int runCount = 1;
             @Override

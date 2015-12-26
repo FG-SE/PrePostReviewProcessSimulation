@@ -147,7 +147,7 @@ public class ExperimentRun {
         public abstract void handleResult(ExperimentResult no, ExperimentResult pre, ExperimentResult post);
     }
 
-    private class CombinedResult {
+    private static class CombinedResult {
 
         private final EnumMap<ReviewMode, ExperimentResult> map = new EnumMap<>(ReviewMode.class);
 

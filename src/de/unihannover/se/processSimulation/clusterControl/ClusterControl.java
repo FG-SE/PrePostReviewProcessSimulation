@@ -79,6 +79,9 @@ public class ClusterControl {
                         try {
                             while (!Thread.interrupted()) {
                                 final TextMessage message = (TextMessage) consumer.receive();
+                                if (message == null) {
+                                    break;
+                                }
                                 final String logMsg = new Date() + " - Log: " + message.getText();
                                 System.out.println(logMsg);
                                 w.write(logMsg);
