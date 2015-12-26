@@ -172,13 +172,15 @@ abstract class Task extends PrePostEntity implements MemoryItem {
         if (fixing) {
             bugsToCreate *= this.getModel().getParameters().getFixingBugRateFactor();
         }
-        for (final Task t : this.getPrerequisites()) {
-            for (final Bug b : t.lurkingBugs) {
-                assert !b.isFixed();
-                final boolean bugSpawnsFollowUpBug = this.getModel().getRandomBool(
-                                this.getModel().getParameters().getFollowUpBugSpawnProbability());
-                if (bugSpawnsFollowUpBug) {
-                    bugsToCreate += 1;
+        if (!fixing) {
+            for (final Task t : this.getPrerequisites()) {
+                for (final Bug b : t.lurkingBugs) {
+                    assert !b.isFixed();
+                    final boolean bugSpawnsFollowUpBug = this.getModel().getRandomBool(
+                                    this.getModel().getParameters().getFollowUpBugSpawnProbability());
+                    if (bugSpawnsFollowUpBug) {
+                        bugsToCreate += 1;
+                    }
                 }
             }
         }
