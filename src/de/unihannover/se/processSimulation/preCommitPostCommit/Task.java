@@ -213,6 +213,9 @@ abstract class Task extends PrePostEntity implements MemoryItem {
         }
 
         if (this.implementor.makesBlockerBug()) {
+            //Currently, a blocker bug is added regardless of the type of change and even when there already is
+            //  another blocker bug lurking. This is correct if the time lost is proportional to the number of
+            //  blocker bugs inserted. A smaller increase per lurking blocker bug would certainly be more realistic.
             this.lurkingBugs.add(new GlobalBlockerBug(this));
         }
     }

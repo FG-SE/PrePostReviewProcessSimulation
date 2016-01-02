@@ -38,9 +38,9 @@ public class ParameterAndResultToArffMerger {
 //                    new File("sobolStuff/sobolParameterSets.txt"),
 //                    new File("sobolStuff/results.txt"),
 //                    new File("sobolStuff/combined.arff"));
-        mergeToArff(new File("sobolStuff/paramsSETNarrow.txt"),
+        mergeToArff(new File("sobolStuff/params.txt"),
                         new File("sobolStuff/randomParameterSets.txt"),
-                        new File("sobolStuff/result.txt"),
+                        new File("sobolStuff/results.txt"),
                         new File("sobolStuff/combined.arff"));
     }
 

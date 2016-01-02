@@ -101,28 +101,36 @@ public class BulkFileExecutor {
 
     public static Object parseParameterValue(final String value, final ParameterType param) {
         if (param.getType().equals(DependencyGraphConstellation.class)) {
-            final int idx = (int) Double.parseDouble(value);
-            if (idx == 0) {
-                return DependencyGraphConstellation.NO_DEPENDENCIES;
-            } else if (idx == 1) {
-                return DependencyGraphConstellation.REALISTIC;
-            } else if (idx == 2) {
-                return DependencyGraphConstellation.DIAMONDS;
-            } else if (idx == 3) {
-                return DependencyGraphConstellation.CHAINS;
+            if (value.matches("[+\\-0-9.]+")) {
+                final int idx = (int) Double.parseDouble(value);
+                if (idx == 0) {
+                    return DependencyGraphConstellation.NO_DEPENDENCIES;
+                } else if (idx == 1) {
+                    return DependencyGraphConstellation.REALISTIC;
+                } else if (idx == 2) {
+                    return DependencyGraphConstellation.DIAMONDS;
+                } else if (idx == 3) {
+                    return DependencyGraphConstellation.CHAINS;
+                } else {
+                    throw new RuntimeException("Invalid value " + idx);
+                }
             } else {
-                throw new RuntimeException("Invalid value " + idx);
+                return DependencyGraphConstellation.valueOf(value);
             }
-        }if (param.getType().equals(DistributionFactory.class)) {
-            final int idx = (int) Double.parseDouble(value);
-            if (idx == 0) {
-                return DistributionFactory.POSNORMAL;
-            } else if (idx == 1) {
-                return DistributionFactory.LOGNORMAL;
-            } else if (idx == 2) {
-                return DistributionFactory.EXPSHIFT;
+        } else if (param.getType().equals(DistributionFactory.class)) {
+            if (value.matches("[+\\-0-9.]+")) {
+                final int idx = (int) Double.parseDouble(value);
+                if (idx == 0) {
+                    return DistributionFactory.POSNORMAL;
+                } else if (idx == 1) {
+                    return DistributionFactory.LOGNORMAL;
+                } else if (idx == 2) {
+                    return DistributionFactory.EXPSHIFT;
+                } else {
+                    throw new RuntimeException("Invalid value " + idx);
+                }
             } else {
-                throw new RuntimeException("Invalid value " + idx);
+                return DistributionFactory.valueOf(value);
             }
         } else if (param.getType().equals(Integer.class)) {
             return (int) Double.parseDouble(value);
