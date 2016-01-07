@@ -80,7 +80,7 @@ public class ReferenceBehaviourTest {
         return new CustomTypeSafeMatcher<Long>("is similar to " + finishedStoryPoints) {
             @Override
             protected boolean matchesSafely(Long arg0) {
-                return Math.abs(arg0 - finishedStoryPoints) < 0.005 * 0.5 * (arg0 + finishedStoryPoints);
+                return Math.abs(arg0 - finishedStoryPoints) <= 0.005 * 0.5 * (arg0 + finishedStoryPoints);
             }
         };
     }
@@ -89,7 +89,7 @@ public class ReferenceBehaviourTest {
         return new CustomTypeSafeMatcher<Long>("is significantly larger than " + finishedStoryPoints) {
             @Override
             protected boolean matchesSafely(Long arg0) {
-                return Math.abs(arg0 - finishedStoryPoints) >= 0.005 * 0.5 * (arg0 + finishedStoryPoints);
+                return Math.abs(arg0 - finishedStoryPoints) > 0.005 * 0.5 * (arg0 + finishedStoryPoints);
             }
         };
     }
@@ -98,7 +98,7 @@ public class ReferenceBehaviourTest {
         return new CustomTypeSafeMatcher<Double>("is significantly larger than " + storyCycleTimeMean) {
             @Override
             protected boolean matchesSafely(Double arg0) {
-                return Math.abs(arg0 - storyCycleTimeMean) >= 0.005 * 0.5 * (arg0 + storyCycleTimeMean);
+                return Math.abs(arg0 - storyCycleTimeMean) > 0.005 * 0.5 * (arg0 + storyCycleTimeMean);
             }
         };
     }
@@ -307,6 +307,27 @@ public class ReferenceBehaviourTest {
         final Long modelLowProb = runExperimentAndGetMedianResult(p1, ReviewMode.POST_COMMIT, PrePostModel::getFinishedStoryPoints);
         final Long modelHighProb = runExperimentAndGetMedianResult(p2, ReviewMode.POST_COMMIT, PrePostModel::getFinishedStoryPoints);
         assertEquals(modelLowProb, modelHighProb);
+    }
+
+    @Test
+    public void testNoDifferenceInBugsNoMatterIfFixedAsRemarkOrAfterAssessment() throws Exception {
+        final BulkParameterFactory p = BulkParameterFactory
+                        .forCommercial()
+                        .copyWithChangedParam(ParameterType.REVIEW_SKILL_MODE, 0.05)
+                        .copyWithChangedParam(ParameterType.IMPLEMENTATION_SKILL_MODE, 0.4)
+                        .copyWithChangedParam(ParameterType.BUG_ACTIVATION_TIME_DEVELOPER_MEAN_DIFF, 300.0)
+                        .copyWithChangedParam(ParameterType.BUG_ACTIVATION_TIME_CUSTOMER_MODE, 2000.0)
+                        .copyWithChangedParam(ParameterType.BUG_ACTIVATION_TIME_CUSTOMER_MEAN_DIFF, 3000.0)
+                        .copyWithChangedParam(ParameterType.DEPENDENCY_GRAPH_CONSTELLATION, DependencyGraphConstellation.NO_DEPENDENCIES)
+                        .copyWithChangedParam(ParameterType.GLOBAL_BUG_MODE, 0.0)
+                        .copyWithChangedParam(ParameterType.GLOBAL_BUG_TRIANGLE_WIDTH, 0.0)
+                        .copyWithChangedParam(ParameterType.FOLLOW_UP_BUG_SPAWN_PROBABILITY, 0.0)
+                        .copyWithChangedParam(ParameterType.FIXING_BUG_RATE_FACTOR, 0.0)
+                        .copyWithChangedParam(ParameterType.TASK_SWITCH_TIME_BUG_FACTOR, 0.0)
+                        .copyWithChangedParam(ParameterType.FOLLOW_UP_BUG_SPAWN_PROBABILITY, 0.0);
+        final Long modelPost = runExperimentAndGetMedianResult(p, ReviewMode.POST_COMMIT, PrePostModel::getBugCountFoundByCustomers);
+        final Long modelPre = runExperimentAndGetMedianResult(p, ReviewMode.PRE_COMMIT, PrePostModel::getBugCountFoundByCustomers);
+        assertThat(modelPre, isSimilarTo(modelPost));
     }
 
 }

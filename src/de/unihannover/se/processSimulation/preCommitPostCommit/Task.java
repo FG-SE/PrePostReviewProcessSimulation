@@ -251,10 +251,12 @@ abstract class Task extends PrePostEntity implements MemoryItem {
      * Suspends the current implementation for the given amount to fix a bug/remark.
      * @pre this.state == State.IN_IMPLEMENTATION
      */
-    public void suspendImplementationForFixing(TimeSpan timeSpan) {
+    public void suspendImplementationForFixing(Bug bug) {
         //there is no task switch overhead because the fix belongs to the current task
+        final TimeSpan timeSpan = bug.getFixEffort();
         this.createBugs(timeSpan, true, true);
         this.suspendImplementation(timeSpan);
+        this.bugsFixedInCommit.add(bug);
     }
 
     /**
@@ -368,7 +370,7 @@ abstract class Task extends PrePostEntity implements MemoryItem {
             throw new AssertionError("Should not happen: Bug in open task " + this);
         case IN_IMPLEMENTATION:
             //task is currently in work: fixing is done while the author is at it and delays the implementation
-            this.suspendImplementationForFixing(bug.getFixEffort());
+            this.suspendImplementationForFixing(bug);
             break;
         case READY_FOR_REVIEW:
             //tasks is ready for review: bug assessment is seen as a review round (but not counted as one)
