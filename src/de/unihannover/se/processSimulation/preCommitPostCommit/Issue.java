@@ -24,32 +24,32 @@ import desmoj.core.simulator.Model;
 import desmoj.core.simulator.TimeSpan;
 
 /**
- * Abstract class for all kinds of "bugs" that can be injected during development. The term "bug" is used in a very broad sense in
- * this model.
+ * Abstract class for all kinds of "issues/bugs" that can be injected during development. The term "issue" is used in a very broad sense in
+ * this model, it can mean a correctness defect, but also things like usability or maintainability issues.
  *
- * A is injected into the source code during implementation. After some event (commit/deploy to customer), it can become visible to a developer
- * or customer. When it becomes visible, it has to be handled in the development process. A bug can also be "fixed", which prevents it from
+ * An issue is injected into the source code during implementation. After some event (commit/deploy to customer), it can become visible to a developer
+ * or customer. When it becomes visible, it has to be handled in the development process. An issue can also be "fixed", which prevents it from
  * becoming visible in the future.
  */
-abstract class Bug extends PrePostEntity {
+abstract class Issue extends PrePostEntity {
 
     /**
-     * Event that makes a bug visible when it occurs.
+     * Event that makes an issue visible when it occurs.
      * This is modeled as event and not as process for performance reasons.
      */
-    private final class BugBecomesVisibleEvent extends ExternalEvent {
+    private final class IssueBecomesVisibleEvent extends ExternalEvent {
 
         private final boolean byCustomer;
 
-        public BugBecomesVisibleEvent(Model owner, String name, boolean byCustomer) {
+        public IssueBecomesVisibleEvent(Model owner, String name, boolean byCustomer) {
             super(owner, name, true);
             this.byCustomer = byCustomer;
         }
 
         @Override
         public void eventRoutine() {
-            if (!Bug.this.fixed) {
-                Bug.this.becomeVisible(this.byCustomer);
+            if (!Issue.this.fixed) {
+                Issue.this.becomeVisible(this.byCustomer);
             }
         }
 
@@ -62,17 +62,17 @@ abstract class Bug extends PrePostEntity {
     private final TimeSpan fixEffort;
 
     /**
-     * Creates a new bug that was injected during implementation of the given task.
+     * Creates a new issue that was injected during implementation of the given task.
      */
-    public Bug(Task task, String name) {
+    public Issue(Task task, String name) {
         super(task.getModel(), name);
         this.task = task;
         this.fixEffort = task.getModel().getParameters().getReviewRemarkFixDist().sampleTimeSpan(TimeUnit.HOURS);
     }
 
     /**
-     * Has to be called as soon as the bug can become visible to developers.
-     * Schedules the corresponding event (if the bug has not been already fixed).
+     * Has to be called as soon as the issue can become visible to developers.
+     * Schedules the corresponding event (if the issue has not been already fixed).
      */
     public final void handlePublishedForDevelopers() {
         if (this.startedForDevelopers || this.fixed) {
@@ -81,13 +81,13 @@ abstract class Bug extends PrePostEntity {
         this.startedForDevelopers = true;
         final TimeSpan t = this.getActivationTimeForDevelopers();
         if (t != null) {
-            new BugBecomesVisibleEvent(this.getModel(), this.getName(), false).schedule(t);
+            new IssueBecomesVisibleEvent(this.getModel(), this.getName(), false).schedule(t);
         }
     }
 
     /**
-     * Has to be called as soon as the bug can become visible to customers.
-     * Schedules the corresponding event (if the bug has not been already fixed).
+     * Has to be called as soon as the issue can become visible to customers.
+     * Schedules the corresponding event (if the issue has not been already fixed).
      */
     public final void handlePublishedForCustomers() {
         if (this.startedForCustomers || this.fixed) {
@@ -96,47 +96,47 @@ abstract class Bug extends PrePostEntity {
         this.startedForCustomers = true;
         final TimeSpan t = this.getActivationTimeForCustomers();
         if (t != null) {
-            new BugBecomesVisibleEvent(this.getModel(), this.getName(), true).schedule(t);
+            new IssueBecomesVisibleEvent(this.getModel(), this.getName(), true).schedule(t);
         }
     }
 
     /**
-     * Needs to be implemented in subclasses to return the time until this bug becomes visible
+     * Needs to be implemented in subclasses to return the time until this issue becomes visible
      * to a developer.
      */
     protected abstract TimeSpan getActivationTimeForDevelopers();
 
     /**
-     * Needs to be implemented in subclasses to return the time until this bug becomes visible
+     * Needs to be implemented in subclasses to return the time until this issue becomes visible
      * to a customer.
      */
     protected abstract TimeSpan getActivationTimeForCustomers();
 
     /**
-     * Is called when the bug became visible.
+     * Is called when the issue became visible.
      */
     protected abstract void becomeVisible(boolean byCustomer);
 
     /**
-     * Marks this bug as fixed. A fixed bug can not become visible any more and can not be observed
+     * Marks this issue as fixed. A fixed issue can not become visible any more and can not be observed
      * in a review, too.
      */
     public final void fix() {
         if (!this.fixed) {
             this.fixed = true;
-            this.task.handleBugFixed(this);
+            this.task.handleIssueFixed(this);
         }
     }
 
     /**
-     * Returns the task which injected this bug.
+     * Returns the task which injected this issue.
      */
     public final Task getTask() {
         return this.task;
     }
 
     /**
-     * Return true iff this bug is fixed.
+     * Return true iff this issue is fixed.
      */
     final boolean isFixed() {
         return this.fixed;

@@ -24,25 +24,25 @@ public class ExperimentResult {
     private final double storyCycleTimeStdDev;
     private final long startedStoryCount;
     private final long finishedStoryCount;
-    private final long bugCountFoundByCustomers;
+    private final long issueCountFoundByCustomers;
     private final long investedPersonHours;
     private final long elapsedHours;
     private final double wastedTimeTaskSwitch;
     private final long conflictCount;
-    private final long globalBugCount;
+    private final long globalIssueCount;
     private final long expWallClockDuration;
     private final boolean hadError;
     private final double avgImplementationTime;
     private final double avgReviewTime;
     private final double avgRemarkFixingTime;
-    private final double avgBugFixingTime;
-    private final double avgBugAssessmentTime;
+    private final double avgIssueFixingTime;
+    private final double avgIssueAssessmentTime;
     private final double avgPlanningTime;
     private final double totalImplementationTime;
     private final double totalReviewTime;
     private final double totalRemarkFixingTime;
-    private final double totalBugFixingTime;
-    private final double totalBugAssessmentTime;
+    private final double totalIssueFixingTime;
+    private final double totalIssueAssessmentTime;
     private final double totalPlanningTime;
     private final double avgReviewRoundCount;
     private final double avgTimePostToPre;
@@ -54,23 +54,23 @@ public class ExperimentResult {
                     double storyCycleTimeStdDev,
                     long startedStoryCount,
                     long finishedStoryCount,
-                    long bugCountFoundByCustomers,
+                    long issueCountFoundByCustomers,
                     long investedPersonHours,
                     long elapsedHours,
                     double wastedTimeTaskSwitch,
                     long conflictCount,
-                    long globalBugCount,
+                    long globalIssueCount,
                     double avgImplementationTime,
                     double avgReviewTime,
                     double avgRemarkFixingTime,
-                    double avgBugFixingTime,
-                    double avgBugAssessmentTime,
+                    double avgIssueFixingTime,
+                    double avgIssueAssessmentTime,
                     double avgPlanningTime,
                     double totalImplementationTime,
                     double totalReviewTime,
                     double totalRemarkFixingTime,
-                    double totalBugFixingTime,
-                    double totalBugAssessmentTime,
+                    double totalIssueFixingTime,
+                    double totalIssueAssessmentTime,
                     double totalPlanningTime,
                     double avgReviewRoundCount,
                     double avgTimePostToPre,
@@ -82,23 +82,23 @@ public class ExperimentResult {
         this.storyCycleTimeStdDev = storyCycleTimeStdDev;
         this.startedStoryCount = startedStoryCount;
         this.finishedStoryCount = finishedStoryCount;
-        this.bugCountFoundByCustomers = bugCountFoundByCustomers;
+        this.issueCountFoundByCustomers = issueCountFoundByCustomers;
         this.investedPersonHours = investedPersonHours;
         this.elapsedHours = elapsedHours;
         this.wastedTimeTaskSwitch = wastedTimeTaskSwitch;
         this.conflictCount = conflictCount;
-        this.globalBugCount = globalBugCount;
+        this.globalIssueCount = globalIssueCount;
         this.avgImplementationTime = avgImplementationTime;
         this.avgReviewTime = avgReviewTime;
         this.avgRemarkFixingTime = avgRemarkFixingTime;
-        this.avgBugFixingTime = avgBugFixingTime;
-        this.avgBugAssessmentTime = avgBugAssessmentTime;
+        this.avgIssueFixingTime = avgIssueFixingTime;
+        this.avgIssueAssessmentTime = avgIssueAssessmentTime;
         this.avgPlanningTime = avgPlanningTime;
         this.totalImplementationTime = totalImplementationTime;
         this.totalReviewTime = totalReviewTime;
         this.totalRemarkFixingTime = totalRemarkFixingTime;
-        this.totalBugFixingTime = totalBugFixingTime;
-        this.totalBugAssessmentTime = totalBugAssessmentTime;
+        this.totalIssueFixingTime = totalIssueFixingTime;
+        this.totalIssueAssessmentTime = totalIssueAssessmentTime;
         this.totalPlanningTime = totalPlanningTime;
         this.avgReviewRoundCount = avgReviewRoundCount;
         this.avgTimePostToPre = avgTimePostToPre;
@@ -135,13 +135,13 @@ public class ExperimentResult {
         return this.finishedStoryCount;
     }
 
-    public long getBugCountFoundByCustomers() {
-        return this.bugCountFoundByCustomers;
+    public long getIssueCountFoundByCustomers() {
+        return this.issueCountFoundByCustomers;
     }
 
-    public double getBugCountFoundByCustomersPerStoryPoint() {
+    public double getIssueCountFoundByCustomersPerStoryPoint() {
         //adjustment by 1.0 for cases where no story points were done
-        return (this.bugCountFoundByCustomers + 1.0) / (this.finishedStoryPoints + 1.0);
+        return (this.issueCountFoundByCustomers + 1.0) / (this.finishedStoryPoints + 1.0);
     }
 
     public long getInvestedPersonHours() {
@@ -160,12 +160,12 @@ public class ExperimentResult {
         return this.avgRemarkFixingTime;
     }
 
-    public double getAvgBugFixingTime() {
-        return this.avgBugFixingTime;
+    public double getAvgIssueFixingTime() {
+        return this.avgIssueFixingTime;
     }
 
-    public double getAvgBugAssessmentTime() {
-        return this.avgBugAssessmentTime;
+    public double getAvgIssueAssessmentTime() {
+        return this.avgIssueAssessmentTime;
     }
 
     public double getAvgPlanningTime() {
@@ -184,12 +184,12 @@ public class ExperimentResult {
         return this.totalRemarkFixingTime;
     }
 
-    public double getTotalBugFixingTime() {
-        return this.totalBugFixingTime;
+    public double getTotalIssueFixingTime() {
+        return this.totalIssueFixingTime;
     }
 
-    public double getTotalBugAssessmentTime() {
-        return this.totalBugAssessmentTime;
+    public double getTotalIssueAssessmentTime() {
+        return this.totalIssueAssessmentTime;
     }
 
     public double getTotalPlanningTime() {
@@ -216,8 +216,8 @@ public class ExperimentResult {
         return this.conflictCount;
     }
 
-    public long getGlobalBugCount() {
-        return this.globalBugCount;
+    public long getGlobalIssueCount() {
+        return this.globalIssueCount;
     }
 
     public long getExperimentDuration() {

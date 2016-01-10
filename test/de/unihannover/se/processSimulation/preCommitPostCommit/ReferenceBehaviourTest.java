@@ -110,8 +110,8 @@ public class ReferenceBehaviourTest {
                         .copyWithChangedParam(ParameterType.IMPLEMENTATION_SKILL_MODE, 0.0)
                         .copyWithChangedParam(ParameterType.IMPLEMENTATION_SKILL_TRIANGLE_WIDTH, 0.0)
                         .copyWithChangedParam(ParameterType.NUMBER_OF_DEVELOPERS, 2)
-                        .copyWithChangedParam(ParameterType.GLOBAL_BUG_MODE, 0.0)
-                        .copyWithChangedParam(ParameterType.GLOBAL_BUG_TRIANGLE_WIDTH, 0.0)
+                        .copyWithChangedParam(ParameterType.GLOBAL_ISSUE_MODE, 0.0)
+                        .copyWithChangedParam(ParameterType.GLOBAL_ISSUE_TRIANGLE_WIDTH, 0.0)
                         .copyWithChangedParam(ParameterType.CONFLICT_PROBABILITY, 0.0)
                         .copyWithChangedParam(ParameterType.TASK_SWITCH_OVERHEAD_AFTER_ONE_HOUR, 0.0)
                         .copyWithChangedParam(ParameterType.MAX_TASK_SWITCH_OVERHEAD, 0.0)
@@ -127,7 +127,7 @@ public class ReferenceBehaviourTest {
                         .forCommercial()
                         .copyWithChangedParam(ParameterType.IMPLEMENTATION_SKILL_MODE, 0.0)
                         .copyWithChangedParam(ParameterType.NUMBER_OF_DEVELOPERS, 2)
-                        .copyWithChangedParam(ParameterType.GLOBAL_BUG_MODE, 0.0)
+                        .copyWithChangedParam(ParameterType.GLOBAL_ISSUE_MODE, 0.0)
                         .copyWithChangedParam(ParameterType.CONFLICT_PROBABILITY, 0.0)
                         .copyWithChangedParam(ParameterType.TASK_SWITCH_OVERHEAD_AFTER_ONE_HOUR, 0.0)
                         .copyWithChangedParam(ParameterType.MAX_TASK_SWITCH_OVERHEAD, 0.0)
@@ -143,8 +143,8 @@ public class ReferenceBehaviourTest {
                         .forCommercial()
                         .copyWithChangedParam(ParameterType.IMPLEMENTATION_SKILL_MODE, 0.0)
                         .copyWithChangedParam(ParameterType.NUMBER_OF_DEVELOPERS, 2)
-                        .copyWithChangedParam(ParameterType.GLOBAL_BUG_MODE, 1.0)
-                        .copyWithChangedParam(ParameterType.GLOBAL_BUG_SUSPEND_TIME_MODE, 10.0)
+                        .copyWithChangedParam(ParameterType.GLOBAL_ISSUE_MODE, 1.0)
+                        .copyWithChangedParam(ParameterType.GLOBAL_ISSUE_SUSPEND_TIME_MODE, 10.0)
                         .copyWithChangedParam(ParameterType.CONFLICT_PROBABILITY, 0.0)
                         .copyWithChangedParam(ParameterType.TASK_SWITCH_OVERHEAD_AFTER_ONE_HOUR, 0.0)
                         .copyWithChangedParam(ParameterType.MAX_TASK_SWITCH_OVERHEAD, 0.0)
@@ -160,7 +160,7 @@ public class ReferenceBehaviourTest {
                         .forCommercial()
                         .copyWithChangedParam(ParameterType.IMPLEMENTATION_SKILL_MODE, 0.0)
                         .copyWithChangedParam(ParameterType.NUMBER_OF_DEVELOPERS, 10)
-                        .copyWithChangedParam(ParameterType.GLOBAL_BUG_MODE, 0.0)
+                        .copyWithChangedParam(ParameterType.GLOBAL_ISSUE_MODE, 0.0)
                         .copyWithChangedParam(ParameterType.CONFLICT_PROBABILITY, 1.0)
                         .copyWithChangedParam(ParameterType.CONFLICT_RESOLUTION_TIME_MODE, 99.0)
                         .copyWithChangedParam(ParameterType.TASK_SWITCH_OVERHEAD_AFTER_ONE_HOUR, 0.0)
@@ -177,7 +177,7 @@ public class ReferenceBehaviourTest {
                         .forCommercial()
                         .copyWithChangedParam(ParameterType.IMPLEMENTATION_SKILL_MODE, 0.0)
                         .copyWithChangedParam(ParameterType.NUMBER_OF_DEVELOPERS, 2)
-                        .copyWithChangedParam(ParameterType.GLOBAL_BUG_MODE, 0.0)
+                        .copyWithChangedParam(ParameterType.GLOBAL_ISSUE_MODE, 0.0)
                         .copyWithChangedParam(ParameterType.CONFLICT_PROBABILITY, 1.0)
                         .copyWithChangedParam(ParameterType.TASK_SWITCH_OVERHEAD_AFTER_ONE_HOUR, 1.0)
                         .copyWithChangedParam(ParameterType.MAX_TASK_SWITCH_OVERHEAD, 2.0)
@@ -284,11 +284,11 @@ public class ReferenceBehaviourTest {
         final BulkParameterFactory p1 = BulkParameterFactory
                         .forCommercial()
                         .copyWithChangedParam(ParameterType.DEPENDENCY_GRAPH_CONSTELLATION, DependencyGraphConstellation.CHAINS)
-                        .copyWithChangedParam(ParameterType.FOLLOW_UP_BUG_SPAWN_PROBABILITY, 0.001);
+                        .copyWithChangedParam(ParameterType.FOLLOW_UP_ISSUE_SPAWN_PROBABILITY, 0.001);
         final BulkParameterFactory p2 = BulkParameterFactory
                         .forCommercial()
                         .copyWithChangedParam(ParameterType.DEPENDENCY_GRAPH_CONSTELLATION, DependencyGraphConstellation.CHAINS)
-                        .copyWithChangedParam(ParameterType.FOLLOW_UP_BUG_SPAWN_PROBABILITY, 0.1);
+                        .copyWithChangedParam(ParameterType.FOLLOW_UP_ISSUE_SPAWN_PROBABILITY, 0.1);
         final Long modelLowProb = runExperimentAndGetMedianResult(p1, ReviewMode.POST_COMMIT, PrePostModel::getFinishedStoryPoints);
         final Long modelHighProb = runExperimentAndGetMedianResult(p2, ReviewMode.POST_COMMIT, PrePostModel::getFinishedStoryPoints);
         assertThat(modelLowProb, isSignificantlyLargerThan(modelHighProb));
@@ -299,11 +299,11 @@ public class ReferenceBehaviourTest {
         final BulkParameterFactory p1 = BulkParameterFactory
                         .forCommercial()
                         .copyWithChangedParam(ParameterType.DEPENDENCY_GRAPH_CONSTELLATION, DependencyGraphConstellation.NO_DEPENDENCIES)
-                        .copyWithChangedParam(ParameterType.FOLLOW_UP_BUG_SPAWN_PROBABILITY, 0.001);
+                        .copyWithChangedParam(ParameterType.FOLLOW_UP_ISSUE_SPAWN_PROBABILITY, 0.001);
         final BulkParameterFactory p2 = BulkParameterFactory
                         .forCommercial()
                         .copyWithChangedParam(ParameterType.DEPENDENCY_GRAPH_CONSTELLATION, DependencyGraphConstellation.NO_DEPENDENCIES)
-                        .copyWithChangedParam(ParameterType.FOLLOW_UP_BUG_SPAWN_PROBABILITY, 0.1);
+                        .copyWithChangedParam(ParameterType.FOLLOW_UP_ISSUE_SPAWN_PROBABILITY, 0.1);
         final Long modelLowProb = runExperimentAndGetMedianResult(p1, ReviewMode.POST_COMMIT, PrePostModel::getFinishedStoryPoints);
         final Long modelHighProb = runExperimentAndGetMedianResult(p2, ReviewMode.POST_COMMIT, PrePostModel::getFinishedStoryPoints);
         assertEquals(modelLowProb, modelHighProb);
@@ -315,18 +315,18 @@ public class ReferenceBehaviourTest {
                         .forCommercial()
                         .copyWithChangedParam(ParameterType.REVIEW_SKILL_MODE, 0.05)
                         .copyWithChangedParam(ParameterType.IMPLEMENTATION_SKILL_MODE, 0.4)
-                        .copyWithChangedParam(ParameterType.BUG_ACTIVATION_TIME_DEVELOPER_MEAN_DIFF, 300.0)
-                        .copyWithChangedParam(ParameterType.BUG_ACTIVATION_TIME_CUSTOMER_MODE, 2000.0)
-                        .copyWithChangedParam(ParameterType.BUG_ACTIVATION_TIME_CUSTOMER_MEAN_DIFF, 3000.0)
+                        .copyWithChangedParam(ParameterType.ISSUE_ACTIVATION_TIME_DEVELOPER_MEAN_DIFF, 300.0)
+                        .copyWithChangedParam(ParameterType.ISSUE_ACTIVATION_TIME_CUSTOMER_MODE, 2000.0)
+                        .copyWithChangedParam(ParameterType.ISSUE_ACTIVATION_TIME_CUSTOMER_MEAN_DIFF, 3000.0)
                         .copyWithChangedParam(ParameterType.DEPENDENCY_GRAPH_CONSTELLATION, DependencyGraphConstellation.NO_DEPENDENCIES)
-                        .copyWithChangedParam(ParameterType.GLOBAL_BUG_MODE, 0.0)
-                        .copyWithChangedParam(ParameterType.GLOBAL_BUG_TRIANGLE_WIDTH, 0.0)
-                        .copyWithChangedParam(ParameterType.FOLLOW_UP_BUG_SPAWN_PROBABILITY, 0.0)
-                        .copyWithChangedParam(ParameterType.FIXING_BUG_RATE_FACTOR, 0.0)
-                        .copyWithChangedParam(ParameterType.TASK_SWITCH_TIME_BUG_FACTOR, 0.0)
-                        .copyWithChangedParam(ParameterType.FOLLOW_UP_BUG_SPAWN_PROBABILITY, 0.0);
-        final Long modelPost = runExperimentAndGetMedianResult(p, ReviewMode.POST_COMMIT, PrePostModel::getBugCountFoundByCustomers);
-        final Long modelPre = runExperimentAndGetMedianResult(p, ReviewMode.PRE_COMMIT, PrePostModel::getBugCountFoundByCustomers);
+                        .copyWithChangedParam(ParameterType.GLOBAL_ISSUE_MODE, 0.0)
+                        .copyWithChangedParam(ParameterType.GLOBAL_ISSUE_TRIANGLE_WIDTH, 0.0)
+                        .copyWithChangedParam(ParameterType.FOLLOW_UP_ISSUE_SPAWN_PROBABILITY, 0.0)
+                        .copyWithChangedParam(ParameterType.FIXING_ISSUE_RATE_FACTOR, 0.0)
+                        .copyWithChangedParam(ParameterType.TASK_SWITCH_TIME_ISSUE_FACTOR, 0.0)
+                        .copyWithChangedParam(ParameterType.FOLLOW_UP_ISSUE_SPAWN_PROBABILITY, 0.0);
+        final Long modelPost = runExperimentAndGetMedianResult(p, ReviewMode.POST_COMMIT, PrePostModel::getIssueCountFoundByCustomers);
+        final Long modelPre = runExperimentAndGetMedianResult(p, ReviewMode.PRE_COMMIT, PrePostModel::getIssueCountFoundByCustomers);
         assertThat(modelPre, isSimilarTo(modelPost));
     }
 

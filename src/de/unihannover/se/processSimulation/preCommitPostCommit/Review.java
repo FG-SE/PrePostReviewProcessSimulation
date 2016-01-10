@@ -25,28 +25,28 @@ import java.util.List;
  */
 class Review {
 
-    private final List<Bug> remarks;
+    private final List<Issue> remarks;
 
     /**
      * Creates a review with the given remarks.
      */
-    public Review(List<? extends Bug> foundBugs) {
-        this.remarks = new ArrayList<>(foundBugs);
+    public Review(List<? extends Issue> foundIssues) {
+        this.remarks = new ArrayList<>(foundIssues);
     }
 
     /**
-     * Returns the bugs that have been found during this review.
+     * Returns the issues that have been found during this review.
      */
-    public List<Bug> getRemarks() {
+    public List<Issue> getRemarks() {
         return this.remarks;
     }
 
     /**
-     * Adds a bug to the set of review remarks/found bugs.
+     * Adds an issue to the set of review remarks/found issues.
      */
-    public void addRemark(Bug bug) {
-        if (!this.remarks.contains(bug)) {
-            this.remarks.add(bug);
+    public void addRemark(Issue issue) {
+        if (!this.remarks.contains(issue)) {
+            this.remarks.add(issue);
         }
     }
 

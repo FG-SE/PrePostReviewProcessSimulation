@@ -28,15 +28,15 @@ import desmoj.core.statistic.Count;
 
 /**
  * Representation of an agile task board. It contains tasks in several "columns" corresponding to the
- * task's states. It also allows to get a new story from the backlog and to check if new bugs occured
+ * task's states. It also allows to get a new story from the backlog and to check if new issues occured
  * that need to be taken care of.
  */
 class Board {
 
     private final PrePostModel model;
-    private final List<NormalBug> unassessedBugs;
+    private final List<NormalIssue> unassessedIssues;
     private final List<StoryTask> openStoryTasks;
-    private final List<BugfixTask> openBugs;
+    private final List<IssueFixTask> openIssues;
     private final Set<Task> tasksInImplementation;
     private final List<Task> tasksReadyForReview;
     private final List<Task> tasksWithReviewRemarks;
@@ -50,9 +50,9 @@ class Board {
     public Board(PrePostModel owner) {
         this.model = owner;
         //DESMO-J queues are slow when large, therefore use lists instead
-        this.unassessedBugs = new LinkedList<>();
+        this.unassessedIssues = new LinkedList<>();
         this.openStoryTasks = new LinkedList<>();
-        this.openBugs = new LinkedList<>();
+        this.openIssues = new LinkedList<>();
         this.tasksInImplementation = new LinkedHashSet<>();
         this.tasksReadyForReview = new LinkedList<>();
         this.tasksWithReviewRemarks = new LinkedList<>();
@@ -85,16 +85,16 @@ class Board {
     }
 
     /**
-     * Returns an open {@link BugfixTask} and moves it from the "open" column to the "in implementation" column.
-     * If there are several open bugfix tasks, one that minimizes the task switch overhead for the given
-     * developer is chosen. Returns null iff there are no open bugfix tasks.
+     * Returns an open {@link IssueFixTask} and moves it from the "open" column to the "in implementation" column.
+     * If there are several open issuefix tasks, one that minimizes the task switch overhead for the given
+     * developer is chosen. Returns null iff there are no open issuefix tasks.
      */
-    public BugfixTask getBugToFix(Developer developer) {
-        if (this.openBugs.isEmpty()) {
+    public IssueFixTask getIssueToFix(Developer developer) {
+        if (this.openIssues.isEmpty()) {
             return null;
         }
-        final BugfixTask best = determineBestFit(this.openBugs, developer);
-        this.openBugs.remove(best);
+        final IssueFixTask best = determineBestFit(this.openIssues, developer);
+        this.openIssues.remove(best);
         this.tasksInImplementation.add(best);
         return best;
     }
@@ -103,7 +103,7 @@ class Board {
      * Returns an open {@link StoryTask} and moves it from the "open" column to the "in implementation" column.
      * Only tasks whose prerequisite tasks have been commited are taken into account.
      * If there are several open story tasks, one that minimizes the task switch overhead for the given
-     * developer is chosen. Returns null iff there are no open bugfix tasks that can be implemented.
+     * developer is chosen. Returns null iff there are no open issuefix tasks that can be implemented.
      */
     public StoryTask getTaskToImplement(Developer developer) {
         final List<StoryTask> possibleTasks = new ArrayList<>();
@@ -208,10 +208,10 @@ class Board {
     }
 
     /**
-     * Adds a new {@link BugfixTask} to the "open" column of the board.
+     * Adds a new {@link IssueFixTask} to the "open" column of the board.
      */
-    public void addBugToBeFixed(BugfixTask bugfixTask) {
-        this.openBugs.add(bugfixTask);
+    public void addIssueToBeFixed(IssueFixTask issuefixTask) {
+        this.openIssues.add(issuefixTask);
     }
 
     /**
@@ -230,18 +230,18 @@ class Board {
     }
 
     /**
-     * Adds a newly occured bug to the list of bugs that have to be assessed.
+     * Adds a newly occured issue to the list of issues that have to be assessed.
      */
-    public void addUnassessedBug(NormalBug normalBug) {
-        this.unassessedBugs.add(normalBug);
+    public void addUnassessedIssue(NormalIssue normalIssue) {
+        this.unassessedIssues.add(normalIssue);
     }
 
     /**
-     * Returns a bug that needs assessment. Returns null iff there are no unassessed bugs.
+     * Returns a issue that needs assessment. Returns null iff there are no unassessed issues.
      */
-    public NormalBug getUnassessedBug() {
-        //here the current developer is not taken into account because the topic the bug belongs to is possibly not known before assessment
-        return this.unassessedBugs.isEmpty() ? null : this.unassessedBugs.remove(0);
+    public NormalIssue getUnassessedIssue() {
+        //here the current developer is not taken into account because the topic the issue belongs to is possibly not known before assessment
+        return this.unassessedIssues.isEmpty() ? null : this.unassessedIssues.remove(0);
     }
 
     /**
@@ -259,10 +259,10 @@ class Board {
     }
 
     /**
-     * Returns the number of "open" bugfix tasks at the moment.
+     * Returns the number of "open" issuefix tasks at the moment.
      */
-    int countOpenBugfixTasks() {
-        return this.openBugs.size();
+    int countOpenIssuefixTasks() {
+        return this.openIssues.size();
     }
 
     /**

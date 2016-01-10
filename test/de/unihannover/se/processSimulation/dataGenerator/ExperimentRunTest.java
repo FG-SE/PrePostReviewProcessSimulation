@@ -152,15 +152,15 @@ public class ExperimentRunTest {
         assertEquals(median(11.5, 10.5, 12.5), result.getStoryCycleTimeMeanMedian(ReviewMode.PRE_COMMIT));
         assertEquals(median(21.5, 20.5, 22.5), result.getStoryCycleTimeMeanMedian(ReviewMode.POST_COMMIT));
 
-        assertEquals(median(2, 0, 4), result.getBugCountMedian(ReviewMode.NO_REVIEW));
-        assertEquals(median(12, 10, 14), result.getBugCountMedian(ReviewMode.PRE_COMMIT));
-        assertEquals(median(22, 20, 24), result.getBugCountMedian(ReviewMode.POST_COMMIT));
+        assertEquals(median(2, 0, 4), result.getIssueCountMedian(ReviewMode.NO_REVIEW));
+        assertEquals(median(12, 10, 14), result.getIssueCountMedian(ReviewMode.PRE_COMMIT));
+        assertEquals(median(22, 20, 24), result.getIssueCountMedian(ReviewMode.POST_COMMIT));
 
         assertEquals(median(22, 21, 24), result.getFinishedStoryMedian());
 
         assertEquals(median(10/21.0, 10/25.0, 10/17.0), result.getFactorStoryPoints());
         assertEquals(median(10/16.5, 10/17.5, 10/15.5), result.getFactorCycleTime());
-        assertEquals(median(0.097087, 0.067114, 0.116009), result.getFactorBugs());
+        assertEquals(median(0.097087, 0.067114, 0.116009), result.getFactorIssues());
 
         assertEquals(PrePostComparison.POST_BETTER, result.getSummary().getStoryPointsResult());
         assertTrue(result.isSummaryStatisticallySignificant());

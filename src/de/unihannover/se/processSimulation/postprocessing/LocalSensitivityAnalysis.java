@@ -83,8 +83,8 @@ public class LocalSensitivityAnalysis {
                         .copyWithChangedParam(ExperimentRunParameters.MAX_RUNS, 60);
         final ExperimentRun result = ExperimentRun.perform(runSettings, DataGenerator::runExperiment, f, (no, pre, post) -> {System.out.print(".");});
         System.out.println();
-        final MedianWithConfidenceInterval median = result.getFactorBugs();
-        System.out.println(title + ": " + median + " " + result.getSummary().getBugsResult());
+        final MedianWithConfidenceInterval median = result.getFactorIssues();
+        System.out.println(title + ": " + median + " " + result.getSummary().getIssuesResult());
         results.add(new Pair<String, Double>(title, median.getMedian()));
     }
 

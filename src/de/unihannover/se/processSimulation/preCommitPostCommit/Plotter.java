@@ -37,10 +37,10 @@ public class Plotter extends PrePostProcess {
 
     private static final String TASKS_WITH_REVIEW_REMARKS = "tasksWithReviewRemarks";
     private static final String TASKS_READY_FOR_REVIEW = "tasksReadyForReview";
-    private static final String BUGS_FOUND_BY_CUSTOMER = "bugsFoundByCustomer";
+    private static final String ISSUES_FOUND_BY_CUSTOMER = "issuesFoundByCustomer";
 
     private static final String OPEN_STORY_TASKS = "openStoryTasks";
-    private static final String OPEN_BUGFIX_TASKS = "openBugfixTasks";
+    private static final String OPEN_ISSUEFIX_TASKS = "openIssueFixTasks";
     private static final String FINISHED_STORIES = "finishedStories";
     private static final String STARTED_STORIES = "startedStories";
     private static final String TIME = "time";
@@ -59,11 +59,11 @@ public class Plotter extends PrePostProcess {
             wResults.addNumericAttribute(TIME);
             wResults.addNumericAttribute(STARTED_STORIES);
             wResults.addNumericAttribute(FINISHED_STORIES);
-            wResults.addNumericAttribute(BUGS_FOUND_BY_CUSTOMER);
+            wResults.addNumericAttribute(ISSUES_FOUND_BY_CUSTOMER);
 
             wBoard.addNumericAttribute(TIME);
             wBoard.addNumericAttribute(OPEN_STORY_TASKS);
-            wBoard.addNumericAttribute(OPEN_BUGFIX_TASKS);
+            wBoard.addNumericAttribute(OPEN_ISSUEFIX_TASKS);
             wBoard.addNumericAttribute(TASKS_READY_FOR_REVIEW);
             wBoard.addNumericAttribute(TASKS_WITH_REVIEW_REMARKS);
 
@@ -72,14 +72,14 @@ public class Plotter extends PrePostProcess {
                 dataResults.put(TIME, this.presentTime().getTimeAsDouble(TimeUnit.HOURS));
                 dataResults.put(STARTED_STORIES, this.getModel().getStartedStoryCount());
                 dataResults.put(FINISHED_STORIES, this.getModel().getFinishedStoryCount());
-                dataResults.put(BUGS_FOUND_BY_CUSTOMER, this.getModel().getBugCountFoundByCustomers());
+                dataResults.put(ISSUES_FOUND_BY_CUSTOMER, this.getModel().getIssueCountFoundByCustomers());
                 wResults.writeTuple(dataResults);
                 wResults.flush();
 
                 final Map<String, Object> dataBoard = new HashMap<>();
                 dataBoard.put(TIME, this.presentTime().getTimeAsDouble(TimeUnit.HOURS));
                 dataBoard.put(OPEN_STORY_TASKS, this.getBoard().countOpenStoryTasks());
-                dataBoard.put(OPEN_BUGFIX_TASKS, this.getBoard().countOpenBugfixTasks());
+                dataBoard.put(OPEN_ISSUEFIX_TASKS, this.getBoard().countOpenIssuefixTasks());
                 dataBoard.put(TASKS_READY_FOR_REVIEW, this.getBoard().countTasksReadyForReview());
                 dataBoard.put(TASKS_WITH_REVIEW_REMARKS, this.getBoard().countTasksWithReviewRemarks());
                 wBoard.writeTuple(dataBoard);

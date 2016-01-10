@@ -22,13 +22,13 @@ import java.util.concurrent.TimeUnit;
 import desmoj.core.simulator.TimeSpan;
 
 /**
- * A "global blocker bug" is a certain kind of bug that occurs almost immediately after commit and that impedes
+ * A "global blocker issue" is a certain kind of issue that occurs almost immediately after commit and that impedes
  * all currently implementing developers (think: someone broke the build badly).
  */
-class GlobalBlockerBug extends Bug {
+class GlobalBlockerIssue extends Issue {
 
-    public GlobalBlockerBug(Task task) {
-        super(task, "global-bug");
+    public GlobalBlockerIssue(Task task) {
+        super(task, "global-issue");
     }
 
     /**
@@ -54,10 +54,10 @@ class GlobalBlockerBug extends Bug {
     @Override
     protected void becomeVisible(boolean byCustomer) {
         assert !byCustomer;
-        this.getModel().dynamicCount("occurredGlobalBugs");
+        this.getModel().dynamicCount("occurredGlobalIssues");
         //TODO: wenn gerade nichts im Implementierung ist wird das Problem gelöst, ohne dass es Zeit gekostet hat. Das ist unrealistisch. Ist das schlimm?
         for (final Task t : this.getBoard().getAllTasksInImplementation()) {
-            t.suspendImplementation(this.getModel().getParameters().getGlobalBugSuspendTimeDist().sampleTimeSpan(TimeUnit.HOURS));
+            t.suspendImplementation(this.getModel().getParameters().getGlobalIssueSuspendTimeDist().sampleTimeSpan(TimeUnit.HOURS));
         }
         this.fix();
     }

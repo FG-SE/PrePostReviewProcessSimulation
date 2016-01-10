@@ -432,9 +432,9 @@ public class ServerMain extends AbstractHandler {
                 detailsTable.append("<td>").append(no == null ? "" : no.getStoryCycleTimeMean()).append("</td>");
                 detailsTable.append("<td>").append(pre.getStoryCycleTimeMean()).append("</td>");
                 detailsTable.append("<td>").append(post.getStoryCycleTimeMean()).append("</td>");
-                detailsTable.append("<td>").append(no == null ? "" : no.getBugCountFoundByCustomers()).append("</td>");
-                detailsTable.append("<td>").append(pre.getBugCountFoundByCustomers()).append("</td>");
-                detailsTable.append("<td>").append(post.getBugCountFoundByCustomers()).append("</td>");
+                detailsTable.append("<td>").append(no == null ? "" : no.getIssueCountFoundByCustomers()).append("</td>");
+                detailsTable.append("<td>").append(pre.getIssueCountFoundByCustomers()).append("</td>");
+                detailsTable.append("<td>").append(post.getIssueCountFoundByCustomers()).append("</td>");
                 detailsTable.append("</tr>");
                 count.incrementAndGet();
             }
@@ -450,7 +450,7 @@ public class ServerMain extends AbstractHandler {
 
         final ExperimentRunSummary summary = result.getSummary();
         w.println("Summary result - Story points: " + summary.getStoryPointsResult() + "<br/>");
-        w.println("Summary result - Bugs found by customer: " + summary.getBugsResult() + "<br/>");
+        w.println("Summary result - Bugs found by customer: " + summary.getIssuesResult() + "<br/>");
         w.println("Summary result - Cycle time: " + summary.getCycleTimeResult() + "<br/>");
         if (!result.isSummaryStatisticallySignificant()) {
             w.println("Summary result not statistically significant<br/>");
@@ -459,7 +459,7 @@ public class ServerMain extends AbstractHandler {
         w.println("Median share of productive work: " + result.getShareProductiveWork().toHtmlPercent() + "<br/>");
         w.println("Median share no review/review story points: " + result.getFactorNoReview().toHtmlPercent() + "<br/>");
         w.println("Median difference pre/post story points: " + this.formatDiff(result.getFactorStoryPoints(), "pre", "post") + "<br/>");
-        w.println("Median difference pre/post bugs found by customer/story point: " + this.formatDiff(result.getFactorBugs(), "post", "pre") + "<br/>");
+        w.println("Median difference pre/post issues found by customer/story point: " + this.formatDiff(result.getFactorIssues(), "post", "pre") + "<br/>");
         w.println("Median difference pre/post cycle time: " + this.formatDiff(result.getFactorCycleTime(), "post", "pre") + "<br/>");
         w.println("<br/>");
 
@@ -471,9 +471,9 @@ public class ServerMain extends AbstractHandler {
         detailsTable.append("<td>").append(result.getStoryCycleTimeMeanMedian(ReviewMode.NO_REVIEW).toHtml()).append("</td>");
         detailsTable.append("<td>").append(result.getStoryCycleTimeMeanMedian(ReviewMode.PRE_COMMIT).toHtml()).append("</td>");
         detailsTable.append("<td>").append(result.getStoryCycleTimeMeanMedian(ReviewMode.POST_COMMIT).toHtml()).append("</td>");
-        detailsTable.append("<td>").append(result.getBugCountMedian(ReviewMode.NO_REVIEW).toHtml()).append("</td>");
-        detailsTable.append("<td>").append(result.getBugCountMedian(ReviewMode.PRE_COMMIT).toHtml()).append("</td>");
-        detailsTable.append("<td>").append(result.getBugCountMedian(ReviewMode.POST_COMMIT).toHtml()).append("</td>");
+        detailsTable.append("<td>").append(result.getIssueCountMedian(ReviewMode.NO_REVIEW).toHtml()).append("</td>");
+        detailsTable.append("<td>").append(result.getIssueCountMedian(ReviewMode.PRE_COMMIT).toHtml()).append("</td>");
+        detailsTable.append("<td>").append(result.getIssueCountMedian(ReviewMode.POST_COMMIT).toHtml()).append("</td>");
         detailsTable.append("</tr>");
         detailsTable.append("</table>");
         w.println(detailsTable);

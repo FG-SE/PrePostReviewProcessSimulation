@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
 
 import co.paralleluniverse.fibers.SuspendExecution;
 import de.unihannover.se.processSimulation.common.ReviewMode;
-import de.unihannover.se.processSimulation.preCommitPostCommit.NormalBug.BugType;
+import de.unihannover.se.processSimulation.preCommitPostCommit.NormalIssue.IssueType;
 import desmoj.core.simulator.TimeInstant;
 import desmoj.core.simulator.TimeOperations;
 import desmoj.core.simulator.TimeSpan;
@@ -71,15 +71,15 @@ abstract class Task extends PrePostEntity implements MemoryItem {
     private Developer implementor;
 
     /**
-     * Bugs that can still be found in review, i.e. that were neither found in a previous review or fixed for another reason.
+     * Issues that can still be found in review, i.e. that were neither found in a previous review or fixed for another reason.
      */
-    private final List<Bug> lurkingBugs;
+    private final List<Issue> lurkingIssues;
 
     /**
-     * Bugs that will be fixed with the next commit. In the case of post commit reviews, this are bugs found in the current review, while for
-     * pre commit reviews, this are all bugs found in any review.
+     * Issues that will be fixed with the next commit. In the case of post commit reviews, this are issues found in the current review, while for
+     * pre commit reviews, this are all issues found in any review.
      */
-    private final List<Bug> bugsFixedInCommit;
+    private final List<Issue> issuesFixedInCommit;
 
     /**
      * Interruptions that occurred during the current implementation session and that will delay it.
@@ -97,17 +97,17 @@ abstract class Task extends PrePostEntity implements MemoryItem {
     private int reviewRounds;
 
     /**
-     * Bugs that have been noticed to belong to this task by other developers while it was in review.
+     * Issues that have been noticed to belong to this task by other developers while it was in review.
      */
-    private List<NormalBug> bugsFoundByOthersDuringReview;
+    private List<NormalIssue> issuesFoundByOthersDuringReview;
 
     /**
-     * The time bugs (would) become active for developers when doing post commit reviews. Helper for statistics.
+     * The time issues (would) become active for developers when doing post commit reviews. Helper for statistics.
      */
     private TimeInstant timeActivePost;
 
     /**
-     * The time bugs (would) become active for developers when doing pre commit reviews. Helper for statistics.
+     * The time issues (would) become active for developers when doing pre commit reviews. Helper for statistics.
      */
     private TimeInstant timeActivePre;
 
@@ -118,8 +118,8 @@ abstract class Task extends PrePostEntity implements MemoryItem {
     public Task(PrePostModel model, String name, TimeSpan implementationTime) {
         super(model, name);
         this.state = State.OPEN;
-        this.lurkingBugs = new ArrayList<>();
-        this.bugsFixedInCommit = new ArrayList<>();
+        this.lurkingIssues = new ArrayList<>();
+        this.issuesFixedInCommit = new ArrayList<>();
         this.implementationInterruptions = new ArrayList<>();
         this.implementationTime = implementationTime;
     }
@@ -142,17 +142,17 @@ abstract class Task extends PrePostEntity implements MemoryItem {
         final TimeSpan implementationTime = this.getImplementationTime();
         this.implementor.hold(implementationTime);
 
-        final TimeSpan bugTime = TimeOperations.add(
-                        this.getTimeRelevantForBugCreation(),
-                        TimeOperations.multiply(taskSwitchTime, this.getModel().getParameters().getTaskSwitchTimeBugFactor()));
-        this.createBugs(bugTime, this instanceof BugfixTask, false);
+        final TimeSpan issueTime = TimeOperations.add(
+                        this.getTimeRelevantForIssueCreation(),
+                        TimeOperations.multiply(taskSwitchTime, this.getModel().getParameters().getTaskSwitchTimeIssueFactor()));
+        this.createIssues(issueTime, this instanceof IssueFixTask, false);
         this.endImplementation();
     }
 
     /**
-     * Returns the time/effort that is used to calculate the number of bugs injected while implementing this task.
+     * Returns the time/effort that is used to calculate the number of issues injected while implementing this task.
      */
-    protected abstract TimeSpan getTimeRelevantForBugCreation();
+    protected abstract TimeSpan getTimeRelevantForIssueCreation();
 
     /**
      * Perform the work that has to be done at the end of implementation:
@@ -180,61 +180,61 @@ abstract class Task extends PrePostEntity implements MemoryItem {
     }
 
     /**
-     * Inject bugs into this task. The number of bugs depends on the given time/effort that went into
-     * implementation, if it was bug fixing or new implementation and the developer.
+     * Inject issues into this task. The number of issues depends on the given time/effort that went into
+     * implementation, if it was issue fixing or new implementation and the developer.
      */
-    private void createBugs(TimeSpan relevantTime, boolean fixing, boolean reviewRemark) {
-        //determine number of bugs to create
-        double bugsToCreate = this.implementor.getImplementationSkill() * relevantTime.getTimeAsDouble(TimeUnit.HOURS);
+    private void createIssues(TimeSpan relevantTime, boolean fixing, boolean reviewRemark) {
+        //determine number of issues to create
+        double issuesToCreate = this.implementor.getImplementationSkill() * relevantTime.getTimeAsDouble(TimeUnit.HOURS);
         if (fixing) {
-            bugsToCreate *= this.getModel().getParameters().getFixingBugRateFactor();
+            issuesToCreate *= this.getModel().getParameters().getFixingIssueRateFactor();
         }
         if (!fixing) {
             for (final Task t : this.getPrerequisites()) {
-                for (final Bug b : t.lurkingBugs) {
+                for (final Issue b : t.lurkingIssues) {
                     assert !b.isFixed();
-                    final boolean bugSpawnsFollowUpBug = this.getModel().getRandomBool(
-                                    this.getModel().getParameters().getFollowUpBugSpawnProbability());
-                    if (bugSpawnsFollowUpBug) {
-                        bugsToCreate += 1;
+                    final boolean issueSpawnsFollowUpIssue = this.getModel().getRandomBool(
+                                    this.getModel().getParameters().getFollowUpIssueSpawnProbability());
+                    if (issueSpawnsFollowUpIssue) {
+                        issuesToCreate += 1;
                     }
                 }
             }
         }
 
-        //create bugs
-        int normalBugsCreated = 0;
-        while (bugsToCreate > 1) {
-            this.createNormalBug();
-            bugsToCreate -= 1.0;
-            normalBugsCreated++;
+        //create issues
+        int normalIssuesCreated = 0;
+        while (issuesToCreate > 1) {
+            this.createNormalIssue();
+            issuesToCreate -= 1.0;
+            normalIssuesCreated++;
         }
-        final boolean withExtraBug = this.getModel().getRandomBool(bugsToCreate);
-        if (withExtraBug) {
-            this.createNormalBug();
-            normalBugsCreated++;
+        final boolean withExtraIssue = this.getModel().getRandomBool(issuesToCreate);
+        if (withExtraIssue) {
+            this.createNormalIssue();
+            normalIssuesCreated++;
         }
         if (reviewRemark) {
             assert fixing;
-            this.getModel().dynamicCount("bugsInjectedWhileFixingReviewRemarks", normalBugsCreated);
+            this.getModel().dynamicCount("issuesInjectedWhileFixingReviewRemarks", normalIssuesCreated);
         } else if (fixing) {
-            this.getModel().dynamicCount("bugsInjectedWhileFixingBugs", normalBugsCreated);
+            this.getModel().dynamicCount("issuesInjectedWhileFixingIssues", normalIssuesCreated);
         } else {
-            this.getModel().dynamicCount("bugsInjectedWhileImplementing", normalBugsCreated);
+            this.getModel().dynamicCount("issuesInjectedWhileImplementing", normalIssuesCreated);
         }
 
-        if (this.implementor.makesBlockerBug()) {
-            //Currently, a blocker bug is added regardless of the type of change and even when there already is
-            //  another blocker bug lurking. This is correct if the time lost is proportional to the number of
-            //  blocker bugs inserted. A smaller increase per lurking blocker bug would certainly be more realistic.
-            this.lurkingBugs.add(new GlobalBlockerBug(this));
+        if (this.implementor.makesBlockerIssue()) {
+            //Currently, a blocker issue is added regardless of the type of change and even when there already is
+            //  another blocker issue lurking. This is correct if the time lost is proportional to the number of
+            //  blocker issues inserted. A smaller increase per lurking blocker issue would certainly be more realistic.
+            this.lurkingIssues.add(new GlobalBlockerIssue(this));
         }
     }
 
-    private void createNormalBug() {
-        final BugType type = this.getModel().getParameters().getInternalBugDist().sample()
-                        ? BugType.DEVELOPER_ONLY : BugType.DEVELOPER_AND_CUSTOMER;
-        this.lurkingBugs.add(new NormalBug(this, type));
+    private void createNormalIssue() {
+        final IssueType type = this.getModel().getParameters().getInternalIssueDist().sample()
+                        ? IssueType.DEVELOPER_ONLY : IssueType.DEVELOPER_AND_CUSTOMER;
+        this.lurkingIssues.add(new NormalIssue(this, type));
     }
 
     private void handleAdditionalWaitsForInterruptions() throws SuspendExecution {
@@ -259,15 +259,15 @@ abstract class Task extends PrePostEntity implements MemoryItem {
     }
 
     /**
-     * Suspends the current implementation for the given amount to fix a bug/remark.
+     * Suspends the current implementation for the given amount to fix a issue/remark.
      * @pre this.state == State.IN_IMPLEMENTATION
      */
-    public void suspendImplementationForFixing(Bug bug) {
+    public void suspendImplementationForFixing(Issue issue) {
         //there is no task switch overhead because the fix belongs to the current task
-        final TimeSpan timeSpan = bug.getFixEffort();
-        this.createBugs(timeSpan, true, true);
+        final TimeSpan timeSpan = issue.getFixEffort();
+        this.createIssues(timeSpan, true, true);
         this.suspendImplementation(timeSpan);
-        this.bugsFixedInCommit.add(bug);
+        this.issuesFixedInCommit.add(issue);
     }
 
     /**
@@ -278,27 +278,27 @@ abstract class Task extends PrePostEntity implements MemoryItem {
         assert this.state == State.READY_FOR_REVIEW;
         assert this.implementor != null;
         assert this.implementor != reviewer;
-        assert this.bugsFoundByOthersDuringReview == null;
+        assert this.issuesFoundByOthersDuringReview == null;
         assert this.getModel().getReviewMode() != ReviewMode.NO_REVIEW;
 
         this.setState(State.IN_REVIEW);
         this.reviewRounds++;
-        this.bugsFoundByOthersDuringReview = new ArrayList<>();
+        this.issuesFoundByOthersDuringReview = new ArrayList<>();
         this.handleTaskSwitchOverhead(reviewer);
 
         reviewer.hold(this.getModel().getParameters().getReviewTimeDist().sampleTimeSpan(TimeUnit.HOURS));
 
-        final List<Bug> foundBugs = new ArrayList<>();
-        for (final Bug b : this.lurkingBugs) {
-            if (reviewer.findsBug()) {
-                foundBugs.add(b);
+        final List<Issue> foundIssues = new ArrayList<>();
+        for (final Issue b : this.lurkingIssues) {
+            if (reviewer.findsIssue()) {
+                foundIssues.add(b);
             }
         }
-        foundBugs.addAll(this.bugsFoundByOthersDuringReview);
-        this.bugsFoundByOthersDuringReview = null;
-        reviewer.sendTraceNote("ends review of " + this + ", found " + foundBugs.size() + " of " + this.lurkingBugs.size() + " bugs " + foundBugs);
-        this.currentReview = new Review(foundBugs);
-        if (foundBugs.isEmpty()) {
+        foundIssues.addAll(this.issuesFoundByOthersDuringReview);
+        this.issuesFoundByOthersDuringReview = null;
+        reviewer.sendTraceNote("ends review of " + this + ", found " + foundIssues.size() + " of " + this.lurkingIssues.size() + " issues " + foundIssues);
+        this.currentReview = new Review(foundIssues);
+        if (foundIssues.isEmpty()) {
             this.endReviewWithoutRemarks(reviewer);
         } else {
             this.endReviewWithRemarks();
@@ -351,56 +351,56 @@ abstract class Task extends PrePostEntity implements MemoryItem {
         final TimeSpan taskSwitchTime = this.handleTaskSwitchOverhead(dev);
 
         //In reality, it could happen that remarks are not fixed correctly or at all. This is not modeled here,
-        //  as these wrong fixes could be regarded as new bugs (which are modeled).
+        //  as these wrong fixes could be regarded as new issues (which are modeled).
 
         TimeSpan timeForFixing = new TimeSpan(0);
-        for (final Bug b : this.currentReview.getRemarks()) {
+        for (final Issue b : this.currentReview.getRemarks()) {
             timeForFixing = TimeOperations.add(timeForFixing, b.getFixEffort());
         }
         dev.hold(timeForFixing);
-        this.lurkingBugs.removeAll(this.currentReview.getRemarks());
-        this.bugsFixedInCommit.addAll(this.currentReview.getRemarks());
+        this.lurkingIssues.removeAll(this.currentReview.getRemarks());
+        this.issuesFixedInCommit.addAll(this.currentReview.getRemarks());
 
-        final TimeSpan bugTime = TimeOperations.add(
+        final TimeSpan issueTime = TimeOperations.add(
                         timeForFixing,
-                        TimeOperations.multiply(taskSwitchTime, this.getModel().getParameters().getTaskSwitchTimeBugFactor()));
-        this.createBugs(bugTime, true, true);
+                        TimeOperations.multiply(taskSwitchTime, this.getModel().getParameters().getTaskSwitchTimeIssueFactor()));
+        this.createIssues(issueTime, true, true);
         this.endImplementation();
     }
 
     /**
-     * Let the given developer have a look at the given bug and decide what to do with it.
-     * Returns when bug assessment is finished.
+     * Let the given developer have a look at the given issue and decide what to do with it.
+     * Returns when issue assessment is finished.
      */
-    public void performBugAssessment(Developer dev, NormalBug bug) throws SuspendExecution {
+    public void performIssueAssessment(Developer dev, NormalIssue issue) throws SuspendExecution {
         this.handleTaskSwitchOverhead(dev);
-        dev.hold(this.getModel().getParameters().getBugAssessmentTimeDist().sampleTimeSpan(TimeUnit.HOURS));
+        dev.hold(this.getModel().getParameters().getIssueAssessmentTimeDist().sampleTimeSpan(TimeUnit.HOURS));
 
-        this.getModel().dynamicCount("bugAssessmentResult" + this.state + "withStory" + (this.getStory().isFinished() ? "Finished" : "InWork"));
+        this.getModel().dynamicCount("issueAssessmentResult" + this.state + "withStory" + (this.getStory().isFinished() ? "Finished" : "InWork"));
         switch (this.state) {
         case OPEN:
-            throw new AssertionError("Should not happen: Bug in open task " + this);
+            throw new AssertionError("Should not happen: Issue in open task " + this);
         case IN_IMPLEMENTATION:
             //task is currently in work: fixing is done while the author is at it and delays the implementation
-            this.suspendImplementationForFixing(bug);
+            this.suspendImplementationForFixing(issue);
             break;
         case READY_FOR_REVIEW:
-            //tasks is ready for review: bug assessment is seen as a review round (but not counted as one)
+            //tasks is ready for review: issue assessment is seen as a review round (but not counted as one)
             this.getBoard().removeTaskFromReviewQueue(this);
-            this.currentReview = new Review(Collections.singletonList(bug));
+            this.currentReview = new Review(Collections.singletonList(issue));
             this.endReviewWithRemarks();
             break;
         case IN_REVIEW:
-            //task is in review: add bug to the review remarks
-            this.bugsFoundByOthersDuringReview.add(bug);
+            //task is in review: add issue to the review remarks
+            this.issuesFoundByOthersDuringReview.add(issue);
             break;
         case REJECTED:
-            //task has been reviewed with remarks: add bug to the review remarks
-            this.currentReview.addRemark(bug);
+            //task has been reviewed with remarks: add issue to the review remarks
+            this.currentReview.addRemark(issue);
             break;
         case DONE:
-            //task is already finished: create a separate bugfix task
-            this.getBoard().addBugToBeFixed(new BugfixTask(bug));
+            //task is already finished: create a separate issuefix task
+            this.getBoard().addIssueToBeFixed(new IssueFixTask(issue));
             break;
         }
     }
@@ -458,7 +458,7 @@ abstract class Task extends PrePostEntity implements MemoryItem {
 
     /**
      * Perform a commit. In case of conflict, retry until success.
-     * After commit, other developers can find bugs injected with this task.
+     * After commit, other developers can find issues injected with this task.
      */
     private void commit(Developer commiter) throws SuspendExecution {
 
@@ -473,11 +473,11 @@ abstract class Task extends PrePostEntity implements MemoryItem {
 
         this.handleCommited();
         this.commited = true;
-        for (final Bug b : this.bugsFixedInCommit) {
+        for (final Issue b : this.issuesFixedInCommit) {
             b.fix();
         }
-        this.bugsFixedInCommit.clear();
-        for (final Bug b : this.lurkingBugs) {
+        this.issuesFixedInCommit.clear();
+        for (final Issue b : this.lurkingIssues) {
             assert !b.isFixed();
             b.handlePublishedForDevelopers();
         }
@@ -509,11 +509,11 @@ abstract class Task extends PrePostEntity implements MemoryItem {
     }
 
     /**
-     * Tell all the bugs that are still lurking (not found by reviews or fixed) that they can now be found
+     * Tell all the issues that are still lurking (not found by reviews or fixed) that they can now be found
      * by customers.
      */
-    public void startLurkingBugsForCustomer() {
-        for (final Bug b : this.lurkingBugs) {
+    public void startLurkingIssuesForCustomer() {
+        for (final Issue b : this.lurkingIssues) {
             assert !b.isFixed();
             b.handlePublishedForCustomers();
         }
@@ -524,11 +524,11 @@ abstract class Task extends PrePostEntity implements MemoryItem {
     }
 
     /**
-     * Remove the given fixed bug from the set of lurking bugs.
+     * Remove the given fixed issue from the set of lurking issues.
      */
-    void handleBugFixed(Bug bug) {
-        assert bug.isFixed();
-        this.lurkingBugs.remove(bug);
+    void handleIssueFixed(Issue issue) {
+        assert issue.isFixed();
+        this.lurkingIssues.remove(issue);
     }
 
     /**

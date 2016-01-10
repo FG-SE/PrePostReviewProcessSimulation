@@ -30,24 +30,24 @@ import desmoj.core.simulator.TimeInstant;
  * Representation of a software developer. Software developers are the main active processes of the model.
  * They interact with the {@link Board} to know what to do and act accordingly.
  *
- * Every developer has certain skills: For implementation (bugs injected/hour and chance to insert a global bug
- * during implementation) and for reviewing (chance to detect a bug in review).
+ * Every developer has certain skills: For implementation (issues injected/hour and chance to insert a global issue
+ * during implementation) and for reviewing (chance to detect a issue in review).
  * A developer also has a "memory" where he knows when he last had contact with a certain topic.
  */
 class Developer extends PrePostProcess {
 
     private final BoolDistBernoulli reviewerSkill;
-    private final BoolDistBernoulli globalBugDist;
+    private final BoolDistBernoulli globalIssueDist;
     private final Map<String, TimeInstant> memory;
     private final ContDist implementationSkill;
 
     /**
      * Creates a developer with the given skills.
      */
-    public Developer(PrePostModel owner, double reviewerSkill, double globalBugProbability, double implementationSkill) {
+    public Developer(PrePostModel owner, double reviewerSkill, double globalIssueProbability, double implementationSkill) {
         super(owner, "developer");
         this.reviewerSkill = new BoolDistBernoulli(owner, "reviewerSkill-" + this, reviewerSkill, true, true);
-        this.globalBugDist = new BoolDistBernoulli(owner, "globalBugDist-" + this, globalBugProbability, true, true);
+        this.globalIssueDist = new BoolDistBernoulli(owner, "globalIssueDist-" + this, globalIssueProbability, true, true);
         //as distribution, so that it can be seen in the DESMO report
         this.implementationSkill = new ContDistConstant(owner, "implementationSkill-" + this, implementationSkill, true, false);
         this.memory = new LinkedHashMap<>();
@@ -55,7 +55,7 @@ class Developer extends PrePostProcess {
 
     /**
      * Perform the developers work: Look at the board what to do next, do it, and repeat until infinity (which is actually quite finite).
-     * The possible things to do have a strict priority order, with "bug assessment" being the most important and "help another developer
+     * The possible things to do have a strict priority order, with "issue assessment" being the most important and "help another developer
      * in story planning" the least important.
      */
     @Override
@@ -63,13 +63,13 @@ class Developer extends PrePostProcess {
         while (true) {
             final Board board = this.getBoard();
 
-            final NormalBug unassessedBug = board.getUnassessedBug();
+            final NormalIssue unassessedIssue = board.getUnassessedIssue();
             final TimeInstant startTime = this.presentTime();
-            if (unassessedBug != null) {
-                final Task buggyTask = unassessedBug.getTask();
-                buggyTask.performBugAssessment(this, unassessedBug);
-                this.saveLastTimeIHadToDoWith(buggyTask);
-                this.getModel().countTime("timeFor_assessingBugs", startTime);
+            if (unassessedIssue != null) {
+                final Task issuegyTask = unassessedIssue.getTask();
+                issuegyTask.performIssueAssessment(this, unassessedIssue);
+                this.saveLastTimeIHadToDoWith(issuegyTask);
+                this.getModel().countTime("timeFor_assessingIssues", startTime);
                 continue;
             }
 
@@ -89,11 +89,11 @@ class Developer extends PrePostProcess {
                 continue;
             }
 
-            final BugfixTask bugToFix = board.getBugToFix(this);
-            if (bugToFix != null) {
-                bugToFix.performImplementation(this);
-                this.saveLastTimeIHadToDoWith(bugToFix);
-                this.getModel().countTime("timeFor_fixingBugs", startTime);
+            final IssueFixTask issueToFix = board.getIssueToFix(this);
+            if (issueToFix != null) {
+                issueToFix.performImplementation(this);
+                this.saveLastTimeIHadToDoWith(issueToFix);
+                this.getModel().countTime("timeFor_fixingIssues", startTime);
                 continue;
             }
 
@@ -129,8 +129,8 @@ class Developer extends PrePostProcess {
      * the developer will inject a global blocker into his current task.
      * Returns true iff this is the case.
      */
-    public boolean makesBlockerBug() {
-        return this.globalBugDist.sample();
+    public boolean makesBlockerIssue() {
+        return this.globalIssueDist.sample();
     }
 
     /**
@@ -142,9 +142,9 @@ class Developer extends PrePostProcess {
 
     /**
      * Samples a value from the underlying random distribution to determine if
-     * the developer will find a bug in review. Returns true iff this is the case.
+     * the developer will find a issue in review. Returns true iff this is the case.
      */
-    public boolean findsBug() {
+    public boolean findsIssue() {
         return this.reviewerSkill.sample();
     }
 

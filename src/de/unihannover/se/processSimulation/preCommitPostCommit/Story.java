@@ -47,7 +47,7 @@ class Story extends PrePostEntity implements MemoryItem {
     private State state;
     private final List<StoryTask> tasks;
     private final List<Developer> additionalPlanners = new ArrayList<>();
-    private Set<BugfixTask> bugsBeforeFinish = new HashSet<>();
+    private Set<IssueFixTask> issuesBeforeFinish = new HashSet<>();
 
     /**
      * Creates a new story in state "in planning", with a random planning time.
@@ -127,18 +127,18 @@ class Story extends PrePostEntity implements MemoryItem {
     }
 
     /**
-     * Is called when a bug in this story has been identified. When this happens
-     * before the story is finished, it keeps the story from finishing until the bugfix
+     * Is called when a issue in this story has been identified. When this happens
+     * before the story is finished, it keeps the story from finishing until the issuefix
      * task is finished.
      */
-    void registerBug(BugfixTask task) {
+    void registerIssue(IssueFixTask task) {
         if (this.state != State.FINISHED) {
-            this.bugsBeforeFinish.add(task);
+            this.issuesBeforeFinish.add(task);
         }
     }
 
     /**
-     * Returns true iff this story can be finished, i.e. every task and every known bug is finished.
+     * Returns true iff this story can be finished, i.e. every task and every known issue is finished.
      * @pre this.state != State.FINISHED
      */
     public boolean canBeFinished() {
@@ -147,8 +147,8 @@ class Story extends PrePostEntity implements MemoryItem {
                 return false;
             }
         }
-        //when a bug occured before the story was declared finished, it blocks finishing
-        for (final BugfixTask t : this.bugsBeforeFinish) {
+        //when a issue occured before the story was declared finished, it blocks finishing
+        for (final IssueFixTask t : this.issuesBeforeFinish) {
             if (!t.isFinished()) {
                 return false;
             }
@@ -201,7 +201,7 @@ class Story extends PrePostEntity implements MemoryItem {
 
     /**
      * Finishes this story (conceptually includes delivery to the customer).
-     * Changes its state, updates the statistics and notifies all contained bugs that they can now be found by customers.
+     * Changes its state, updates the statistics and notifies all contained issues that they can now be found by customers.
      */
     public void finish() {
         assert this.state == State.IN_IMPLEMENTATION;
@@ -209,12 +209,12 @@ class Story extends PrePostEntity implements MemoryItem {
         this.state = State.FINISHED;
         this.getModel().countFinishedStory(this);
         for (final StoryTask t : this.getTasks()) {
-            t.startLurkingBugsForCustomer();
+            t.startLurkingIssuesForCustomer();
         }
-        for (final BugfixTask t : this.bugsBeforeFinish) {
-            t.startLurkingBugsForCustomer();
+        for (final IssueFixTask t : this.issuesBeforeFinish) {
+            t.startLurkingIssuesForCustomer();
         }
-        this.bugsBeforeFinish = null;
+        this.issuesBeforeFinish = null;
     }
 
 }

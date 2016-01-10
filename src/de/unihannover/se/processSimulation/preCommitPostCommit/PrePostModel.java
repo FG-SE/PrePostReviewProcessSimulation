@@ -58,7 +58,7 @@ public class PrePostModel extends Model {
     private SourceRepository<Task> sourceRepository;
 
     private Count finishedStoryPoints;
-    private Count bugCountFoundByCustomers;
+    private Count issueCountFoundByCustomers;
     private Tally storyCycleTime;
     private Tally planningGroupSize;
     private Tally reviewRoundCount;
@@ -118,7 +118,7 @@ public class PrePostModel extends Model {
 
         this.finishedStoryPoints = new Count(this, "finishedStoryPoints", true, false);
         this.storyCycleTime = new Tally(this, "storyCycleTime", true, false);
-        this.bugCountFoundByCustomers = new Count(this, "bugCountFoundByCustomers", true, false);
+        this.issueCountFoundByCustomers = new Count(this, "issueCountFoundByCustomers", true, false);
         this.planningGroupSize = new Tally(this, "planningGroupSize", true, false);
         this.reviewRoundCount = new Tally(this, "reviewRoundCount", true, false);
         this.timePostToPre = new Tally(this, "timePostToPre", true, false);
@@ -127,7 +127,7 @@ public class PrePostModel extends Model {
         for (int i = 0; i < this.parameters.getNumDevelopers(); i++) {
             this.developers.add(new Developer(this,
                             this.parameters.getReviewSkillDist().sample(),
-                            this.parameters.getGlobalBugDist().sample(),
+                            this.parameters.getGlobalIssueDist().sample(),
                             this.parameters.getImplementationSkillDist().sample()));
         }
     }
@@ -243,17 +243,17 @@ public class PrePostModel extends Model {
     }
 
     /**
-     * Returns the number of bugs found by customers since the last reset.
+     * Returns the number of issues found by customers since the last reset.
      */
-    public long getBugCountFoundByCustomers() {
-        return this.bugCountFoundByCustomers.getValue();
+    public long getIssueCountFoundByCustomers() {
+        return this.issueCountFoundByCustomers.getValue();
     }
 
     /**
-     * Adjusts the statistics for a bug found by a customer.
+     * Adjusts the statistics for an issue found by a customer.
      */
-    void countBugFoundByCustomer() {
-        this.bugCountFoundByCustomers.update();
+    void countIssueFoundByCustomer() {
+        this.issueCountFoundByCustomers.update();
     }
 
     /**
@@ -325,10 +325,10 @@ public class PrePostModel extends Model {
     }
 
     /**
-     * Returns the number of global bugs that occurred.
+     * Returns the number of global issues that occurred.
      */
-    public long getGlobalBugCount() {
-        final Count cnt = this.dynamicCounters.get("occurredGlobalBugs");
+    public long getGlobalIssueCount() {
+        final Count cnt = this.dynamicCounters.get("occurredGlobalIssues");
         return cnt == null ? 0 : cnt.getValue();
     }
 
@@ -349,7 +349,7 @@ public class PrePostModel extends Model {
     }
 
     /**
-     * Returns the average number of review rounds (not including bug assessment short-cut review)
+     * Returns the average number of review rounds (not including issue assessment short-cut review)
      * performed per task.
      */
     public double getAvgReviewRoundCount() {
@@ -357,7 +357,7 @@ public class PrePostModel extends Model {
     }
 
     /**
-     * Updates the statistic for the average time between the instant when bugs would become developer-visible
+     * Updates the statistic for the average time between the instant when issues would become developer-visible
      * when doing post commit and when doing pre commit.
      */
     public void updateTimePostToPreStatistic(TimeSpan diff) {
@@ -369,7 +369,7 @@ public class PrePostModel extends Model {
     }
 
     /**
-     * Updates the statistic for the average time between the instant when bugs would become developer-visible
+     * Updates the statistic for the average time between the instant when issues would become developer-visible
      * when doing pre commit and when they will be customer-visible.
      */
     public void updateTimePreToCustStatistic(TimeSpan diff) {

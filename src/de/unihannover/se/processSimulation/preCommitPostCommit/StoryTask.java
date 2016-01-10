@@ -103,7 +103,7 @@ class StoryTask extends Task {
     }
 
     @Override
-    protected TimeSpan getTimeRelevantForBugCreation() {
+    protected TimeSpan getTimeRelevantForIssueCreation() {
         return this.getImplementationTime();
     }
 

@@ -81,33 +81,33 @@ public class BulkParameterFactory extends ParametersFactory {
     }
 
     public enum ParameterType {
-        IMPLEMENTATION_SKILL_MODE(Double.class, "Die 'Implementierungs-Fähigkeit' der Entwickler, gemessen in Bugs pro Stunde. Das Modell geht davon aus, dass Unit-Tests, Continuous Integration etc bereits vor dem Review gelaufen sind, deshalb dürfen dort auftretende Probleme hier nicht mitzählen. Die konkrete Fähigkeit der Entwickler ergibt sich zufällig (Dreiecksverteilung) auf Basis des angegebenen Werts."),
+        IMPLEMENTATION_SKILL_MODE(Double.class, "Die 'Implementierungs-Fähigkeit' der Entwickler, gemessen in Issues pro Stunde. Das Modell geht davon aus, dass Unit-Tests, Continuous Integration etc bereits vor dem Review gelaufen sind, deshalb dürfen dort auftretende Probleme hier nicht mitzählen. Die konkrete Fähigkeit der Entwickler ergibt sich zufällig (Dreiecksverteilung) auf Basis des angegebenen Werts."),
         IMPLEMENTATION_SKILL_TRIANGLE_WIDTH(Double.class, ""),
         REVIEW_SKILL_MODE(Double.class, "Die 'Review-Fähigkeit' der Entwickler, angegeben als Wahrscheinlichkeit, ein Problem im Review zu entdecken. 1,0 heißt also 'jedes Problem wird entdeckt', 0,0 heißt 'kein Problem wird entdeckt'. Die konkrete Fähigkeit der Entwickler ergibt sich zufällig (Dreiecksverteilung) auf Basis des angegebenen Werts."),
         REVIEW_SKILL_TRIANGLE_WIDTH(Double.class, ""),
-        GLOBAL_BUG_MODE(Double.class, "Die Wahrscheinlichkeit, dass ein 'globales Problem' beim Implementieren eines Tasks eingebaut wird. 1,0 heißt 'es wird immer eingebaut', 0,0 heißt 'es wird nie eingebaut'."),
-        GLOBAL_BUG_TRIANGLE_WIDTH(Double.class, ""),
+        GLOBAL_ISSUE_MODE(Double.class, "Die Wahrscheinlichkeit, dass ein 'globales Problem' beim Implementieren eines Tasks eingebaut wird. 1,0 heißt 'es wird immer eingebaut', 0,0 heißt 'es wird nie eingebaut'."),
+        GLOBAL_ISSUE_TRIANGLE_WIDTH(Double.class, ""),
         CONFLICT_PROBABILITY(Double.class, "Die Wahrscheinlichkeit, dass es beim Commit zu einem Konflikt mit einem konkreten anderen Task kommt, der zwischen dem eigenen Update und jetzt commitet hat. Mit anderen Worten die Wahrscheinlichkeit, dass zwei zur gleichen Zeit laufende Tasks die gleichen Stellen betreffen."),
         IMPLEMENTATION_TIME_DIST(DistributionFactory.class, ""),
         IMPLEMENTATION_TIME_MODE(Double.class, ""),
         IMPLEMENTATION_TIME_MEAN_DIFF(Double.class, "Die Dauer für die Implementierung eines Story-Tasks in Stunden (ohne Overhead). Angegeben als Differenz zwischen Modus und arithmetischem Mittel der Log-Normal-Verteilung, entspricht bei üblich kleinen Werten für den Modus also grob dem Mittelwert."),
-        BUGFIX_TASK_OVERHEAD_TIME_DIST(DistributionFactory.class, ""),
-        BUGFIX_TASK_OVERHEAD_TIME_MODE(Double.class, ""),
-        BUGFIX_TASK_OVERHEAD_TIME_MEAN_DIFF(Double.class, "Die Dauer für die Analyse eines Bugfix-Tasks in Stunden (ohne Taskwechsel-Overhead). Die Zeit für das eigentliche Fixen ist dann die gleiche wie beim Review-Remark. Angegeben als Differenz zwischen Modus und arithmetischem Mittel der Log-Normal-Verteilung, entspricht bei üblich kleinen Werten für den Modus also grob dem Mittelwert."),
+        ISSUEFIX_TASK_OVERHEAD_TIME_DIST(DistributionFactory.class, ""),
+        ISSUEFIX_TASK_OVERHEAD_TIME_MODE(Double.class, ""),
+        ISSUEFIX_TASK_OVERHEAD_TIME_MEAN_DIFF(Double.class, "Die Dauer für die Analyse eines Issuefix-Tasks in Stunden (ohne Taskwechsel-Overhead). Die Zeit für das eigentliche Fixen ist dann die gleiche wie beim Review-Remark. Angegeben als Differenz zwischen Modus und arithmetischem Mittel der Log-Normal-Verteilung, entspricht bei üblich kleinen Werten für den Modus also grob dem Mittelwert."),
         REVIEW_REMARK_FIX_TIME_DIST(DistributionFactory.class, ""),
         REVIEW_REMARK_FIX_TIME_MODE(Double.class, ""),
         REVIEW_REMARK_FIX_TIME_MEAN_DIFF(Double.class, "Die Dauer für die Korrektur einer einzelnen Review-Anmerkung in Stunden (ohne Overhead). Angegeben als Differenz zwischen Modus und arithmetischem Mittel der Log-Normal-Verteilung, entspricht bei üblich kleinen Werten für den Modus also grob dem Mittelwert."),
-        GLOBAL_BUG_SUSPEND_TIME_MODE(Double.class, "Dauer der Unterbrechung der Implementierung durch ein 'globales Problem', angegeben in Stunden (Modus einer Dreiecksverteilung)."),
-        GLOBAL_BUG_SUSPEND_TIME_TRIANGLE_WIDTH(Double.class, ""),
-        BUG_ASSESSMENT_TIME_MODE(Double.class, ""),
-        BUG_ASSESSMENT_TIME_MEAN_DIFF(Double.class, ""),
+        GLOBAL_ISSUE_SUSPEND_TIME_MODE(Double.class, "Dauer der Unterbrechung der Implementierung durch ein 'globales Problem', angegeben in Stunden (Modus einer Dreiecksverteilung)."),
+        GLOBAL_ISSUE_SUSPEND_TIME_TRIANGLE_WIDTH(Double.class, ""),
+        ISSUE_ASSESSMENT_TIME_MODE(Double.class, ""),
+        ISSUE_ASSESSMENT_TIME_MEAN_DIFF(Double.class, ""),
         CONFLICT_RESOLUTION_TIME_MODE(Double.class, "Dauer des Commit-Konfliktauflösung, angegeben in Stunden (Modus einer Dreiecksverteilung)."),
         CONFLICT_RESOLUTION_TIME_TRIANGLE_WIDTH(Double.class, ""),
-        INTERNAL_BUG_SHARE(Double.class, "Anteil an internen (Wartbarkeits- o.ä.) Problemen an der Gesamtzahl"),
-        BUG_ACTIVATION_TIME_DEVELOPER_MODE(Double.class, ""),
-        BUG_ACTIVATION_TIME_DEVELOPER_MEAN_DIFF(Double.class, "Durchschnittliche Zeit in Stunden zwischen Commit eines Problems und (zufälliger) Entdeckung durch einen Entwickler (Mittelwert einer Exponentialverteilung)."),
-        BUG_ACTIVATION_TIME_CUSTOMER_MODE(Double.class, ""),
-        BUG_ACTIVATION_TIME_CUSTOMER_MEAN_DIFF(Double.class, "Durchschnittliche Zeit in Stunden zwischen 'Auslieferung' eines Problems und Entdeckung durch einen Kunden (Mittelwert einer Exponentialverteilung)."),
+        INTERNAL_ISSUE_SHARE(Double.class, "Anteil an internen (Wartbarkeits- o.ä.) Problemen an der Gesamtzahl"),
+        ISSUE_ACTIVATION_TIME_DEVELOPER_MODE(Double.class, ""),
+        ISSUE_ACTIVATION_TIME_DEVELOPER_MEAN_DIFF(Double.class, "Durchschnittliche Zeit in Stunden zwischen Commit eines Problems und (zufälliger) Entdeckung durch einen Entwickler (Mittelwert einer Exponentialverteilung)."),
+        ISSUE_ACTIVATION_TIME_CUSTOMER_MODE(Double.class, ""),
+        ISSUE_ACTIVATION_TIME_CUSTOMER_MEAN_DIFF(Double.class, "Durchschnittliche Zeit in Stunden zwischen 'Auslieferung' eines Problems und Entdeckung durch einen Kunden (Mittelwert einer Exponentialverteilung)."),
         PLANNING_TIME_DIST(DistributionFactory.class, ""),
         PLANNING_TIME_MEAN(Double.class, ""),
         REVIEW_TIME_DIST(DistributionFactory.class, ""),
@@ -117,9 +117,9 @@ public class BulkParameterFactory extends ParametersFactory {
         TASK_SWITCH_OVERHEAD_AFTER_ONE_HOUR(Double.class, "Zeit um wieder in ein Thema reinzukommen, nachdem man sich eine Stunde lang mit etwas anderem beschäftigt hat."),
         MAX_TASK_SWITCH_OVERHEAD(Double.class, "Zeit um wieder in ein Thema reinzukommen, nachdem man sich sehr lange mit etwas anderem beschäftigt hat oder sich noch nie mit dem Thema beschäftigt hatte."),
         BOARD_SEARCH_CUTOFF_LIMIT(Integer.class, ""),
-        TASK_SWITCH_TIME_BUG_FACTOR(Double.class, ""),
-        FIXING_BUG_RATE_FACTOR(Double.class, "Faktor der festlegt, wie viel 'ungefährlicher' Korrekturen gegenüber Neuentwicklung sind. Wird als Multiplikator des Implementierungs-Skills des Entwicklers aufgefasst. 1,0 heißt 'bei Fixes und Neuentwicklung macht man gleich viel Fehler pro Stunde', Werte kleiner 0 heißen 'bei Fixes macht man weniger Fehler pro Stunde', Werte größer 0 heißen 'bei Fixes macht man mehr Fehler pro Stunde'."),
-        FOLLOW_UP_BUG_SPAWN_PROBABILITY(Double.class, ""),
+        TASK_SWITCH_TIME_ISSUE_FACTOR(Double.class, ""),
+        FIXING_ISSUE_RATE_FACTOR(Double.class, "Faktor der festlegt, wie viel 'ungefährlicher' Korrekturen gegenüber Neuentwicklung sind. Wird als Multiplikator des Implementierungs-Skills des Entwicklers aufgefasst. 1,0 heißt 'bei Fixes und Neuentwicklung macht man gleich viel Fehler pro Stunde', Werte kleiner 0 heißen 'bei Fixes macht man weniger Fehler pro Stunde', Werte größer 0 heißen 'bei Fixes macht man mehr Fehler pro Stunde'."),
+        FOLLOW_UP_ISSUE_SPAWN_PROBABILITY(Double.class, ""),
         REVIEW_FIX_TO_TASK_FACTOR(Double.class, ""),
         DEPENDENCY_GRAPH_CONSTELLATION(DependencyGraphConstellation.class, "Struktur der Abhängigkeiten zwischen Story-Tasks, d.h. inwiefern andere Tasks erst begonnen werden können, nachdem andere commitet sind. 'REALISTIC' beruht z.B. auf Echtdaten, bei 'NO_DEPENDENCIES' gibt es keine Abhängigkeiten, und bei 'CHAINS' und 'DIAMONDS' gibt es recht viele.");
 
@@ -269,29 +269,29 @@ public class BulkParameterFactory extends ParametersFactory {
         ret.parameters.put(ParameterType.IMPLEMENTATION_SKILL_TRIANGLE_WIDTH, 0.1);
         ret.parameters.put(ParameterType.REVIEW_SKILL_MODE, 0.45);
         ret.parameters.put(ParameterType.REVIEW_SKILL_TRIANGLE_WIDTH, 0.05);
-        ret.parameters.put(ParameterType.GLOBAL_BUG_MODE, 0.001);
-        ret.parameters.put(ParameterType.GLOBAL_BUG_TRIANGLE_WIDTH, 0.001);
+        ret.parameters.put(ParameterType.GLOBAL_ISSUE_MODE, 0.001);
+        ret.parameters.put(ParameterType.GLOBAL_ISSUE_TRIANGLE_WIDTH, 0.001);
         ret.parameters.put(ParameterType.CONFLICT_PROBABILITY, 0.012);
         ret.parameters.put(ParameterType.IMPLEMENTATION_TIME_DIST, DistributionFactory.LOGNORMAL);
         ret.parameters.put(ParameterType.IMPLEMENTATION_TIME_MODE, 0.2);
         ret.parameters.put(ParameterType.IMPLEMENTATION_TIME_MEAN_DIFF, 9.5);
-        ret.parameters.put(ParameterType.BUGFIX_TASK_OVERHEAD_TIME_DIST, DistributionFactory.LOGNORMAL);
-        ret.parameters.put(ParameterType.BUGFIX_TASK_OVERHEAD_TIME_MODE, 0.01317843);
-        ret.parameters.put(ParameterType.BUGFIX_TASK_OVERHEAD_TIME_MEAN_DIFF, 5.5);
+        ret.parameters.put(ParameterType.ISSUEFIX_TASK_OVERHEAD_TIME_DIST, DistributionFactory.LOGNORMAL);
+        ret.parameters.put(ParameterType.ISSUEFIX_TASK_OVERHEAD_TIME_MODE, 0.01317843);
+        ret.parameters.put(ParameterType.ISSUEFIX_TASK_OVERHEAD_TIME_MEAN_DIFF, 5.5);
         ret.parameters.put(ParameterType.REVIEW_REMARK_FIX_TIME_DIST, DistributionFactory.LOGNORMAL);
         ret.parameters.put(ParameterType.REVIEW_REMARK_FIX_TIME_MODE, 0.02);
         ret.parameters.put(ParameterType.REVIEW_REMARK_FIX_TIME_MEAN_DIFF, 0.7);
-        ret.parameters.put(ParameterType.GLOBAL_BUG_SUSPEND_TIME_MODE, 0.15);
-        ret.parameters.put(ParameterType.GLOBAL_BUG_SUSPEND_TIME_TRIANGLE_WIDTH, 0.1);
-        ret.parameters.put(ParameterType.BUG_ASSESSMENT_TIME_MODE, 0.1);
-        ret.parameters.put(ParameterType.BUG_ASSESSMENT_TIME_MEAN_DIFF, 0.35);
+        ret.parameters.put(ParameterType.GLOBAL_ISSUE_SUSPEND_TIME_MODE, 0.15);
+        ret.parameters.put(ParameterType.GLOBAL_ISSUE_SUSPEND_TIME_TRIANGLE_WIDTH, 0.1);
+        ret.parameters.put(ParameterType.ISSUE_ASSESSMENT_TIME_MODE, 0.1);
+        ret.parameters.put(ParameterType.ISSUE_ASSESSMENT_TIME_MEAN_DIFF, 0.35);
         ret.parameters.put(ParameterType.CONFLICT_RESOLUTION_TIME_MODE, 0.3);
         ret.parameters.put(ParameterType.CONFLICT_RESOLUTION_TIME_TRIANGLE_WIDTH, 0.2);
-        ret.parameters.put(ParameterType.INTERNAL_BUG_SHARE, 0.5);
-        ret.parameters.put(ParameterType.BUG_ACTIVATION_TIME_DEVELOPER_MODE, 0.5);
-        ret.parameters.put(ParameterType.BUG_ACTIVATION_TIME_DEVELOPER_MEAN_DIFF, 2000.0);
-        ret.parameters.put(ParameterType.BUG_ACTIVATION_TIME_CUSTOMER_MODE, 4.0);
-        ret.parameters.put(ParameterType.BUG_ACTIVATION_TIME_CUSTOMER_MEAN_DIFF, 1000.0);
+        ret.parameters.put(ParameterType.INTERNAL_ISSUE_SHARE, 0.5);
+        ret.parameters.put(ParameterType.ISSUE_ACTIVATION_TIME_DEVELOPER_MODE, 0.5);
+        ret.parameters.put(ParameterType.ISSUE_ACTIVATION_TIME_DEVELOPER_MEAN_DIFF, 2000.0);
+        ret.parameters.put(ParameterType.ISSUE_ACTIVATION_TIME_CUSTOMER_MODE, 4.0);
+        ret.parameters.put(ParameterType.ISSUE_ACTIVATION_TIME_CUSTOMER_MEAN_DIFF, 1000.0);
         ret.parameters.put(ParameterType.PLANNING_TIME_DIST, DistributionFactory.LOGNORMAL);
         ret.parameters.put(ParameterType.PLANNING_TIME_MEAN, 4.0);
         ret.parameters.put(ParameterType.REVIEW_TIME_DIST, DistributionFactory.LOGNORMAL);
@@ -301,9 +301,9 @@ public class BulkParameterFactory extends ParametersFactory {
         ret.parameters.put(ParameterType.TASK_SWITCH_OVERHEAD_AFTER_ONE_HOUR, new TimeSpan(5, TimeUnit.MINUTES).getTimeAsDouble(TimeUnit.HOURS));
         ret.parameters.put(ParameterType.MAX_TASK_SWITCH_OVERHEAD, new TimeSpan(30, TimeUnit.MINUTES).getTimeAsDouble(TimeUnit.HOURS));
         ret.parameters.put(ParameterType.BOARD_SEARCH_CUTOFF_LIMIT, 100);
-        ret.parameters.put(ParameterType.TASK_SWITCH_TIME_BUG_FACTOR, 0.0);
-        ret.parameters.put(ParameterType.FIXING_BUG_RATE_FACTOR, 0.3);
-        ret.parameters.put(ParameterType.FOLLOW_UP_BUG_SPAWN_PROBABILITY, 0.005);
+        ret.parameters.put(ParameterType.TASK_SWITCH_TIME_ISSUE_FACTOR, 0.0);
+        ret.parameters.put(ParameterType.FIXING_ISSUE_RATE_FACTOR, 0.3);
+        ret.parameters.put(ParameterType.FOLLOW_UP_ISSUE_SPAWN_PROBABILITY, 0.005);
         ret.parameters.put(ParameterType.REVIEW_FIX_TO_TASK_FACTOR, 1.1);
         ret.parameters.put(ParameterType.DEPENDENCY_GRAPH_CONSTELLATION, DependencyGraphConstellation.REALISTIC);
         return ret;
@@ -323,41 +323,41 @@ public class BulkParameterFactory extends ParametersFactory {
                         b.triangularProbability("reviewSkillDist",
                                         this.getParamD(ParameterType.REVIEW_SKILL_MODE),
                                         this.getParamD(ParameterType.REVIEW_SKILL_TRIANGLE_WIDTH)),
-                        b.triangularProbability("globalBugDist",
-                                        this.getParamD(ParameterType.GLOBAL_BUG_MODE),
-                                        this.getParamD(ParameterType.GLOBAL_BUG_TRIANGLE_WIDTH)),
+                        b.triangularProbability("globalIssueDist",
+                                        this.getParamD(ParameterType.GLOBAL_ISSUE_MODE),
+                                        this.getParamD(ParameterType.GLOBAL_ISSUE_TRIANGLE_WIDTH)),
                         b.bernoulli("conflictDist",
                                         this.getParamD(ParameterType.CONFLICT_PROBABILITY)),
                         this.getParamDi(ParameterType.IMPLEMENTATION_TIME_DIST).create(b, "implementationTimeDist",
                                         this.getParamD(ParameterType.IMPLEMENTATION_TIME_MODE) + this.getParamD(ParameterType.IMPLEMENTATION_TIME_MEAN_DIFF),
                                         this.getParamD(ParameterType.IMPLEMENTATION_TIME_MODE)),
-                        this.getParamDi(ParameterType.BUGFIX_TASK_OVERHEAD_TIME_DIST).create(b, "bugfixTaskOverheadTimeDist",
-                                        this.getParamD(ParameterType.BUGFIX_TASK_OVERHEAD_TIME_MODE) + this.getParamD(ParameterType.BUGFIX_TASK_OVERHEAD_TIME_MEAN_DIFF),
-                                        this.getParamD(ParameterType.BUGFIX_TASK_OVERHEAD_TIME_MODE)),
+                        this.getParamDi(ParameterType.ISSUEFIX_TASK_OVERHEAD_TIME_DIST).create(b, "issuefixTaskOverheadTimeDist",
+                                        this.getParamD(ParameterType.ISSUEFIX_TASK_OVERHEAD_TIME_MODE) + this.getParamD(ParameterType.ISSUEFIX_TASK_OVERHEAD_TIME_MEAN_DIFF),
+                                        this.getParamD(ParameterType.ISSUEFIX_TASK_OVERHEAD_TIME_MODE)),
                         this.getParamDi(ParameterType.REVIEW_REMARK_FIX_TIME_DIST).create(b, "reviewRemarkFixTimeDist",
                                         this.getParamD(ParameterType.REVIEW_REMARK_FIX_TIME_MODE) + this.getParamD(ParameterType.REVIEW_REMARK_FIX_TIME_MEAN_DIFF),
                                         this.getParamD(ParameterType.REVIEW_REMARK_FIX_TIME_MODE)),
-                        b.triangular("globalBugSuspendTimeDist",
-                                        this.getParamD(ParameterType.GLOBAL_BUG_SUSPEND_TIME_MODE),
-                                        this.getParamD(ParameterType.GLOBAL_BUG_SUSPEND_TIME_TRIANGLE_WIDTH),
+                        b.triangular("globalIssueSuspendTimeDist",
+                                        this.getParamD(ParameterType.GLOBAL_ISSUE_SUSPEND_TIME_MODE),
+                                        this.getParamD(ParameterType.GLOBAL_ISSUE_SUSPEND_TIME_TRIANGLE_WIDTH),
                                         0,
                                         Double.MAX_VALUE),
-                        b.logNormal("bugAssessmentTimeDist",
-                                        this.getParamD(ParameterType.BUG_ASSESSMENT_TIME_MODE) + this.getParamD(ParameterType.BUG_ASSESSMENT_TIME_MEAN_DIFF),
-                                        this.getParamD(ParameterType.BUG_ASSESSMENT_TIME_MODE)),
+                        b.logNormal("issueAssessmentTimeDist",
+                                        this.getParamD(ParameterType.ISSUE_ASSESSMENT_TIME_MODE) + this.getParamD(ParameterType.ISSUE_ASSESSMENT_TIME_MEAN_DIFF),
+                                        this.getParamD(ParameterType.ISSUE_ASSESSMENT_TIME_MODE)),
                         b.triangular("conflictResolutionTimeDist",
                                         this.getParamD(ParameterType.CONFLICT_RESOLUTION_TIME_MODE),
                                         this.getParamD(ParameterType.CONFLICT_RESOLUTION_TIME_TRIANGLE_WIDTH),
                                         0,
                                         Double.MAX_VALUE),
-                        b.bernoulli("internalBugDist",
-                                        this.getParamD(ParameterType.INTERNAL_BUG_SHARE)),
-                        b.expShift("bugActivationTimeDeveloperDist",
-                                        this.getParamD(ParameterType.BUG_ACTIVATION_TIME_DEVELOPER_MODE) + this.getParamD(ParameterType.BUG_ACTIVATION_TIME_DEVELOPER_MEAN_DIFF),
-                                        this.getParamD(ParameterType.BUG_ACTIVATION_TIME_DEVELOPER_MODE)),
-                        b.expShift("bugActivationTimeCustomerDist",
-                                        this.getParamD(ParameterType.BUG_ACTIVATION_TIME_CUSTOMER_MODE) + this.getParamD(ParameterType.BUG_ACTIVATION_TIME_CUSTOMER_MEAN_DIFF),
-                                        this.getParamD(ParameterType.BUG_ACTIVATION_TIME_CUSTOMER_MODE)),
+                        b.bernoulli("internalIssueDist",
+                                        this.getParamD(ParameterType.INTERNAL_ISSUE_SHARE)),
+                        b.expShift("issueActivationTimeDeveloperDist",
+                                        this.getParamD(ParameterType.ISSUE_ACTIVATION_TIME_DEVELOPER_MODE) + this.getParamD(ParameterType.ISSUE_ACTIVATION_TIME_DEVELOPER_MEAN_DIFF),
+                                        this.getParamD(ParameterType.ISSUE_ACTIVATION_TIME_DEVELOPER_MODE)),
+                        b.expShift("issueActivationTimeCustomerDist",
+                                        this.getParamD(ParameterType.ISSUE_ACTIVATION_TIME_CUSTOMER_MODE) + this.getParamD(ParameterType.ISSUE_ACTIVATION_TIME_CUSTOMER_MEAN_DIFF),
+                                        this.getParamD(ParameterType.ISSUE_ACTIVATION_TIME_CUSTOMER_MODE)),
                         this.getParamDi(ParameterType.PLANNING_TIME_DIST).create(b, "planningTimeDist",
                                         this.getParamD(ParameterType.PLANNING_TIME_MEAN)),
                         this.getParamDi(ParameterType.REVIEW_TIME_DIST).create(b, "reviewTimeDist",
@@ -367,9 +367,9 @@ public class BulkParameterFactory extends ParametersFactory {
                         new TimeSpan(this.getParamD(ParameterType.TASK_SWITCH_OVERHEAD_AFTER_ONE_HOUR), TimeUnit.HOURS),
                         new TimeSpan(this.getParamD(ParameterType.MAX_TASK_SWITCH_OVERHEAD), TimeUnit.HOURS),
                         this.getParamI(ParameterType.BOARD_SEARCH_CUTOFF_LIMIT),
-                        this.getParamD(ParameterType.TASK_SWITCH_TIME_BUG_FACTOR),
-                        this.getParamD(ParameterType.FIXING_BUG_RATE_FACTOR),
-                        this.getParamD(ParameterType.FOLLOW_UP_BUG_SPAWN_PROBABILITY),
+                        this.getParamD(ParameterType.TASK_SWITCH_TIME_ISSUE_FACTOR),
+                        this.getParamD(ParameterType.FIXING_ISSUE_RATE_FACTOR),
+                        this.getParamD(ParameterType.FOLLOW_UP_ISSUE_SPAWN_PROBABILITY),
                         this.getParamD(ParameterType.REVIEW_FIX_TO_TASK_FACTOR),
                         nextLong(r),
                         (DependencyGraphConstellation) this.getParam(ParameterType.DEPENDENCY_GRAPH_CONSTELLATION));

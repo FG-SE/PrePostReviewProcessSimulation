@@ -34,19 +34,19 @@ public class ExperimentRun {
         private final ReviewNoReviewComparison noReviewResult;
         private final PrePostComparison storyPointsResult;
         private final PrePostComparison cycleTimeResult;
-        private final PrePostComparison bugsResult;
+        private final PrePostComparison issuesResult;
 
         public ExperimentRunSummary(
                         RealismCheckResult realismCheckResult,
                         ReviewNoReviewComparison noReviewResult,
                         PrePostComparison storyPointsResult,
                         PrePostComparison cycleTimeResult,
-                        PrePostComparison bugsResult) {
+                        PrePostComparison issuesResult) {
             this.realismCheckResult = realismCheckResult;
             this.noReviewResult = noReviewResult;
             this.storyPointsResult = storyPointsResult;
             this.cycleTimeResult = cycleTimeResult;
-            this.bugsResult = bugsResult;
+            this.issuesResult = issuesResult;
         }
 
         public RealismCheckResult getRealismCheckResult() {
@@ -65,8 +65,8 @@ public class ExperimentRun {
             return this.cycleTimeResult;
         }
 
-        public PrePostComparison getBugsResult() {
-            return this.bugsResult;
+        public PrePostComparison getIssuesResult() {
+            return this.issuesResult;
         }
 
         @Override
@@ -80,7 +80,7 @@ public class ExperimentRun {
                 return false;
             }
             final ExperimentRunSummary e = (ExperimentRunSummary) o;
-            return this.bugsResult == e.bugsResult
+            return this.issuesResult == e.issuesResult
                 && this.cycleTimeResult == e.cycleTimeResult
                 && this.storyPointsResult == e.storyPointsResult
                 && this.noReviewResult == e.noReviewResult
@@ -105,13 +105,13 @@ public class ExperimentRun {
                             PrePostComparison.NO_REVIEW);
         }
 
-        public static ExperimentRunSummary review(PrePostComparison summaryStoryPoints, PrePostComparison summaryCycleTime, PrePostComparison summaryBugs) {
+        public static ExperimentRunSummary review(PrePostComparison summaryStoryPoints, PrePostComparison summaryCycleTime, PrePostComparison summaryIssues) {
             return new ExperimentRunSummary(
                             RealismCheckResult.REALISTIC,
                             ReviewNoReviewComparison.REVIEW,
                             summaryStoryPoints,
                             summaryCycleTime,
-                            summaryBugs);
+                            summaryIssues);
         }
     }
 
@@ -246,13 +246,13 @@ public class ExperimentRun {
                         this.settings.get(ExperimentRunParameters.LIMIT_NEGLIGIBLE_DIFFERENCE_CYCLE_TIME),
                         onlySignificant,
                         false);
-        final PrePostComparison summaryBugs = this.comparePrePost(
-                        this.getFactorBugs(),
+        final PrePostComparison summaryIssues = this.comparePrePost(
+                        this.getFactorIssues(),
                         this.settings.get(ExperimentRunParameters.LIMIT_NEGLIGIBLE_DIFFERENCE_BUGS),
                         onlySignificant,
                         false);
 
-        return ExperimentRunSummary.review(summaryStoryPoints, summaryCycleTime, summaryBugs);
+        return ExperimentRunSummary.review(summaryStoryPoints, summaryCycleTime, summaryIssues);
     }
 
     private PrePostComparison comparePrePost(MedianWithConfidenceInterval factorToCompare, double limit, boolean onlySignificant, boolean smallerMeansPre) {
@@ -309,13 +309,13 @@ public class ExperimentRun {
         return this.median(values);
     }
 
-    public MedianWithConfidenceInterval getBugCountMedian(ReviewMode mode) {
-        final double[] values = this.getResults(mode, ExperimentResult::getBugCountFoundByCustomers);
+    public MedianWithConfidenceInterval getIssueCountMedian(ReviewMode mode) {
+        final double[] values = this.getResults(mode, ExperimentResult::getIssueCountFoundByCustomers);
         return this.median(values);
     }
 
-    public MedianWithConfidenceInterval getBugCountPerStoryPointMedian(ReviewMode mode) {
-        final double[] values = this.getResults(mode, ExperimentResult::getBugCountFoundByCustomersPerStoryPoint);
+    public MedianWithConfidenceInterval getIssueCountPerStoryPointMedian(ReviewMode mode) {
+        final double[] values = this.getResults(mode, ExperimentResult::getIssueCountFoundByCustomersPerStoryPoint);
         return this.median(values);
     }
 
@@ -334,13 +334,13 @@ public class ExperimentRun {
         return this.median(values);
     }
 
-    public MedianWithConfidenceInterval getAvgBugFixingTimeMedian(ReviewMode mode) {
-        final double[] values = this.getResults(mode, ExperimentResult::getAvgBugFixingTime);
+    public MedianWithConfidenceInterval getAvgIssueFixingTimeMedian(ReviewMode mode) {
+        final double[] values = this.getResults(mode, ExperimentResult::getAvgIssueFixingTime);
         return this.median(values);
     }
 
-    public MedianWithConfidenceInterval getAvgBugAssessmentTimeMedian(ReviewMode mode) {
-        final double[] values = this.getResults(mode, ExperimentResult::getAvgBugAssessmentTime);
+    public MedianWithConfidenceInterval getAvgIssueAssessmentTimeMedian(ReviewMode mode) {
+        final double[] values = this.getResults(mode, ExperimentResult::getAvgIssueAssessmentTime);
         return this.median(values);
     }
 
@@ -364,13 +364,13 @@ public class ExperimentRun {
         return this.median(values);
     }
 
-    public MedianWithConfidenceInterval getTotalBugFixingTimeMedian(ReviewMode mode) {
-        final double[] values = this.getResults(mode, ExperimentResult::getTotalBugFixingTime);
+    public MedianWithConfidenceInterval getTotalIssueFixingTimeMedian(ReviewMode mode) {
+        final double[] values = this.getResults(mode, ExperimentResult::getTotalIssueFixingTime);
         return this.median(values);
     }
 
-    public MedianWithConfidenceInterval getTotalBugAssessmentTimeMedian(ReviewMode mode) {
-        final double[] values = this.getResults(mode, ExperimentResult::getTotalBugAssessmentTime);
+    public MedianWithConfidenceInterval getTotalIssueAssessmentTimeMedian(ReviewMode mode) {
+        final double[] values = this.getResults(mode, ExperimentResult::getTotalIssueAssessmentTime);
         return this.median(values);
     }
 
@@ -404,8 +404,8 @@ public class ExperimentRun {
         return this.median(values);
     }
 
-    public MedianWithConfidenceInterval getGlobalBugCountMedian(ReviewMode mode) {
-        final double[] values = this.getResults(mode, ExperimentResult::getGlobalBugCount);
+    public MedianWithConfidenceInterval getGlobalIssueCountMedian(ReviewMode mode) {
+        final double[] values = this.getResults(mode, ExperimentResult::getGlobalIssueCount);
         return this.median(values);
     }
 
@@ -424,12 +424,12 @@ public class ExperimentRun {
     }
 
     /**
-     * Returns the median relative difference between the number of remaining bugs from pre commit and post commit reviews.
+     * Returns the median relative difference between the number of remaining issues from pre commit and post commit reviews.
      * For every random trial, the factor (post - pre) / avg(post, pre) is calculated.
-     * I.e. if the result is > 0, post commit review resulted in more remaining bugs.
+     * I.e. if the result is > 0, post commit review resulted in more remaining issues.
      */
-    public MedianWithConfidenceInterval getFactorBugs() {
-        final double[] values = this.results.stream().mapToDouble(x -> x.factorPrePost(ExperimentResult::getBugCountFoundByCustomersPerStoryPoint)).toArray();
+    public MedianWithConfidenceInterval getFactorIssues() {
+        final double[] values = this.results.stream().mapToDouble(x -> x.factorPrePost(ExperimentResult::getIssueCountFoundByCustomersPerStoryPoint)).toArray();
         return this.median(values);
     }
 
@@ -482,9 +482,9 @@ public class ExperimentRun {
                     ).count();
     }
 
-    public int getCountBugCountPerStoryPointPreLarger() {
+    public int getCountIssueCountPerStoryPointPreLarger() {
         return (int) this.results.stream().filter(
-                        x -> x.getFor(ReviewMode.PRE_COMMIT).getBugCountFoundByCustomersPerStoryPoint() > x.getFor(ReviewMode.POST_COMMIT).getBugCountFoundByCustomersPerStoryPoint()
+                        x -> x.getFor(ReviewMode.PRE_COMMIT).getIssueCountFoundByCustomersPerStoryPoint() > x.getFor(ReviewMode.POST_COMMIT).getIssueCountFoundByCustomersPerStoryPoint()
                     ).count();
     }
 

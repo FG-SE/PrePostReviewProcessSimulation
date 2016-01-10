@@ -25,28 +25,28 @@ import desmoj.core.simulator.TimeOperations;
 import desmoj.core.simulator.TimeSpan;
 
 /**
- * A {@link Task} in which a certain {@link NormalBug} shall be fixed.
+ * A {@link Task} in which a certain {@link NormalIssue} shall be fixed.
  */
-class BugfixTask extends Task {
+class IssueFixTask extends Task {
 
-    private final NormalBug bug;
+    private final NormalIssue issue;
     private final Story cachedStory;
 
     /**
-     * Creates a new bugfix task for the given bug.
+     * Creates a new fix task for the given issue.
      */
-    public BugfixTask(NormalBug bug) {
-        super(bug.getModel(), "bug",
+    public IssueFixTask(NormalIssue issue) {
+        super(issue.getModel(), "issue",
                         TimeOperations.add(
-                                        bug.getFixEffort(),
-                                        bug.getModel().getParameters().getBugfixTaskOverheadTimeDist().sampleTimeSpan(TimeUnit.HOURS)));
-        this.bug = bug;
-        this.cachedStory = this.bug.getTask().getStory();
-        this.cachedStory.registerBug(this);
+                                        issue.getFixEffort(),
+                                        issue.getModel().getParameters().getIssuefixTaskOverheadTimeDist().sampleTimeSpan(TimeUnit.HOURS)));
+        this.issue = issue;
+        this.cachedStory = this.issue.getTask().getStory();
+        this.cachedStory.registerIssue(this);
     }
 
     /**
-     * Belongs to the same topic as the task during which the bug was injected.
+     * Belongs to the same topic as the task during which the issue was injected.
      */
     @Override
     public String getMemoryKey() {
@@ -54,7 +54,7 @@ class BugfixTask extends Task {
     }
 
     /**
-     * Returns the story that belongs to the task during which the bug was injected.
+     * Returns the story that belongs to the task during which the issue was injected.
      */
     @Override
     public Story getStory() {
@@ -62,7 +62,7 @@ class BugfixTask extends Task {
     }
 
     /**
-     * Bugfixes don't have prerequisites.
+     * Issue fixes don't have prerequisites.
      */
     @Override
     public List<? extends Task> getPrerequisites() {
@@ -70,25 +70,25 @@ class BugfixTask extends Task {
     }
 
     /**
-     * When the bugfix task is commited, the bug is fixed.
+     * When the issue fix task is commited, the issue is fixed.
      */
     @Override
     protected void handleCommited() {
-        this.bug.fix();
+        this.issue.fix();
     }
 
     /**
      * When this task is finished, there are two possibilites:
-     * 1. The story is not finished yet (possibly because this bugfix kept it from finishing). The story will be finished if this
-     *      is now possible. Bugs injected during this bugfix's implementation can only become visible to the customer as soon
+     * 1. The story is not finished yet (possibly because this fix kept it from finishing). The story will be finished if this
+     *      is now possible. Issues injected during this fix's implementation can only become visible to the customer as soon
      *      as the story is finished.
-     * 2. The story is finished (i.e. the bug occured after it had beed finished). Bugs injected during this bugfix's implementation
+     * 2. The story is finished (i.e. the issue occured after the story had beed finished). Issues injected during this fix's implementation
      *      can immediately become visible to the customer.
      */
     @Override
     protected void handleFinishedTask() {
         if (this.cachedStory.isFinished()) {
-            this.startLurkingBugsForCustomer();
+            this.startLurkingIssuesForCustomer();
         } else {
             if (this.cachedStory.canBeFinished()) {
                 this.cachedStory.finish();
@@ -97,8 +97,8 @@ class BugfixTask extends Task {
     }
 
     @Override
-    protected TimeSpan getTimeRelevantForBugCreation() {
-        return TimeOperations.multiply(this.bug.getFixEffort(), this.getModel().getParameters().getReviewFixToTaskFactor());
+    protected TimeSpan getTimeRelevantForIssueCreation() {
+        return TimeOperations.multiply(this.issue.getFixEffort(), this.getModel().getParameters().getReviewFixToTaskFactor());
     }
 
 }
