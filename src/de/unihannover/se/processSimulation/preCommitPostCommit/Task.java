@@ -92,7 +92,7 @@ abstract class Task extends PrePostEntity implements MemoryItem {
     private Review currentReview;
 
     /**
-     * The number of reviews that were performed (including the one that is currently performed).
+     * The number of reviews that were performed (including the one that is currently performed). Helper for statistics.
      */
     private int reviewRounds;
 
@@ -100,6 +100,16 @@ abstract class Task extends PrePostEntity implements MemoryItem {
      * Bugs that have been noticed to belong to this task by other developers while it was in review.
      */
     private List<NormalBug> bugsFoundByOthersDuringReview;
+
+    /**
+     * The time bugs (would) become active for developers when doing post commit reviews. Helper for statistics.
+     */
+    private TimeInstant timeActivePost;
+
+    /**
+     * The time bugs (would) become active for developers when doing pre commit reviews. Helper for statistics.
+     */
+    private TimeInstant timeActivePre;
 
 
     /**
@@ -156,6 +166,7 @@ abstract class Task extends PrePostEntity implements MemoryItem {
         if (this.getModel().getReviewMode() == ReviewMode.POST_COMMIT || this.getModel().getReviewMode() == ReviewMode.NO_REVIEW) {
             this.commit(this.implementor);
         }
+        this.timeActivePost = this.presentTime();
         assert this.implementationInterruptions.isEmpty();
         if (this.getModel().getReviewMode() == ReviewMode.NO_REVIEW) {
             this.setState(State.DONE);
@@ -309,6 +320,7 @@ abstract class Task extends PrePostEntity implements MemoryItem {
         if (this.getModel().getReviewMode() == ReviewMode.PRE_COMMIT) {
             this.commit(reviewer);
         }
+        this.timeActivePre = this.presentTime();
         this.setState(State.DONE);
         this.getModel().updateReviewRoundStatistic(this.reviewRounds);
         this.handleFinishedTask();
@@ -504,6 +516,10 @@ abstract class Task extends PrePostEntity implements MemoryItem {
         for (final Bug b : this.lurkingBugs) {
             assert !b.isFixed();
             b.handlePublishedForCustomers();
+        }
+        if (this.getModel().getReviewMode() != ReviewMode.NO_REVIEW) {
+            this.getModel().updateTimePostToPreStatistic(TimeOperations.diff(this.timeActivePre, this.timeActivePost));
+            this.getModel().updateTimePreToCustStatistic(TimeOperations.diff(this.presentTime(), this.timeActivePre));
         }
     }
 

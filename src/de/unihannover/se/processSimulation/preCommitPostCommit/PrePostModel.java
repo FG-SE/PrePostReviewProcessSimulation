@@ -62,6 +62,8 @@ public class PrePostModel extends Model {
     private Tally storyCycleTime;
     private Tally planningGroupSize;
     private Tally reviewRoundCount;
+    private Tally timePostToPre;
+    private Tally timePreToCust;
     private final Map<String, Aggregate> timeCounters = new HashMap<>();
     private final Map<String, Count> dynamicCounters = new HashMap<>();
 
@@ -119,6 +121,8 @@ public class PrePostModel extends Model {
         this.bugCountFoundByCustomers = new Count(this, "bugCountFoundByCustomers", true, false);
         this.planningGroupSize = new Tally(this, "planningGroupSize", true, false);
         this.reviewRoundCount = new Tally(this, "reviewRoundCount", true, false);
+        this.timePostToPre = new Tally(this, "timePostToPre", true, false);
+        this.timePreToCust = new Tally(this, "timePreToCust", true, false);
 
         for (int i = 0; i < this.parameters.getNumDevelopers(); i++) {
             this.developers.add(new Developer(this,
@@ -279,6 +283,14 @@ public class PrePostModel extends Model {
         return agg.getValue() / agg.getObservations();
     }
 
+    private double getTimeCounterTotal(String name) {
+        final Aggregate agg = this.timeCounters.get(name);
+        if (agg == null) {
+            return 0;
+        }
+        return agg.getValue();
+    }
+
     /**
      * Increments the counter with the given name by one.
      */
@@ -344,6 +356,30 @@ public class PrePostModel extends Model {
         return this.reviewRoundCount.getMean();
     }
 
+    /**
+     * Updates the statistic for the average time between the instant when bugs would become developer-visible
+     * when doing post commit and when doing pre commit.
+     */
+    public void updateTimePostToPreStatistic(TimeSpan diff) {
+        this.timePostToPre.update(diff);
+    }
+
+    public double getAvgTimePostToPre() {
+        return this.timePostToPre.getMean();
+    }
+
+    /**
+     * Updates the statistic for the average time between the instant when bugs would become developer-visible
+     * when doing pre commit and when they will be customer-visible.
+     */
+    public void updateTimePreToCustStatistic(TimeSpan diff) {
+        this.timePreToCust.update(diff);
+    }
+
+    public double getAvgTimePreToCust() {
+        return this.timePreToCust.getMean();
+    }
+
     public double getAvgImplementationTime() {
         return this.getTimeCounterAvg("timeFor_implementing");
     }
@@ -366,6 +402,30 @@ public class PrePostModel extends Model {
 
     public double getAvgPlanningTime() {
         return this.getTimeCounterAvg("timeFor_planning");
+    }
+
+    public double getTotalImplementationTime() {
+        return this.getTimeCounterTotal("timeFor_implementing");
+    }
+
+    public double getTotalReviewTime() {
+        return this.getTimeCounterTotal("timeFor_reviewing");
+    }
+
+    public double getTotalRemarkFixingTime() {
+        return this.getTimeCounterTotal("timeFor_fixingReviewRemarks");
+    }
+
+    public double getTotalBugFixingTime() {
+        return this.getTimeCounterTotal("timeFor_fixingBugs");
+    }
+
+    public double getTotalBugAssessmentTime() {
+        return this.getTimeCounterTotal("timeFor_assessingBugs");
+    }
+
+    public double getTotalPlanningTime() {
+        return this.getTimeCounterTotal("timeFor_planning");
     }
 
 }

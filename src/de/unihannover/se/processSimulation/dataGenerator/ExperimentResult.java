@@ -38,7 +38,15 @@ public class ExperimentResult {
     private final double avgBugFixingTime;
     private final double avgBugAssessmentTime;
     private final double avgPlanningTime;
+    private final double totalImplementationTime;
+    private final double totalReviewTime;
+    private final double totalRemarkFixingTime;
+    private final double totalBugFixingTime;
+    private final double totalBugAssessmentTime;
+    private final double totalPlanningTime;
     private final double avgReviewRoundCount;
+    private final double avgTimePostToPre;
+    private final double avgTimePreToCust;
 
     public ExperimentResult(
                     long finishedStoryPoints,
@@ -58,7 +66,15 @@ public class ExperimentResult {
                     double avgBugFixingTime,
                     double avgBugAssessmentTime,
                     double avgPlanningTime,
+                    double totalImplementationTime,
+                    double totalReviewTime,
+                    double totalRemarkFixingTime,
+                    double totalBugFixingTime,
+                    double totalBugAssessmentTime,
+                    double totalPlanningTime,
                     double avgReviewRoundCount,
+                    double avgTimePostToPre,
+                    double avgTimePreToCust,
                     long expWallClockDuration,
                     boolean hadError) {
         this.finishedStoryPoints = finishedStoryPoints;
@@ -78,7 +94,15 @@ public class ExperimentResult {
         this.avgBugFixingTime = avgBugFixingTime;
         this.avgBugAssessmentTime = avgBugAssessmentTime;
         this.avgPlanningTime = avgPlanningTime;
+        this.totalImplementationTime = totalImplementationTime;
+        this.totalReviewTime = totalReviewTime;
+        this.totalRemarkFixingTime = totalRemarkFixingTime;
+        this.totalBugFixingTime = totalBugFixingTime;
+        this.totalBugAssessmentTime = totalBugAssessmentTime;
+        this.totalPlanningTime = totalPlanningTime;
         this.avgReviewRoundCount = avgReviewRoundCount;
+        this.avgTimePostToPre = avgTimePostToPre;
+        this.avgTimePreToCust = avgTimePreToCust;
         this.expWallClockDuration = expWallClockDuration;
         this.hadError = hadError;
     }
@@ -148,8 +172,40 @@ public class ExperimentResult {
         return this.avgPlanningTime;
     }
 
+    public double getTotalImplementationTime() {
+        return this.totalImplementationTime;
+    }
+
+    public double getTotalReviewTime() {
+        return this.totalReviewTime;
+    }
+
+    public double getTotalRemarkFixingTime() {
+        return this.totalRemarkFixingTime;
+    }
+
+    public double getTotalBugFixingTime() {
+        return this.totalBugFixingTime;
+    }
+
+    public double getTotalBugAssessmentTime() {
+        return this.totalBugAssessmentTime;
+    }
+
+    public double getTotalPlanningTime() {
+        return this.totalPlanningTime;
+    }
+
     public double getAvgReviewRoundCount() {
         return this.avgReviewRoundCount;
+    }
+
+    public double getAvgTimePostToPre() {
+        return this.avgTimePostToPre;
+    }
+
+    public double getAvgTimePreToCust() {
+        return this.avgTimePreToCust;
     }
 
     public double getWastedTimeTaskSwitch() {

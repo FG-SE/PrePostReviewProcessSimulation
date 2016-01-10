@@ -87,7 +87,15 @@ public class DataGenerator {
                         model.getAvgBugFixingTime(),
                         model.getAvgBugAssessmentTime(),
                         model.getAvgPlanningTime(),
+                        model.getTotalImplementationTime(),
+                        model.getTotalReviewTime(),
+                        model.getTotalRemarkFixingTime(),
+                        model.getTotalBugFixingTime(),
+                        model.getTotalBugAssessmentTime(),
+                        model.getTotalPlanningTime(),
                         model.getAvgReviewRoundCount(),
+                        model.getAvgTimePostToPre(),
+                        model.getAvgTimePreToCust(),
                         expDuration,
                         exp.hasError());
 

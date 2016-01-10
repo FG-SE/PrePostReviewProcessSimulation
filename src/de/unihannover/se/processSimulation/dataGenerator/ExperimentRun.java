@@ -349,8 +349,48 @@ public class ExperimentRun {
         return this.median(values);
     }
 
+    public MedianWithConfidenceInterval getTotalImplementationTimeMedian(ReviewMode mode) {
+        final double[] values = this.getResults(mode, ExperimentResult::getTotalImplementationTime);
+        return this.median(values);
+    }
+
+    public MedianWithConfidenceInterval getTotalReviewTimeMedian(ReviewMode mode) {
+        final double[] values = this.getResults(mode, ExperimentResult::getTotalReviewTime);
+        return this.median(values);
+    }
+
+    public MedianWithConfidenceInterval getTotalRemarkFixingTimeMedian(ReviewMode mode) {
+        final double[] values = this.getResults(mode, ExperimentResult::getTotalRemarkFixingTime);
+        return this.median(values);
+    }
+
+    public MedianWithConfidenceInterval getTotalBugFixingTimeMedian(ReviewMode mode) {
+        final double[] values = this.getResults(mode, ExperimentResult::getTotalBugFixingTime);
+        return this.median(values);
+    }
+
+    public MedianWithConfidenceInterval getTotalBugAssessmentTimeMedian(ReviewMode mode) {
+        final double[] values = this.getResults(mode, ExperimentResult::getTotalBugAssessmentTime);
+        return this.median(values);
+    }
+
+    public MedianWithConfidenceInterval getTotalPlanningTimeMedian(ReviewMode mode) {
+        final double[] values = this.getResults(mode, ExperimentResult::getTotalPlanningTime);
+        return this.median(values);
+    }
+
     public MedianWithConfidenceInterval getAvgReviewRoundCountMedian(ReviewMode mode) {
         final double[] values = this.getResults(mode, ExperimentResult::getAvgReviewRoundCount);
+        return this.median(values);
+    }
+
+    public MedianWithConfidenceInterval getAvgTimePostToPreMedian(ReviewMode mode) {
+        final double[] values = this.getResults(mode, ExperimentResult::getAvgTimePostToPre);
+        return this.median(values);
+    }
+
+    public MedianWithConfidenceInterval getAvgTimePreToCustMedian(ReviewMode mode) {
+        final double[] values = this.getResults(mode, ExperimentResult::getAvgTimePreToCust);
         return this.median(values);
     }
 

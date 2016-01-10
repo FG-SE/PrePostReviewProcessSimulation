@@ -38,7 +38,7 @@ import desmoj.core.dist.Operator;
 import desmoj.core.simulator.Model;
 import desmoj.core.simulator.TimeSpan;
 
-public class BulkParameterFactory extends ParametersFactory implements Cloneable {
+public class BulkParameterFactory extends ParametersFactory {
 
     public enum DistributionFactory {
         POSNORMAL {
@@ -150,7 +150,7 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
             if (this.type.equals(Double.class)) {
                 return Double.valueOf(param);
             } else if (this.type.equals(Integer.class)) {
-                return Integer.valueOf(param);
+                return (int) Double.parseDouble(param);
             } else if (this.type.isEnum()) {
                 for (final Object enumValue : this.type.getEnumConstants()) {
                     if (((Enum<?>) enumValue).name().equals(param)) {
@@ -392,11 +392,10 @@ public class BulkParameterFactory extends ParametersFactory implements Cloneable
     }
 
     private BulkParameterFactory copy() {
-        try {
-            return (BulkParameterFactory) this.clone();
-        } catch (final CloneNotSupportedException e) {
-            throw new RuntimeException("should not happen", e);
-        }
+        final BulkParameterFactory copy = new BulkParameterFactory();
+        copy.seed = this.seed;
+        copy.parameters.putAll(this.parameters);
+        return copy;
     }
 
     public Object getParam(ParameterType param) {
