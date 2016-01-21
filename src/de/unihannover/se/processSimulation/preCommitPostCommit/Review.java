@@ -18,6 +18,7 @@
 package de.unihannover.se.processSimulation.preCommitPostCommit;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -30,8 +31,11 @@ class Review {
     /**
      * Creates a review with the given remarks.
      */
-    public Review(List<? extends Issue> foundIssues) {
+    public Review(Collection<? extends Issue> foundIssues) {
         this.remarks = new ArrayList<>(foundIssues);
+        for (final Issue issue : this.remarks) {
+            issue.setWasObserved();
+        }
     }
 
     /**
@@ -47,6 +51,7 @@ class Review {
     public void addRemark(Issue issue) {
         if (!this.remarks.contains(issue)) {
             this.remarks.add(issue);
+            issue.setWasObserved();
         }
     }
 

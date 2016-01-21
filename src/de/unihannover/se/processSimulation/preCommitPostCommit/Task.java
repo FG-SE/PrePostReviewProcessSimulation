@@ -19,7 +19,9 @@ package de.unihannover.se.processSimulation.preCommitPostCommit;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import co.paralleluniverse.fibers.SuspendExecution;
@@ -145,7 +147,7 @@ abstract class Task extends PrePostEntity implements MemoryItem {
         final TimeSpan issueTime = TimeOperations.add(
                         this.getTimeRelevantForIssueCreation(),
                         TimeOperations.multiply(taskSwitchTime, this.getModel().getParameters().getTaskSwitchTimeIssueFactor()));
-        this.createIssues(issueTime, this instanceof IssueFixTask, false);
+        this.createIssues(issueTime, this instanceof IssueFixTask, -1);
         this.endImplementation();
     }
 
@@ -183,7 +185,7 @@ abstract class Task extends PrePostEntity implements MemoryItem {
      * Inject issues into this task. The number of issues depends on the given time/effort that went into
      * implementation, if it was issue fixing or new implementation and the developer.
      */
-    private void createIssues(TimeSpan relevantTime, boolean fixing, boolean reviewRemark) {
+    private void createIssues(TimeSpan relevantTime, boolean fixing, int reviewRemarkCount) {
         //determine number of issues to create
         double issuesToCreate = this.implementor.getImplementationSkill() * relevantTime.getTimeAsDouble(TimeUnit.HOURS);
         if (fixing) {
@@ -214,13 +216,16 @@ abstract class Task extends PrePostEntity implements MemoryItem {
             this.createNormalIssue();
             normalIssuesCreated++;
         }
-        if (reviewRemark) {
+        if (reviewRemarkCount > 0) {
             assert fixing;
             this.getModel().dynamicCount("issuesInjectedWhileFixingReviewRemarks", normalIssuesCreated);
+            this.getModel().updateIssuesInjectedPerReviewRemark(((double) normalIssuesCreated) / reviewRemarkCount);
         } else if (fixing) {
             this.getModel().dynamicCount("issuesInjectedWhileFixingIssues", normalIssuesCreated);
+            this.getModel().updateIssuesInjectedPerIssueTask(normalIssuesCreated);
         } else {
             this.getModel().dynamicCount("issuesInjectedWhileImplementing", normalIssuesCreated);
+            this.getModel().updateIssuesInjectedPerImplementationTask(normalIssuesCreated);
         }
 
         if (this.implementor.makesBlockerIssue()) {
@@ -265,7 +270,7 @@ abstract class Task extends PrePostEntity implements MemoryItem {
     public void suspendImplementationForFixing(Issue issue) {
         //there is no task switch overhead because the fix belongs to the current task
         final TimeSpan timeSpan = issue.getFixEffort();
-        this.createIssues(timeSpan, true, true);
+        this.createIssues(timeSpan, true, 1);
         this.suspendImplementation(timeSpan);
         this.issuesFixedInCommit.add(issue);
     }
@@ -288,7 +293,7 @@ abstract class Task extends PrePostEntity implements MemoryItem {
 
         reviewer.hold(this.getModel().getParameters().getReviewTimeDist().sampleTimeSpan(TimeUnit.HOURS));
 
-        final List<Issue> foundIssues = new ArrayList<>();
+        final Set<Issue> foundIssues = new LinkedHashSet<>();
         for (final Issue b : this.lurkingIssues) {
             if (reviewer.findsIssue()) {
                 foundIssues.add(b);
@@ -296,6 +301,7 @@ abstract class Task extends PrePostEntity implements MemoryItem {
         }
         foundIssues.addAll(this.issuesFoundByOthersDuringReview);
         this.issuesFoundByOthersDuringReview = null;
+        assert this.lurkingIssues.containsAll(foundIssues);
         reviewer.sendTraceNote("ends review of " + this + ", found " + foundIssues.size() + " of " + this.lurkingIssues.size() + " issues " + foundIssues);
         this.currentReview = new Review(foundIssues);
         if (foundIssues.isEmpty()) {
@@ -353,6 +359,7 @@ abstract class Task extends PrePostEntity implements MemoryItem {
         //In reality, it could happen that remarks are not fixed correctly or at all. This is not modeled here,
         //  as these wrong fixes could be regarded as new issues (which are modeled).
 
+        assert !this.currentReview.getRemarks().isEmpty();
         TimeSpan timeForFixing = new TimeSpan(0);
         for (final Issue b : this.currentReview.getRemarks()) {
             timeForFixing = TimeOperations.add(timeForFixing, b.getFixEffort());
@@ -364,7 +371,7 @@ abstract class Task extends PrePostEntity implements MemoryItem {
         final TimeSpan issueTime = TimeOperations.add(
                         timeForFixing,
                         TimeOperations.multiply(taskSwitchTime, this.getModel().getParameters().getTaskSwitchTimeIssueFactor()));
-        this.createIssues(issueTime, true, true);
+        this.createIssues(issueTime, true, this.currentReview.getRemarks().size());
         this.endImplementation();
     }
 
@@ -376,7 +383,14 @@ abstract class Task extends PrePostEntity implements MemoryItem {
         this.handleTaskSwitchOverhead(dev);
         dev.hold(this.getModel().getParameters().getIssueAssessmentTimeDist().sampleTimeSpan(TimeUnit.HOURS));
 
+        if (issue.wasObserved()) {
+            //possibly the issue was already found in a review while the developer was busy doing bug assessment
+            //  when he finally figures that out, there's nothing more to do
+            this.getModel().dynamicCount("issueAssessmentResultAlreadyObserved");
+            return;
+        }
         this.getModel().dynamicCount("issueAssessmentResult" + this.state + "withStory" + (this.getStory().isFinished() ? "Finished" : "InWork"));
+        issue.setWasObserved();
         switch (this.state) {
         case OPEN:
             throw new AssertionError("Should not happen: Issue in open task " + this);

@@ -74,7 +74,11 @@ class IssueFixTask extends Task {
      */
     @Override
     protected void handleCommited() {
-        this.issue.fix();
+        if (!this.isCommited()) {
+            //only call fix the first time the task is commitet (post commit will be commited several times)
+            this.issue.fix();
+        }
+        assert this.issue.isFixed();
     }
 
     /**

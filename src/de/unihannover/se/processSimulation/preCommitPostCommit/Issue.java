@@ -59,6 +59,7 @@ abstract class Issue extends PrePostEntity {
     private boolean startedForDevelopers;
     private boolean startedForCustomers;
     private boolean fixed;
+    private boolean wasObserved;
     private final TimeSpan fixEffort;
 
     /**
@@ -122,10 +123,11 @@ abstract class Issue extends PrePostEntity {
      * in a review, too.
      */
     public final void fix() {
-        if (!this.fixed) {
-            this.fixed = true;
-            this.task.handleIssueFixed(this);
-        }
+        assert this.wasObserved;
+        assert !this.fixed;
+
+        this.fixed = true;
+        this.task.handleIssueFixed(this);
     }
 
     /**
@@ -147,6 +149,20 @@ abstract class Issue extends PrePostEntity {
      */
     public TimeSpan getFixEffort() {
         return this.fixEffort;
+    }
+
+    /**
+     * Registers that this issue was observed (and assessed) by a developer.
+     */
+    void setWasObserved() {
+        this.wasObserved = true;
+    }
+
+    /**
+     * Returns true if this issue has already been observed by someone, either in review or in issue assessment.
+     */
+    boolean wasObserved() {
+        return this.wasObserved;
     }
 
 }
