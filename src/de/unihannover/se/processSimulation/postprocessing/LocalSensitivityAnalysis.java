@@ -1,6 +1,7 @@
 package de.unihannover.se.processSimulation.postprocessing;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,6 +13,7 @@ import de.unihannover.se.processSimulation.dataGenerator.BulkParameterFactory.Di
 import de.unihannover.se.processSimulation.dataGenerator.BulkParameterFactory.ParameterType;
 import de.unihannover.se.processSimulation.dataGenerator.DataGenerator;
 import de.unihannover.se.processSimulation.dataGenerator.ExperimentRun;
+import de.unihannover.se.processSimulation.dataGenerator.ExperimentRun.PrePostComparison;
 import de.unihannover.se.processSimulation.dataGenerator.ExperimentRunSettings;
 import de.unihannover.se.processSimulation.dataGenerator.ExperimentRunSettings.ExperimentRunParameters;
 import de.unihannover.se.processSimulation.dataGenerator.MedianWithConfidenceInterval;
@@ -22,7 +24,9 @@ public class LocalSensitivityAnalysis {
     public static void main(String[] args) throws Exception {
         BulkParameterFactory f = BulkParameterFactory.forCommercial();
         final List<ParameterType> types = new ArrayList<>();
-        try (BufferedReader r = new BufferedReader(new FileReader("localSensitivityInput.txt"))) {
+        System.out.println("Local sensitivity analysis for parameters: " + args[0]);
+        System.out.println();
+        try (BufferedReader r = new BufferedReader(new FileReader(args[0]))) {
             String line;
             while ((line = r.readLine()) != null) {
                 final String[] parts = line.split(":");
@@ -32,22 +36,23 @@ public class LocalSensitivityAnalysis {
                 f = f.copyWithChangedParam(type, value);
             }
         }
+        final String filename = new File(args[0]).getName();
 
         final List<Pair<String, Double>> results = new ArrayList<>();
-        performExperiment(results, f, "original data");
+        performExperiment(results, f, "original data", filename);
         for (final ParameterType t : types) {
             if (Double.class.isAssignableFrom(t.getType())) {
-                final BulkParameterFactory fUpp = f.copyWithChangedParam(t, ((Number) f.getParam(t)).doubleValue() * 2.0);
-                performExperiment(results, fUpp, t + " +> " + fUpp.getParam(t));
+                final BulkParameterFactory fUpp = f.copyWithChangedParam(t, ((Number) f.getParam(t)).doubleValue() * 1.5);
+                performExperiment(results, fUpp, t + " +> " + fUpp.getParam(t), filename);
 
                 final BulkParameterFactory fLow = f.copyWithChangedParam(t, ((Number) f.getParam(t)).doubleValue() * 0.5);
-                performExperiment(results, fLow, t + " -> " + fLow.getParam(t));
+                performExperiment(results, fLow, t + " -> " + fLow.getParam(t), filename);
             } else if (Integer.class.isAssignableFrom(t.getType())) {
-                final BulkParameterFactory fUpp = f.copyWithChangedParam(t, (int) (((Number) f.getParam(t)).doubleValue() * 2.0));
-                performExperiment(results, fUpp, t + " +> " + fUpp.getParam(t));
+                final BulkParameterFactory fUpp = f.copyWithChangedParam(t, (int) (((Number) f.getParam(t)).doubleValue() * 1.5));
+                performExperiment(results, fUpp, t + " +> " + fUpp.getParam(t), filename);
 
                 final BulkParameterFactory fLow = f.copyWithChangedParam(t, (int) (((Number) f.getParam(t)).doubleValue() * 0.5));
-                performExperiment(results, fLow, t + " -> " + fLow.getParam(t));
+                performExperiment(results, fLow, t + " -> " + fLow.getParam(t), filename);
             } else if (t.getType().equals(DistributionFactory.class)) {
                 final DistributionFactory oldValue = (DistributionFactory) f.getParam(t);
                 DistributionFactory newValue;
@@ -56,7 +61,7 @@ public class LocalSensitivityAnalysis {
                 } else {
                     newValue = DistributionFactory.EXPSHIFT;
                 }
-                performExperiment(results, f.copyWithChangedParam(t, newValue), t + " -> " + newValue);
+                performExperiment(results, f.copyWithChangedParam(t, newValue), t + " -> " + newValue, filename);
             } else if (t.getType().equals(DependencyGraphConstellation.class)) {
                 final DependencyGraphConstellation oldValue = (DependencyGraphConstellation) f.getParam(t);
                 DependencyGraphConstellation newValue;
@@ -65,7 +70,7 @@ public class LocalSensitivityAnalysis {
                 } else {
                     newValue = DependencyGraphConstellation.NO_DEPENDENCIES;
                 }
-                performExperiment(results, f.copyWithChangedParam(t, newValue), t + " -> " + newValue);
+                performExperiment(results, f.copyWithChangedParam(t, newValue), t + " -> " + newValue, filename);
             }
         }
 
@@ -77,14 +82,29 @@ public class LocalSensitivityAnalysis {
         }
     }
 
-    private static void performExperiment(List<Pair<String, Double>> results, BulkParameterFactory f, String title) {
+    private static void performExperiment(List<Pair<String, Double>> results, BulkParameterFactory f, String title, String filename) {
         final ExperimentRunSettings runSettings = ExperimentRunSettings.defaultSettings()
-                        .copyWithChangedParam(ExperimentRunParameters.MIN_RUNS, 40)
-                        .copyWithChangedParam(ExperimentRunParameters.MAX_RUNS, 60);
+                        .copyWithChangedParam(ExperimentRunParameters.MIN_RUNS, 20)
+                        .copyWithChangedParam(ExperimentRunParameters.MAX_RUNS, 160);
         final ExperimentRun result = ExperimentRun.perform(runSettings, DataGenerator::runExperiment, f, (no, pre, post) -> {System.out.print(".");});
         System.out.println();
-        final MedianWithConfidenceInterval median = result.getFactorIssues();
-        System.out.println(title + ": " + median + " " + result.getSummary().getIssuesResult());
+        final MedianWithConfidenceInterval median;
+        final PrePostComparison prePostComparison;
+        final String type;
+        if (filename.contains("storyPoints")) {
+            median = result.getFactorStoryPoints();
+            prePostComparison = result.getSummary().getStoryPointsResult();
+            type = "storyPoints";
+        } else if (filename.contains("cycleTime")) {
+            median = result.getFactorCycleTime();
+            prePostComparison = result.getSummary().getCycleTimeResult();
+            type = "cycleTime";
+        } else {
+            median = result.getFactorIssues();
+            prePostComparison = result.getSummary().getIssuesResult();
+            type = "issues";
+        }
+        System.out.println(title + ": " + median + " " + prePostComparison + " " + type);
         results.add(new Pair<String, Double>(title, median.getMedian()));
     }
 

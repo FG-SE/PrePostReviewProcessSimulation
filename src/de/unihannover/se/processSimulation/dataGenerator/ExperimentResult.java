@@ -47,6 +47,9 @@ public class ExperimentResult {
     private final double avgReviewRoundCount;
     private final double avgTimePostToPre;
     private final double avgTimePreToCust;
+    private final double avgIssuesInjectedPerReviewRemark;
+    private final double avgIssuesInjectedPerIssueTask;
+    private final double avgIssuesInjectedPerImplementationTask;
 
     public ExperimentResult(
                     long finishedStoryPoints,
@@ -75,6 +78,9 @@ public class ExperimentResult {
                     double avgReviewRoundCount,
                     double avgTimePostToPre,
                     double avgTimePreToCust,
+                    double avgIssuesInjectedPerReviewRemark,
+                    double avgIssuesInjectedPerIssueTask,
+                    double avgIssuesInjectedPerImplementationTask,
                     long expWallClockDuration,
                     boolean hadError) {
         this.finishedStoryPoints = finishedStoryPoints;
@@ -103,6 +109,9 @@ public class ExperimentResult {
         this.avgReviewRoundCount = avgReviewRoundCount;
         this.avgTimePostToPre = avgTimePostToPre;
         this.avgTimePreToCust = avgTimePreToCust;
+        this.avgIssuesInjectedPerReviewRemark = avgIssuesInjectedPerReviewRemark;
+        this.avgIssuesInjectedPerIssueTask = avgIssuesInjectedPerIssueTask;
+        this.avgIssuesInjectedPerImplementationTask = avgIssuesInjectedPerImplementationTask;
         this.expWallClockDuration = expWallClockDuration;
         this.hadError = hadError;
     }
@@ -206,6 +215,18 @@ public class ExperimentResult {
 
     public double getAvgTimePreToCust() {
         return this.avgTimePreToCust;
+    }
+
+    public double getAvgIssuesInjectedPerReviewRemark() {
+        return this.avgIssuesInjectedPerReviewRemark;
+    }
+
+    public double getAvgIssuesInjectedPerIssueTask() {
+        return this.avgIssuesInjectedPerIssueTask;
+    }
+
+    public double getAvgIssuesInjectedPerImplementationTask() {
+        return this.avgIssuesInjectedPerImplementationTask;
     }
 
     public double getWastedTimeTaskSwitch() {

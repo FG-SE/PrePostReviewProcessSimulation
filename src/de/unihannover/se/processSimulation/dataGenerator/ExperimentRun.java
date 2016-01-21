@@ -394,6 +394,21 @@ public class ExperimentRun {
         return this.median(values);
     }
 
+    public MedianWithConfidenceInterval getAvgIssuesInjectedPerReviewRemarkMedian(ReviewMode mode) {
+        final double[] values = this.getResults(mode, ExperimentResult::getAvgIssuesInjectedPerReviewRemark);
+        return this.median(values);
+    }
+
+    public MedianWithConfidenceInterval getAvgIssuesInjectedPerIssueTaskMedian(ReviewMode mode) {
+        final double[] values = this.getResults(mode, ExperimentResult::getAvgIssuesInjectedPerIssueTask);
+        return this.median(values);
+    }
+
+    public MedianWithConfidenceInterval getAvgIssuesInjectedPerImplementationTaskMedian(ReviewMode mode) {
+        final double[] values = this.getResults(mode, ExperimentResult::getAvgIssuesInjectedPerImplementationTask);
+        return this.median(values);
+    }
+
     public MedianWithConfidenceInterval getWastedTimeTaskSwitchMedian(ReviewMode mode) {
         final double[] values = this.getResults(mode, ExperimentResult::getWastedTimeTaskSwitch);
         return this.median(values);

@@ -430,4 +430,16 @@ public class BulkParameterFactory extends ParametersFactory {
         return this.getParamI(ParameterType.NUMBER_OF_DEVELOPERS);
     }
 
+    public static BulkParameterFactory mix(BulkParameterFactory f1, BulkParameterFactory f2, long mixPattern) {
+        long curPattern = mixPattern;
+        BulkParameterFactory ret = f1;
+        for (final ParameterType t : ParameterType.values()) {
+            if ((curPattern & 0x01) != 0) {
+                ret = ret.copyWithChangedParam(t, f2.getParam(t));
+            }
+            curPattern >>= 1;
+        }
+        return ret;
+    }
+
 }

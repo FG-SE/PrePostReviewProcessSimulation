@@ -64,6 +64,9 @@ public class PrePostModel extends Model {
     private Tally reviewRoundCount;
     private Tally timePostToPre;
     private Tally timePreToCust;
+    private Tally issuesInjectedPerReviewRemark;
+    private Tally issuesInjectedPerIssueTask;
+    private Tally issuesInjectedPerImplementationTask;
     private final Map<String, Aggregate> timeCounters = new HashMap<>();
     private final Map<String, Count> dynamicCounters = new HashMap<>();
 
@@ -123,6 +126,9 @@ public class PrePostModel extends Model {
         this.reviewRoundCount = new Tally(this, "reviewRoundCount", true, false);
         this.timePostToPre = new Tally(this, "timePostToPre", true, false);
         this.timePreToCust = new Tally(this, "timePreToCust", true, false);
+        this.issuesInjectedPerReviewRemark = new Tally(this, "issuesInjectedPerReviewRemark", true, false);
+        this.issuesInjectedPerIssueTask = new Tally(this, "issuesInjectedPerIssueTask", true, false);
+        this.issuesInjectedPerImplementationTask = new Tally(this, "issuesInjectedPerImplementationTask", true, false);
 
         for (int i = 0; i < this.parameters.getNumDevelopers(); i++) {
             this.developers.add(new Developer(this,
@@ -392,12 +398,12 @@ public class PrePostModel extends Model {
         return this.getTimeCounterAvg("timeFor_fixingReviewRemarks");
     }
 
-    public double getAvgBugFixingTime() {
-        return this.getTimeCounterAvg("timeFor_fixingBugs");
+    public double getAvgIssueFixingTime() {
+        return this.getTimeCounterAvg("timeFor_fixingIssues");
     }
 
-    public double getAvgBugAssessmentTime() {
-        return this.getTimeCounterAvg("timeFor_assessingBugs");
+    public double getAvgIssueAssessmentTime() {
+        return this.getTimeCounterAvg("timeFor_assessingIssues");
     }
 
     public double getAvgPlanningTime() {
@@ -416,16 +422,40 @@ public class PrePostModel extends Model {
         return this.getTimeCounterTotal("timeFor_fixingReviewRemarks");
     }
 
-    public double getTotalBugFixingTime() {
-        return this.getTimeCounterTotal("timeFor_fixingBugs");
+    public double getTotalIssueFixingTime() {
+        return this.getTimeCounterTotal("timeFor_fixingIssues");
     }
 
-    public double getTotalBugAssessmentTime() {
-        return this.getTimeCounterTotal("timeFor_assessingBugs");
+    public double getTotalIssueAssessmentTime() {
+        return this.getTimeCounterTotal("timeFor_assessingIssues");
     }
 
     public double getTotalPlanningTime() {
         return this.getTimeCounterTotal("timeFor_planning");
+    }
+
+    void updateIssuesInjectedPerReviewRemark(double ratio) {
+        this.issuesInjectedPerReviewRemark.update(ratio);
+    }
+
+    public double getAvgIssuesInjectedPerReviewRemark() {
+        return this.issuesInjectedPerReviewRemark.getMean();
+    }
+
+    void updateIssuesInjectedPerIssueTask(double ratio) {
+        this.issuesInjectedPerIssueTask.update(ratio);
+    }
+
+    public double getAvgIssuesInjectedPerIssueTask() {
+        return this.issuesInjectedPerIssueTask.getMean();
+    }
+
+    void updateIssuesInjectedPerImplementationTask(double ratio) {
+        this.issuesInjectedPerImplementationTask.update(ratio);
+    }
+
+    public double getAvgIssuesInjectedPerImplementationTask() {
+        return this.issuesInjectedPerImplementationTask.getMean();
     }
 
 }
