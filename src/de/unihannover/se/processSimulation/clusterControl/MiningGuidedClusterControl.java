@@ -40,7 +40,7 @@ public class MiningGuidedClusterControl {
     private static final int TUPLES_PER_FILE = 15;
     private static final long MESSAGE_TIMEOUT = 1000L * 60 * 60 * 3;
     private static final long RESEND_TIMEOUT = 1000L * 60 * 60 * 12;
-    private static final int NEW_WORK_THRESHOLD = 50;
+    private static final int NEW_WORK_THRESHOLD = 120;
 
     private static final class TupleWriter {
         private final File dir;
