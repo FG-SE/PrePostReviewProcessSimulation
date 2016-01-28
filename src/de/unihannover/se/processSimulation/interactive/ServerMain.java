@@ -458,9 +458,15 @@ public class ServerMain extends AbstractHandler {
         w.println("Median finished stories (best alternative): " + result.getFinishedStoryMedian().toHtml() + "<br/>");
         w.println("Median share of productive work: " + result.getShareProductiveWork().toHtmlPercent() + "<br/>");
         w.println("Median share no review/review story points: " + result.getFactorNoReview().toHtmlPercent() + "<br/>");
-        w.println("Median difference pre/post story points: " + this.formatDiff(result.getFactorStoryPoints(), "pre", "post") + "<br/>");
-        w.println("Median difference pre/post issues found by customer/story point: " + this.formatDiff(result.getFactorIssues(), "post", "pre") + "<br/>");
-        w.println("Median difference pre/post cycle time: " + this.formatDiff(result.getFactorCycleTime(), "post", "pre") + "<br/>");
+        w.println("Median difference pre/post story points: "
+                        + this.formatDiff(result.getFactorStoryPoints(), "pre", "post") + "; "
+                        + result.getMinMaxFactorStoryPoints() + "<br/>");
+        w.println("Median difference pre/post issues found by customer/story point: "
+                        + this.formatDiff(result.getFactorIssues(), "post", "pre") + "; "
+                        + result.getMinMaxFactorIssues() + "<br/>");
+        w.println("Median difference pre/post cycle time: "
+                        + this.formatDiff(result.getFactorCycleTime(), "post", "pre") + "; "
+                        + result.getMinMaxFactorCycleTime() + "<br/>");
         w.println("<br/>");
 
         detailsTable.append("<tr>");

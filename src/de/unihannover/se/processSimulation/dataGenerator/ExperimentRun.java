@@ -458,6 +458,31 @@ public class ExperimentRun {
         return this.median(values);
     }
 
+    public String getMinMaxFactorStoryPoints() {
+        final double[] values = this.results.stream().mapToDouble(x -> x.factorPrePost(ExperimentResult::getFinishedStoryPoints)).toArray();
+        return this.minMax(values);
+    }
+
+    public String getMinMaxFactorIssues() {
+        final double[] values = this.results.stream().mapToDouble(x -> x.factorPrePost(ExperimentResult::getIssueCountFoundByCustomersPerStoryPoint)).toArray();
+        return this.minMax(values);
+    }
+
+    public String getMinMaxFactorCycleTime() {
+        final double[] values = this.results.stream().mapToDouble(x -> x.factorPrePost(ExperimentResult::getStoryCycleTimeMeanWithDefault)).toArray();
+        return this.minMax(values);
+    }
+
+    private String minMax(double[] values) {
+        double min = Double.POSITIVE_INFINITY;
+        double max = Double.NEGATIVE_INFINITY;
+        for (final double value : values) {
+            min = Math.min(min, value);
+            max = Math.max(max, value);
+        }
+        return String.format("Minimum: %.2f%%, Maximum: %.2f%%", min * 100, max * 100);
+    }
+
     /**
      * Returns the median factor between the story points finished without and with review.
      * For every random trial, the factor no review / max(post, pre) is calculated.
