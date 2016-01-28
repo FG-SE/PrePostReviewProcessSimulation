@@ -19,6 +19,7 @@ package de.unihannover.se.processSimulation.preCommitPostCommit;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -268,10 +269,14 @@ abstract class Task extends PrePostEntity implements MemoryItem {
      * @pre this.state == State.IN_IMPLEMENTATION
      */
     public void suspendImplementationForFixing(Issue issue) {
+        assert issue.wasObserved();
+        assert !issue.isFixed();
+
         //there is no task switch overhead because the fix belongs to the current task
         final TimeSpan timeSpan = issue.getFixEffort();
         this.createIssues(timeSpan, true, 1);
         this.suspendImplementation(timeSpan);
+        this.lurkingIssues.remove(issue);
         this.issuesFixedInCommit.add(issue);
     }
 
@@ -487,6 +492,7 @@ abstract class Task extends PrePostEntity implements MemoryItem {
 
         this.handleCommited();
         this.commited = true;
+        assert containsNoDuplicates(this.issuesFixedInCommit);
         for (final Issue b : this.issuesFixedInCommit) {
             b.fix();
         }
@@ -495,6 +501,10 @@ abstract class Task extends PrePostEntity implements MemoryItem {
             assert !b.isFixed();
             b.handlePublishedForDevelopers();
         }
+    }
+
+    private static boolean containsNoDuplicates(List<Issue> l) {
+        return l.size() == new HashSet<Issue>(l).size();
     }
 
     /**
