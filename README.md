@@ -16,8 +16,8 @@ Don't forget to activate the quasar agent using the command line option for the 
 Cluster workers and cluster control communicate using Apache ActiveMQ.
 The main class de.unihannover.se.processSimulation.clusterControl.ClusterWorker starts a worker.
 There are several types of control nodes:
-de.unihannover.se.processSimulation.clusterControl.ClusterControl for pre-created data (e.g. sensitivity analysis)
-de.unihannover.se.processSimulation.clusterControl.MiningGuidedClusterControl for random data or data generation guided by data mining
+de.unihannover.se.processSimulation.clusterControl.ClusterControl for pre-created data (e.g. sensitivity analysis),
+de.unihannover.se.processSimulation.clusterControl.MiningGuidedClusterControl for random data or data generation guided by data mining,
 de.unihannover.se.processSimulation.clusterControl.MixingClusterControl for data obtained by mixing points with opposite outcomes
 
 ## Further tools
