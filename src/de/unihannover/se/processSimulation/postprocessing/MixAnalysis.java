@@ -35,6 +35,9 @@ public class MixAnalysis {
         performExperiment(results, f2, "original data 2", filename);
         for (int i = 0; i < ParameterType.values().length; i++) {
             final ParameterType t = ParameterType.values()[i];
+            if (f1.getParam(t).equals(f2.getParam(t))) {
+                continue;
+            }
             final long mixPattern = 1L << i;
             final BulkParameterFactory mix1 = BulkParameterFactory.mix(f1, f2, mixPattern);
             final BulkParameterFactory mix2 = BulkParameterFactory.mix(f2, f1, mixPattern);
