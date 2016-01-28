@@ -26,7 +26,6 @@ import de.unihannover.se.processSimulation.preCommitPostCommit.DependencyGraphCo
 import desmoj.core.dist.BoolDistBernoulli;
 import desmoj.core.dist.ContDist;
 import desmoj.core.dist.ContDistAggregate;
-import desmoj.core.dist.ContDistBeta;
 import desmoj.core.dist.ContDistConstant;
 import desmoj.core.dist.ContDistExponential;
 import desmoj.core.dist.ContDistNormal;
@@ -41,6 +40,9 @@ import desmoj.core.simulator.TimeSpan;
 public class BulkParameterFactory extends ParametersFactory {
 
     public enum DistributionFactory {
+        /**
+         * A normal (gaussian) distribution, limited to positive numbers.
+         */
         POSNORMAL {
             @Override
             public NumericalDist<Double> create(DistributionBuilder b, String name, double mean, double mode) {
@@ -52,6 +54,9 @@ public class BulkParameterFactory extends ParametersFactory {
                 return b.posNormal(name, mean);
             }
         },
+        /**
+         * A log-normal distribution.
+         */
         LOGNORMAL {
             @Override
             public NumericalDist<Double> create(DistributionBuilder b, String name, double mean, double mode) {
@@ -63,6 +68,9 @@ public class BulkParameterFactory extends ParametersFactory {
                 return b.logNormal(name, mean, mean / 5.0);
             }
         },
+        /**
+         * An exponential distribution that is shifted so that the mode does not have to be at 0.
+         */
         EXPSHIFT {
             @Override
             public NumericalDist<Double> create(DistributionBuilder b, String name, double mean, double mode) {
@@ -81,46 +89,188 @@ public class BulkParameterFactory extends ParametersFactory {
     }
 
     public enum ParameterType {
+        /**
+         * The mode of a triangular distribution giving the implementation skills of the developers,
+         * measured in issues injected per implementation task hour.
+         */
         IMPLEMENTATION_SKILL_MODE(Double.class, "Die 'Implementierungs-Fähigkeit' der Entwickler, gemessen in Issues pro Stunde. Das Modell geht davon aus, dass Unit-Tests, Continuous Integration etc bereits vor dem Review gelaufen sind, deshalb dürfen dort auftretende Probleme hier nicht mitzählen. Die konkrete Fähigkeit der Entwickler ergibt sich zufällig (Dreiecksverteilung) auf Basis des angegebenen Werts."),
+        /**
+         * The width of a triangular distribution giving the implementation skills of the developers,
+         * measured in issues injected per implementation task hour. The triangle is chosen as symmetric as possible,
+         * given the lower bound of 0 issues/hour.
+         */
         IMPLEMENTATION_SKILL_TRIANGLE_WIDTH(Double.class, ""),
+        /**
+         * The mode of a triangular distribution giving the code reviewing skills of the developers,
+         * measured as the probability of detecting an issue in review.
+         */
         REVIEW_SKILL_MODE(Double.class, "Die 'Review-Fähigkeit' der Entwickler, angegeben als Wahrscheinlichkeit, ein Problem im Review zu entdecken. 1,0 heißt also 'jedes Problem wird entdeckt', 0,0 heißt 'kein Problem wird entdeckt'. Die konkrete Fähigkeit der Entwickler ergibt sich zufällig (Dreiecksverteilung) auf Basis des angegebenen Werts."),
+        /**
+         * The width of a triangular distribution giving the code reviewing skills of the developers,
+         * measured as the probability of detecting an issue in review. The triangle is chosen as symmetric as possible,
+         * given the lower bound of 0 and the upper bound of 1.
+         */
         REVIEW_SKILL_TRIANGLE_WIDTH(Double.class, ""),
+        /**
+         * The mode of a triangular distribution giving for each developer the probability that a global blocker issue is injected implementing a task or fix.
+         */
         GLOBAL_ISSUE_MODE(Double.class, "Die Wahrscheinlichkeit, dass ein 'globales Problem' beim Implementieren eines Tasks eingebaut wird. 1,0 heißt 'es wird immer eingebaut', 0,0 heißt 'es wird nie eingebaut'."),
+        /**
+         * The width of a triangular distribution giving for each developer the probability that a global blocker issue is injected implementing a task or fix.
+         * The triangle is chosen as symmetric as possible, given the lower bound of 0 and the upper bound of 1.
+         */
         GLOBAL_ISSUE_TRIANGLE_WIDTH(Double.class, ""),
+        /**
+         * The probability that a conflict occurs between a task and another specific task that was committed between the first task's update and now.
+         */
         CONFLICT_PROBABILITY(Double.class, "Die Wahrscheinlichkeit, dass es beim Commit zu einem Konflikt mit einem konkreten anderen Task kommt, der zwischen dem eigenen Update und jetzt commitet hat. Mit anderen Worten die Wahrscheinlichkeit, dass zwei zur gleichen Zeit laufende Tasks die gleichen Stellen betreffen."),
+        /**
+         * Type of the distribution from which a story task's duration (without overhead) is sampled.
+         */
         IMPLEMENTATION_TIME_DIST(DistributionFactory.class, ""),
+        /**
+         * Mode of the distribution from which a story task's duration (without overhead) is sampled.
+         */
         IMPLEMENTATION_TIME_MODE(Double.class, ""),
+        /**
+         * Difference between mean and mode for the distribution from which a story task's duration (without overhead) is sampled.
+         */
         IMPLEMENTATION_TIME_MEAN_DIFF(Double.class, "Die Dauer für die Implementierung eines Story-Tasks in Stunden (ohne Overhead). Angegeben als Differenz zwischen Modus und arithmetischem Mittel der Log-Normal-Verteilung, entspricht bei üblich kleinen Werten für den Modus also grob dem Mittelwert."),
+        /**
+         * Type of the distribution from which the overhead analysis time for fixing an issue as an issue fix task
+         * (in addition to the time needed to fix it as review remark) is sampled.
+         */
         ISSUEFIX_TASK_OVERHEAD_TIME_DIST(DistributionFactory.class, ""),
+        /**
+         * Mode of the distribution from which the overhead analysis time for fixing an issue as an issue fix task
+         * (in addition to the time needed to fix it as review remark) is sampled.
+         */
         ISSUEFIX_TASK_OVERHEAD_TIME_MODE(Double.class, ""),
+        /**
+         * Difference between mean and mode for the distribution from which the overhead analysis time for fixing an issue as an issue fix task
+         * (in addition to the time needed to fix it as review remark) is sampled.
+         */
         ISSUEFIX_TASK_OVERHEAD_TIME_MEAN_DIFF(Double.class, "Die Dauer für die Analyse eines Issuefix-Tasks in Stunden (ohne Taskwechsel-Overhead). Die Zeit für das eigentliche Fixen ist dann die gleiche wie beim Review-Remark. Angegeben als Differenz zwischen Modus und arithmetischem Mittel der Log-Normal-Verteilung, entspricht bei üblich kleinen Werten für den Modus also grob dem Mittelwert."),
+        /**
+         * Type of the distribution from which the time needed to fix a single review remark is sampled.
+         */
         REVIEW_REMARK_FIX_TIME_DIST(DistributionFactory.class, ""),
+        /**
+         * Mode of the distribution from which the time needed to fix a single review remark is sampled.
+         */
         REVIEW_REMARK_FIX_TIME_MODE(Double.class, ""),
+        /**
+         * Difference between mean and mode for the distribution from which the time needed to fix a single review remark is sampled.
+         */
         REVIEW_REMARK_FIX_TIME_MEAN_DIFF(Double.class, "Die Dauer für die Korrektur einer einzelnen Review-Anmerkung in Stunden (ohne Overhead). Angegeben als Differenz zwischen Modus und arithmetischem Mittel der Log-Normal-Verteilung, entspricht bei üblich kleinen Werten für den Modus also grob dem Mittelwert."),
+        /**
+         * Mode of a triangular distribution taken for sampling the time for interruptions through global blocker issues.
+         */
         GLOBAL_ISSUE_SUSPEND_TIME_MODE(Double.class, "Dauer der Unterbrechung der Implementierung durch ein 'globales Problem', angegeben in Stunden (Modus einer Dreiecksverteilung)."),
+        /**
+         * Width of a triangular distribution taken for sampling the time for interruptions through global blocker issues.
+         * The triangle is chosen as symmetric as possible, given the lower bound of 0.
+         */
         GLOBAL_ISSUE_SUSPEND_TIME_TRIANGLE_WIDTH(Double.class, ""),
+        /**
+         * Mode of the log-normal distribution from which the time needed for issue assessment is sampled.
+         */
         ISSUE_ASSESSMENT_TIME_MODE(Double.class, ""),
+        /**
+         * Difference between mean and mode for the log-normal distribution from which the time needed for issue assessment is sampled.
+         */
         ISSUE_ASSESSMENT_TIME_MEAN_DIFF(Double.class, ""),
+        /**
+         * Mode of a triangular distribution taken for sampling the time for resolving a conflict on commit.
+         */
         CONFLICT_RESOLUTION_TIME_MODE(Double.class, "Dauer des Commit-Konfliktauflösung, angegeben in Stunden (Modus einer Dreiecksverteilung)."),
+        /**
+         * Width of a triangular distribution taken for sampling the time for resolving a conflict on commit.
+         * The triangle is chosen as symmetric as possible, given the lower bound of 0.
+         */
         CONFLICT_RESOLUTION_TIME_TRIANGLE_WIDTH(Double.class, ""),
+        /**
+         * Share of issues that can not be found by customers.
+         * 0.0 := all issues can be found by customers
+         * 1.0 := no issues can be found by customers
+         */
         INTERNAL_ISSUE_SHARE(Double.class, "Anteil an internen (Wartbarkeits- o.ä.) Problemen an der Gesamtzahl"),
+        /**
+         * Shift for a shifted exponential distribution giving the time between committing an issue and its surfacing to a developer.
+         */
         ISSUE_ACTIVATION_TIME_DEVELOPER_MODE(Double.class, ""),
+        /**
+         * Unshifted mean for a shifted exponential distribution giving the time between committing an issue and its surfacing to a developer.
+         */
         ISSUE_ACTIVATION_TIME_DEVELOPER_MEAN_DIFF(Double.class, "Durchschnittliche Zeit in Stunden zwischen Commit eines Problems und (zufälliger) Entdeckung durch einen Entwickler (Mittelwert einer Exponentialverteilung)."),
+        /**
+         * Shift for a shifted exponential distribution giving the time between "delivering" an issue and its surfacing to a customer.
+         */
         ISSUE_ACTIVATION_TIME_CUSTOMER_MODE(Double.class, ""),
+        /**
+         * Unshifted mean for a shifted exponential distribution giving the time between "delivering" an issue and its surfacing to a customer.
+         */
         ISSUE_ACTIVATION_TIME_CUSTOMER_MEAN_DIFF(Double.class, "Durchschnittliche Zeit in Stunden zwischen 'Auslieferung' eines Problems und Entdeckung durch einen Kunden (Mittelwert einer Exponentialverteilung)."),
+        /**
+         * Type of the distribution from which the time needed for planning a story is sampled.
+         */
         PLANNING_TIME_DIST(DistributionFactory.class, ""),
+        /**
+         * Mean of the distribution from which the time needed for planning a story is sampled.
+         */
         PLANNING_TIME_MEAN(Double.class, ""),
+        /**
+         * Type of the distribution from which the time needed for a single review round is sampled.
+         */
         REVIEW_TIME_DIST(DistributionFactory.class, ""),
+        /**
+         * Mode of the distribution from which the time needed for a single review round is sampled.
+         */
         REVIEW_TIME_MODE(Double.class, ""),
+        /**
+         * Difference between mean and mode for the distribution from which the time needed for a single review round is sampled.
+         */
         REVIEW_TIME_MEAN_DIFF(Double.class, "Die Dauer für ein Review eines Tasks in Stunden (ohne Overhead). Angegeben als Differenz zwischen Modus und arithmetischem Mittel der Log-Normal-Verteilung, entspricht bei üblich kleinen Werten für den Modus also grob dem Mittelwert."),
+        /**
+         * Number of developers working in the team/same part of the software.
+         */
         NUMBER_OF_DEVELOPERS(Integer.class, "Anzahl der Entwickler im Team"),
+        /**
+         * Time it takes for a developer to re-familiarize himself with a topic after working on another topic for one hour.
+         */
         TASK_SWITCH_OVERHEAD_AFTER_ONE_HOUR(Double.class, "Zeit um wieder in ein Thema reinzukommen, nachdem man sich eine Stunde lang mit etwas anderem beschäftigt hat."),
+        /**
+         * Time it takes for a developer to re-familiarize himself with a topic after working on another topic for a very long time (or for the first time).
+         */
         MAX_TASK_SWITCH_OVERHEAD(Double.class, "Zeit um wieder in ein Thema reinzukommen, nachdem man sich sehr lange mit etwas anderem beschäftigt hat oder sich noch nie mit dem Thema beschäftigt hatte."),
+        /**
+         * Maximum number of items on the board compared when deciding which has the smallest task switch overhead.
+         */
         BOARD_SEARCH_CUTOFF_LIMIT(Integer.class, ""),
+        /**
+         * Factor that determines to which amount time needed for task switch will be taken into account when calculating the number of issues injected.
+         * 0.0 := task switch time is not taken into account for bug calculation
+         * 1.0 := task switch time is fully taken into account for bug calculation
+         * >1.0 := task switch time provokes more issues than normal implementation time
+         */
         TASK_SWITCH_TIME_ISSUE_FACTOR(Double.class, ""),
+        /**
+         * Factor for the issue injection rate that determines how safe fixing is compared to creating new code.
+         * 0.0 := No issues are injected during fixing
+         * 1.0 := During fixing, the same number of issues per hour like for normal implementation is injected.
+         */
         FIXING_ISSUE_RATE_FACTOR(Double.class, "Faktor der festlegt, wie viel 'ungefährlicher' Korrekturen gegenüber Neuentwicklung sind. Wird als Multiplikator des Implementierungs-Skills des Entwicklers aufgefasst. 1,0 heißt 'bei Fixes und Neuentwicklung macht man gleich viel Fehler pro Stunde', Werte kleiner 0 heißen 'bei Fixes macht man weniger Fehler pro Stunde', Werte größer 0 heißen 'bei Fixes macht man mehr Fehler pro Stunde'."),
+        /**
+         * Probability that an issue in a predecessor task leads to a follow up issue in a dependent task.
+         */
         FOLLOW_UP_ISSUE_SPAWN_PROBABILITY(Double.class, ""),
+        /**
+         * Factor determining how time-consuming fixing an issue (without finding it) is in an issue fix task compared to a review remark.
+         */
         REVIEW_FIX_TO_TASK_FACTOR(Double.class, ""),
+        /**
+         * Selects the type of task dependency structures to create.
+         */
         DEPENDENCY_GRAPH_CONSTELLATION(DependencyGraphConstellation.class, "Struktur der Abhängigkeiten zwischen Story-Tasks, d.h. inwiefern andere Tasks erst begonnen werden können, nachdem andere commitet sind. 'REALISTIC' beruht z.B. auf Echtdaten, bei 'NO_DEPENDENCIES' gibt es keine Abhängigkeiten, und bei 'CHAINS' und 'DIAMONDS' gibt es recht viele.");
 
 
@@ -176,20 +326,6 @@ public class BulkParameterFactory extends ParametersFactory {
         public DistributionBuilder(MersenneTwisterRandomGenerator r, Model owner) {
             this.seedSource = r;
             this.owner = owner;
-        }
-
-        public ContDistBeta beta(String name, double mostProbableValue) {
-            assert mostProbableValue >= 0.0;
-            assert mostProbableValue <= 1.0;
-            if (mostProbableValue > 0.0) {
-                final double alpha = 10.0;
-                final double beta = (alpha - 1.0 - mostProbableValue*alpha + 2.0*mostProbableValue) / mostProbableValue;
-                return this.setSeed(new ContDistBeta(this.owner, name, alpha, beta, true, true));
-            } else {
-                final double alpha = 1.0;
-                final double beta = 10.0;
-                return this.setSeed(new ContDistBeta(this.owner, name, alpha, beta, true, true));
-            }
         }
 
         public ContDist triangularProbability(String name, double mostProbableValue, double width) {
